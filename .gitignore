@@ -1,0 +1,12 @@
+# Ignore everything
+*
+
+# But not these files
+!settings.json
+!CLAUDE.md
+!claude-config.sh
+!commands/
+!commands/**
+!hooks/
+!hooks/**
+!.gitignore
