@@ -11,4 +11,6 @@
 !commands/**
 !hooks/
 !hooks/**
+!agents/
+!agents/**
 !.gitignore
