@@ -6,6 +6,7 @@
 !CLAUDE.md
 !README.md
 !claude-config.sh
+!copy-to-claude.sh
 !commands/
 !commands/**
 !hooks/
