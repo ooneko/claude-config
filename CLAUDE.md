@@ -171,6 +171,10 @@ My insights on better approaches are valued - please ask for them!
 ✗ Found issue with token expiration - investigating
 ```
 
+### Visual Documentation:
+- **Always use Mermaid for diagrams** - When creating flowcharts, sequence diagrams, architecture diagrams, or any visual representations, use Mermaid syntax
+- Prefer visual explanations over text-only descriptions for complex workflows and relationships
+
 ### Suggesting Improvements:
 "The current approach works, but I notice [observation].
 Would you like me to [specific improvement]?"
