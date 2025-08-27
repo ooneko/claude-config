@@ -8,6 +8,7 @@ Claude配置文件复制工具 - Python版本
 import json
 import shutil
 import sys
+import argparse
 from pathlib import Path
 from typing import Any, Dict
 import filecmp
@@ -171,18 +172,24 @@ class SettingsJsonMerger:
 class ClaudeConfigCopier:
     """Claude配置文件复制器"""
     
-    def __init__(self, source_dir: Path, target_dir: Path):
+    def __init__(self, source_dir: Path, target_dir: Path, agents_only: bool = False):
         self.source_dir = source_dir
         self.target_dir = target_dir
-        self.claude_items = [
-            "agents",
-            "commands", 
-            "hooks",
-            "output-styles",
-            "CLAUDE.md",
-            "claude-config.sh",
-            "settings.json"
-        ]
+        self.agents_only = agents_only
+        
+        # 根据agents_only标志决定复制哪些项目
+        if agents_only:
+            self.claude_items = ["agents"]
+        else:
+            self.claude_items = [
+                "agents",
+                "commands", 
+                "hooks",
+                "output-styles",
+                "CLAUDE.md",
+                "claude-config.sh",
+                "settings.json"
+            ]
 
     def create_target_dir(self) -> bool:
         """创建目标目录"""
@@ -323,7 +330,10 @@ class ClaudeConfigCopier:
 
     def run(self) -> bool:
         """执行复制操作"""
-        print("🐠 开始将配置文件从", str(self.source_dir), "复制到", str(self.target_dir))
+        if self.agents_only:
+            print("🐠 开始仅复制agents配置从", str(self.source_dir), "到", str(self.target_dir))
+        else:
+            print("🐠 开始将配置文件从", str(self.source_dir), "复制到", str(self.target_dir))
         
         # 创建目标目录
         if not self.create_target_dir():
@@ -386,16 +396,40 @@ class ClaudeConfigCopier:
         return error_count == 0
 
 
+def parse_args():
+    """解析命令行参数"""
+    parser = argparse.ArgumentParser(
+        description='Claude配置文件复制工具',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='''
+使用示例:
+  python copy_to_claude.py           # 复制所有配置文件
+  python copy_to_claude.py --agents  # 仅复制agents目录
+        '''
+    )
+    
+    parser.add_argument(
+        '--agents',
+        action='store_true',
+        help='仅复制agents目录（默认复制所有配置文件）'
+    )
+    
+    return parser.parse_args()
+
+
 def main():
     """主函数"""
     try:
+        # 解析命令行参数
+        args = parse_args()
+        
         # 确定源目录和目标目录
         script_path = Path(__file__).parent.absolute()
         source_dir = script_path
         target_dir = Path.home() / '.claude'
         
         # 创建复制器并运行
-        copier = ClaudeConfigCopier(source_dir, target_dir)
+        copier = ClaudeConfigCopier(source_dir, target_dir, agents_only=args.agents)
         success = copier.run()
         
         sys.exit(0 if success else 1)
