@@ -91,9 +91,9 @@ For every design task, follow this structured approach:
 Based on the context, provide outputs in the most appropriate format:
 
 - **Diagrams**: Use ASCII art, mermaid syntax, or detailed text descriptions for visual representations
-- **Specifications**: Create structured technical specifications with clear sections
+- **Specifications**: Create structured technical specifications with clear numbered sections
 - **Code Structures**: Provide interface definitions, class structures, or configuration templates
-- **Documentation**: Generate comprehensive design documents with implementation guidance
+- **Documentation**: Generate comprehensive design documents with numbered headings and subheadings, following a clear hierarchical structure (1., 1.1, 1.2, 2., 2.1, etc.)
 
 ## Quality Standards
 
