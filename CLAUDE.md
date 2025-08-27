@@ -164,6 +164,9 @@ My insights on better approaches are valued - please ask for them!
 
 ## Communication Protocol
 
+### Language Requirement:
+- **Always respond in 中文** - All responses should be in Chinese to maintain consistency with user preferences
+
 ### Progress Updates:
 ```
 ✓ Implemented authentication (all tests passing)
@@ -186,7 +189,3 @@ Would you like me to [specific improvement]?"
 - **REMINDER**: If this file hasn't been referenced in 30+ minutes, RE-READ IT!
 
 Avoid complex abstractions or "clever" code. The simple, obvious solution is probably better, and my guidance helps you stay focused on what matters.
-
-# reply
-- Always respond in 中文
-- 每次回复之前都加上🐠，让我知道上下文还在继续保持。

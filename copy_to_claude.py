@@ -172,14 +172,19 @@ class SettingsJsonMerger:
 class ClaudeConfigCopier:
     """Claude配置文件复制器"""
     
-    def __init__(self, source_dir: Path, target_dir: Path, agents_only: bool = False):
+    def __init__(self, source_dir: Path, target_dir: Path, agents: bool = False, commands: bool = False):
         self.source_dir = source_dir
         self.target_dir = target_dir
-        self.agents_only = agents_only
+        self.agents = agents
+        self.commands = commands
         
-        # 根据agents_only标志决定复制哪些项目
-        if agents_only:
-            self.claude_items = ["agents"]
+        # 根据标志决定复制哪些项目
+        if agents or commands:
+            self.claude_items = []
+            if agents:
+                self.claude_items.append("agents")
+            if commands:
+                self.claude_items.append("commands")
         else:
             self.claude_items = [
                 "agents",
@@ -330,8 +335,13 @@ class ClaudeConfigCopier:
 
     def run(self) -> bool:
         """执行复制操作"""
-        if self.agents_only:
-            print("🐠 开始仅复制agents配置从", str(self.source_dir), "到", str(self.target_dir))
+        if self.agents or self.commands:
+            selected_items = []
+            if self.agents:
+                selected_items.append("agents")
+            if self.commands:
+                selected_items.append("commands")
+            print(f"🐠 开始仅复制{', '.join(selected_items)}配置从", str(self.source_dir), "到", str(self.target_dir))
         else:
             print("🐠 开始将配置文件从", str(self.source_dir), "复制到", str(self.target_dir))
         
@@ -403,15 +413,23 @@ def parse_args():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 使用示例:
-  python copy_to_claude.py           # 复制所有配置文件
-  python copy_to_claude.py --agents  # 仅复制agents目录
+  python copy_to_claude.py                      # 复制所有配置文件
+  python copy_to_claude.py --agents             # 仅复制agents目录
+  python copy_to_claude.py --commands           # 仅复制commands目录
+  python copy_to_claude.py --agents --commands  # 复制agents和commands目录
         '''
     )
     
     parser.add_argument(
         '--agents',
         action='store_true',
-        help='仅复制agents目录（默认复制所有配置文件）'
+        help='复制agents目录（可与--commands同时使用）'
+    )
+    
+    parser.add_argument(
+        '--commands',
+        action='store_true',
+        help='复制commands目录（可与--agents同时使用）'
     )
     
     return parser.parse_args()
@@ -429,7 +447,7 @@ def main():
         target_dir = Path.home() / '.claude'
         
         # 创建复制器并运行
-        copier = ClaudeConfigCopier(source_dir, target_dir, agents_only=args.agents)
+        copier = ClaudeConfigCopier(source_dir, target_dir, agents=args.agents, commands=args.commands)
         success = copier.run()
         
         sys.exit(0 if success else 1)
