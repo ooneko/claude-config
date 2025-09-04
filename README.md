@@ -2,13 +2,25 @@
 
 这是一个专业的 Claude Code 配置仓库，集成了智能钩子、专业代理、自定义命令和动态配置管理，为高效开发工作流程提供完整的自动化解决方案。
 
+**新版本特性：** 
+- 🔧 **统一工具** - `claude-config.py` 整合了文件复制和配置管理功能
+- 🏗️ **模块化架构** - 清晰的代码结构，便于维护和扩展
+- 🎯 **向后兼容** - 保留旧版脚本，平滑过渡
+
 ## 📁 项目结构
 
 ```
 claude-config/
 ├── CLAUDE.md                   # 全局开发规范和工作流程指令
 ├── settings.json               # Claude Code 核心配置文件
-├── claude-config.sh            # 动态配置管理脚本
+├── claude-config.py            # 统一配置管理工具 (Python)
+├── claude-config.sh            # 旧版配置管理脚本 (保留兼容)
+├── copy_to_claude.py           # 旧版文件复制工具 (保留兼容)
+├── utils/                      # 工具模块包
+│   ├── __init__.py            # 模块包初始化
+│   ├── common.py              # 通用工具和颜色输出
+│   ├── config_manager.py      # 配置管理核心逻辑
+│   └── file_operations.py     # 文件操作和合并逻辑
 ├── commands/                   # 专业自定义命令 (6个)
 │   ├── archviz.md             # 交互式架构可视化生成器
 │   ├── check.md               # 代码质量检查
@@ -38,33 +50,59 @@ claude-config/
 
 1. **克隆配置仓库**
    ```bash
-   cd ~
-   git clone https://github.com/your-username/claude-config.git .claude
+   git clone https://github.com/ooneko/claude-config.git
+   cd claude-config
    ```
 
-2. **配置 Shell 环境**
+2. **使用统一配置工具**
    ```bash
-   # 为 claude-config.sh 创建别名，添加到你的 shell 配置文件 (.bashrc 或 .zshrc)
-   echo 'alias claude-config="$HOME/.claude/claude-config.sh"' >> ~/.zshrc
-   source ~/.zshrc
+   # 复制所有配置文件到 ~/.claude
+   python3 claude-config.py copy
+   
+   # 仅复制 agents 目录
+   python3 claude-config.py copy --agents
+   
+   # 仅复制 commands 目录  
+   python3 claude-config.py copy --commands
+   
+   # 同时复制 agents 和 commands 目录
+   python3 claude-config.py copy --agents --commands
+   ```
+   
+   **claude-config.py 核心特性：**
+   - ✅ **统一接口** - 集成文件复制和配置管理功能
+   - ✅ **智能合并** - settings.json深度合并，保留用户个人配置
+   - ✅ **选择性复制** - 支持仅复制agents、commands或全部配置
+   - ✅ **冲突处理** - CLAUDE.md文件冲突检测和差异显示
+   - ✅ **模块化设计** - 清晰的代码结构，易于维护和扩展
+   - ✅ **用户友好** - 彩色输出、详细反馈和操作确认
+
+3. **配置 Shell 环境**
+   ```bash
+   make install
    ```
    
    > 这样就可以在任何地方直接运行 `claude-config` 命令了
 
-3. **启动 Claude Code**
+4. **启动 Claude Code**
    ```bash
    claude
    ```
 
 ## 🎛️ 动态配置管理
 
-### claude-config.sh 配置工具
+### claude-config.py 统一工具
 
-强大的配置管理脚本，支持动态切换：
+强大的配置管理统一工具，支持动态切换：
 
 ```bash
 # 查看当前配置状态
 claude-config status
+
+# 文件复制管理
+claude-config copy           # 复制所有配置文件
+claude-config copy --agents  # 仅复制agents
+claude-config copy --commands # 仅复制commands
 
 # 代理管理
 claude-config proxy          # 切换代理 (开/关)
@@ -195,6 +233,24 @@ claude-config backup         # 备份当前配置
 - **行业最佳实践**: SOLID、DRY、KISS原则集成
 - **多格式思维**: 图表、规范、代码结构
 - **验证焦点**: 可扩展性、可维护性、性能、安全
+
+## 📊 重要文件说明
+
+### 新版统一工具
+- `claude-config.py` - 统一配置管理主程序，集成所有功能
+- `utils/config_manager.py` - 配置管理核心逻辑（代理、DeepSeek、hooks）
+- `utils/file_operations.py` - 文件操作和智能合并逻辑
+- `utils/common.py` - 通用工具类和颜色输出
+
+### 核心配置和钩子
+- `settings.json` - Claude Code 核心配置文件
+- `hooks/smart-lint.sh` - 智能代码检查系统
+- `hooks/smart-test.sh` - 智能测试运行系统
+- `hooks/common-helpers.sh` - 共享工具函数
+
+### 兼容性保留
+- `claude-config.sh` - 旧版配置管理脚本 (保留兼容)
+- `copy_to_claude.py` - 旧版文件复制工具 (保留兼容)
 
 ## 📊 使用统计
 

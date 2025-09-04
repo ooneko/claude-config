@@ -1,57 +1,38 @@
 #!/usr/bin/env python3
 """
-Claude配置文件复制工具 - Python版本
-
-智能复制Claude配置文件到~/.claude目录，特别支持settings.json的深度合并
+文件操作模块 - 处理文件复制、合并和管理
 """
 
 import json
 import shutil
-import sys
-import argparse
 from pathlib import Path
-from typing import Any, Dict
-import filecmp
-import difflib
-from dataclasses import dataclass
-from enum import Enum
+from typing import Dict, Any, List
 
-
-class Color:
-    """命令行颜色输出"""
-    RED = '\033[0;31m'
-    GREEN = '\033[0;32m'
-    YELLOW = '\033[1;33m'
-    BLUE = '\033[0;34m'
-    NC = '\033[0m'  # No Color
-
-    @staticmethod
-    def print_colored(text: str, color: str) -> None:
-        print(f"{color}{text}{Color.NC}")
-
-    @staticmethod
-    def input_colored(prompt: str, color: str = YELLOW) -> str:
-        return input(f"{color}{prompt}{Color.NC}")
-
-
-class ConflictResolution(Enum):
-    """冲突解决方式"""
-    OVERWRITE = "overwrite"
-    SKIP = "skip"
-    SHOW_DIFF = "diff"
-    MERGE = "merge"
-
-
-@dataclass
-class CopyResult:
-    """复制操作结果"""
-    success: bool
-    message: str
-    skipped: bool = False
+from .common import Color, OperationResult, FileComparator
 
 
 class SettingsJsonMerger:
     """settings.json智能合并器"""
+    
+    @staticmethod
+    def should_preserve_proxy_config(target_data: Dict[str, Any]) -> bool:
+        """检查是否应该保留目标文件中的代理配置"""
+        env = target_data.get('env', {})
+        return 'http_proxy' in env or 'https_proxy' in env
+    
+    @staticmethod
+    def filter_proxy_from_source(source_data: Dict[str, Any]) -> Dict[str, Any]:
+        """从源数据中移除代理配置"""
+        result = source_data.copy()
+        if 'env' in result and isinstance(result['env'], dict):
+            env = result['env'].copy()
+            env.pop('http_proxy', None)
+            env.pop('https_proxy', None)
+            if env:
+                result['env'] = env
+            else:
+                result.pop('env', None)
+        return result
     
     @staticmethod
     def deep_merge_dict(target: Dict[str, Any], source: Dict[str, Any]) -> Dict[str, Any]:
@@ -131,7 +112,7 @@ class SettingsJsonMerger:
         return result
 
     @staticmethod
-    def merge_settings(target_file: Path, source_file: Path) -> CopyResult:
+    def merge_settings(target_file: Path, source_file: Path) -> OperationResult:
         """合并settings.json文件"""
         try:
             # 读取源文件
@@ -143,6 +124,14 @@ class SettingsJsonMerger:
                 with open(target_file, 'r', encoding='utf-8') as f:
                     target_data = json.load(f)
                 
+                # 检查是否需要保留代理配置
+                preserve_proxy = SettingsJsonMerger.should_preserve_proxy_config(target_data)
+                
+                # 如果目标文件有代理配置，从源文件中移除代理配置
+                if preserve_proxy:
+                    Color.print_colored("📡 检测到现有代理配置，将保留用户代理设置", Color.YELLOW)
+                    source_data = SettingsJsonMerger.filter_proxy_from_source(source_data)
+                
                 # 深度合并
                 merged_data = SettingsJsonMerger.deep_merge_dict(target_data, source_data)
                 
@@ -150,52 +139,53 @@ class SettingsJsonMerger:
                 if merged_data != target_data:
                     Color.print_colored("🔄 检测到settings.json配置变化", Color.YELLOW)
                     print("将进行智能合并，保留您的个人配置")
+                    if preserve_proxy:
+                        print("   - 保留现有代理配置")
                     
                     # 写入合并后的配置
                     with open(target_file, 'w', encoding='utf-8') as f:
                         json.dump(merged_data, f, indent=2, ensure_ascii=False)
                     
-                    return CopyResult(True, "智能合并settings.json配置")
+                    return OperationResult(True, "智能合并settings.json配置")
                 else:
-                    return CopyResult(True, "settings.json配置无变化", skipped=True)
+                    return OperationResult(True, "settings.json配置无变化", skipped=True)
             else:
-                # 目标文件不存在，直接复制
-                shutil.copy2(source_file, target_file)
-                return CopyResult(True, "复制settings.json配置")
+                # 目标文件不存在，检查源文件是否包含代理配置
+                if 'env' in source_data and isinstance(source_data['env'], dict):
+                    env = source_data['env']
+                    if 'http_proxy' in env or 'https_proxy' in env:
+                        Color.print_colored("⚠️  源文件包含代理配置，但将被跳过", Color.YELLOW)
+                        print("   请使用 claude-config.py proxy on 来配置代理")
+                        # 移除代理配置后再复制
+                        source_data = SettingsJsonMerger.filter_proxy_from_source(source_data)
+                
+                # 写入过滤后的配置
+                with open(target_file, 'w', encoding='utf-8') as f:
+                    json.dump(source_data, f, indent=2, ensure_ascii=False)
+                return OperationResult(True, "复制settings.json配置")
                 
         except json.JSONDecodeError as e:
-            return CopyResult(False, f"JSON格式错误: {e}")
+            return OperationResult(False, f"JSON格式错误: {e}")
         except Exception as e:
-            return CopyResult(False, f"合并settings.json失败: {e}")
+            return OperationResult(False, f"合并settings.json失败: {e}")
 
 
-class ClaudeConfigCopier:
-    """Claude配置文件复制器"""
+class FileOperations:
+    """文件操作管理器"""
     
-    def __init__(self, source_dir: Path, target_dir: Path, agents: bool = False, commands: bool = False):
+    def __init__(self, source_dir: Path, target_dir: Path, selected_items: List[str] = None):
         self.source_dir = source_dir
         self.target_dir = target_dir
-        self.agents = agents
-        self.commands = commands
-        
-        # 根据标志决定复制哪些项目
-        if agents or commands:
-            self.claude_items = []
-            if agents:
-                self.claude_items.append("agents")
-            if commands:
-                self.claude_items.append("commands")
-        else:
-            self.claude_items = [
-                "agents",
-                "commands", 
-                "hooks",
-                "output-styles",
-                "CLAUDE.md.to.copy",
-                "claude-config.sh",
-                "settings.json"
-            ]
-
+        self.selected_items = selected_items or [
+            "agents",
+            "commands", 
+            "hooks",
+            "output-styles",
+            "CLAUDE.md.to.copy",
+            "claude-config.sh",
+            "settings.json"
+        ]
+    
     def create_target_dir(self) -> bool:
         """创建目标目录"""
         try:
@@ -207,15 +197,15 @@ class ClaudeConfigCopier:
             Color.print_colored(f"创建目录失败: {e}", Color.RED)
             return False
 
-    def handle_claude_md(self, src_path: Path, dest_path: Path) -> CopyResult:
+    def handle_claude_md(self, src_path: Path, dest_path: Path) -> OperationResult:
         """特殊处理CLAUDE.md文件"""
         if not dest_path.exists():
             shutil.copy2(src_path, dest_path)
-            return CopyResult(True, "复制CLAUDE.md")
+            return OperationResult(True, "复制CLAUDE.md")
         
         # 检查文件是否相同
-        if filecmp.cmp(src_path, dest_path, shallow=False):
-            return CopyResult(True, "跳过相同的CLAUDE.md", skipped=True)
+        if FileComparator.files_are_same(src_path, dest_path):
+            return OperationResult(True, "跳过相同的CLAUDE.md", skipped=True)
         
         # 文件不同，询问用户处理方式
         Color.print_colored("⚠️  发现CLAUDE.md文件内容不同！", Color.YELLOW)
@@ -228,46 +218,20 @@ class ClaudeConfigCopier:
         print("  [d/D] 查看文件差异")
         
         while True:
-            choice = Color.input_colored("请选择 (y/n/d): ", Color.YELLOW).strip().lower()
+            choice = Color.input_colored("请选择 (y/n/d): ").strip().lower()
             
             if choice in ['y', 'yes']:
                 shutil.copy2(src_path, dest_path)
-                return CopyResult(True, "覆盖CLAUDE.md")
+                return OperationResult(True, "覆盖CLAUDE.md")
             elif choice in ['n', 'no']:
-                return CopyResult(True, "跳过CLAUDE.md", skipped=True)
+                return OperationResult(True, "跳过CLAUDE.md", skipped=True)
             elif choice in ['d', 'diff']:
-                self.show_file_diff(dest_path, src_path)
+                FileComparator.show_file_diff(dest_path, src_path)
                 print()
             else:
                 print("请输入 y、n 或 d")
 
-    def show_file_diff(self, file1: Path, file2: Path) -> None:
-        """显示两个文件的差异"""
-        try:
-            with open(file1, 'r', encoding='utf-8') as f1, open(file2, 'r', encoding='utf-8') as f2:
-                diff = difflib.unified_diff(
-                    f1.readlines(),
-                    f2.readlines(),
-                    fromfile=str(file1),
-                    tofile=str(file2),
-                    lineterm=''
-                )
-                Color.print_colored("文件差异:", Color.YELLOW)
-                for line in diff:
-                    if line.startswith('+++') or line.startswith('---'):
-                        Color.print_colored(line, Color.BLUE)
-                    elif line.startswith('@@'):
-                        Color.print_colored(line, Color.YELLOW)
-                    elif line.startswith('+'):
-                        Color.print_colored(line, Color.GREEN)
-                    elif line.startswith('-'):
-                        Color.print_colored(line, Color.RED)
-                    else:
-                        print(line)
-        except Exception as e:
-            Color.print_colored(f"显示差异失败: {e}", Color.RED)
-
-    def copy_file(self, src_path: Path, dest_path: Path) -> CopyResult:
+    def copy_file(self, src_path: Path, dest_path: Path) -> OperationResult:
         """复制单个文件"""
         try:
             # 特殊处理不同类型的文件
@@ -278,21 +242,21 @@ class ClaudeConfigCopier:
             
             # 普通文件处理
             if dest_path.exists():
-                if filecmp.cmp(src_path, dest_path, shallow=False):
-                    return CopyResult(True, f"跳过相同文件: {src_path.name}", skipped=True)
+                if FileComparator.files_are_same(src_path, dest_path):
+                    return OperationResult(True, f"跳过相同文件: {src_path.name}", skipped=True)
                 else:
                     shutil.copy2(src_path, dest_path)
-                    return CopyResult(True, f"覆盖文件: {src_path.name}")
+                    return OperationResult(True, f"覆盖文件: {src_path.name}")
             else:
                 # 确保目标目录存在
                 dest_path.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(src_path, dest_path)
-                return CopyResult(True, f"复制文件: {src_path.name}")
+                return OperationResult(True, f"复制文件: {src_path.name}")
                 
         except Exception as e:
-            return CopyResult(False, f"复制文件{src_path.name}失败: {e}")
+            return OperationResult(False, f"复制文件{src_path.name}失败: {e}")
 
-    def copy_directory(self, src_path: Path, dest_path: Path) -> CopyResult:
+    def copy_directory(self, src_path: Path, dest_path: Path) -> OperationResult:
         """递归复制目录"""
         try:
             results = []
@@ -314,36 +278,30 @@ class ClaudeConfigCopier:
             
             # 统计结果
             success_count = sum(1 for r in results if r.success and not r.skipped)
-            skip_count = sum(1 for r in results if r.skipped)
             
             if success_count > 0:
-                return CopyResult(True, f"处理目录: {src_path.name} ({success_count}个文件)")
+                return OperationResult(True, f"处理目录: {src_path.name} ({success_count}个文件)")
             else:
-                return CopyResult(True, f"跳过目录: {src_path.name} (无变化)", skipped=True)
+                return OperationResult(True, f"跳过目录: {src_path.name} (无变化)", skipped=True)
                 
         except Exception as e:
-            return CopyResult(False, f"复制目录{src_path.name}失败: {e}")
+            return OperationResult(False, f"复制目录{src_path.name}失败: {e}")
 
-    def copy_item(self, src_path: Path, dest_path: Path) -> CopyResult:
+    def copy_item(self, src_path: Path, dest_path: Path) -> OperationResult:
         """复制文件或目录"""
         if src_path.is_file():
             return self.copy_file(src_path, dest_path)
         elif src_path.is_dir():
             return self.copy_directory(src_path, dest_path)
         else:
-            return CopyResult(False, f"未知类型: {src_path.name}")
+            return OperationResult(False, f"未知类型: {src_path.name}")
 
-    def run(self) -> bool:
+    def run_copy_operation(self) -> bool:
         """执行复制操作"""
-        if self.agents or self.commands:
-            selected_items = []
-            if self.agents:
-                selected_items.append("agents")
-            if self.commands:
-                selected_items.append("commands")
-            print(f"🐠 开始仅复制{', '.join(selected_items)}配置从", str(self.source_dir), "到", str(self.target_dir))
+        if len(self.selected_items) < 7:  # 不是全部项目
+            print(f"🐠 开始仅复制{', '.join(self.selected_items)}配置从 {self.source_dir} 到 {self.target_dir}")
         else:
-            print("🐠 开始将配置文件从", str(self.source_dir), "复制到", str(self.target_dir))
+            print(f"🐠 开始将配置文件从 {self.source_dir} 复制到 {self.target_dir}")
         
         # 创建目标目录
         if not self.create_target_dir():
@@ -356,7 +314,7 @@ class ClaudeConfigCopier:
         error_count = 0
         
         # 复制每个配置项
-        for item_name in self.claude_items:
+        for item_name in self.selected_items:
             src_path = self.source_dir / item_name
             
             if not src_path.exists():
@@ -394,9 +352,16 @@ class ClaudeConfigCopier:
         
         print(f"配置文件位置: {self.target_dir}")
         
+        # 显示代理配置提示
+        if error_count == 0:
+            print("\\n💡 代理配置提示:")
+            print("   - 启用代理: ./claude-config.py proxy on")
+            print("   - 禁用代理: ./claude-config.py proxy off")
+            print("   - 查看状态: ./claude-config.py status")
+        
         # 显示目标目录内容
         try:
-            print("\n目标目录内容:")
+            print("\\n目标目录内容:")
             items = list(self.target_dir.iterdir())
             items.sort(key=lambda x: (x.is_file(), x.name))
             
@@ -409,61 +374,3 @@ class ClaudeConfigCopier:
             Color.print_colored(f"列出目录内容失败: {e}", Color.RED)
         
         return error_count == 0
-
-
-def parse_args():
-    """解析命令行参数"""
-    parser = argparse.ArgumentParser(
-        description='Claude配置文件复制工具',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
-使用示例:
-  python copy_to_claude.py                      # 复制所有配置文件
-  python copy_to_claude.py --agents             # 仅复制agents目录
-  python copy_to_claude.py --commands           # 仅复制commands目录
-  python copy_to_claude.py --agents --commands  # 复制agents和commands目录
-        '''
-    )
-    
-    parser.add_argument(
-        '--agents',
-        action='store_true',
-        help='复制agents目录（可与--commands同时使用）'
-    )
-    
-    parser.add_argument(
-        '--commands',
-        action='store_true',
-        help='复制commands目录（可与--agents同时使用）'
-    )
-    
-    return parser.parse_args()
-
-
-def main():
-    """主函数"""
-    try:
-        # 解析命令行参数
-        args = parse_args()
-        
-        # 确定源目录和目标目录
-        script_path = Path(__file__).parent.absolute()
-        source_dir = script_path
-        target_dir = Path.home() / '.claude'
-        
-        # 创建复制器并运行
-        copier = ClaudeConfigCopier(source_dir, target_dir, agents=args.agents, commands=args.commands)
-        success = copier.run()
-        
-        sys.exit(0 if success else 1)
-        
-    except KeyboardInterrupt:
-        Color.print_colored("\n\n用户中断操作", Color.YELLOW)
-        sys.exit(1)
-    except Exception as e:
-        Color.print_colored(f"运行失败: {e}", Color.RED)
-        sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
