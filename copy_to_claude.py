@@ -191,7 +191,7 @@ class ClaudeConfigCopier:
                 "commands", 
                 "hooks",
                 "output-styles",
-                "CLAUDE.md",
+                "CLAUDE.md.to.copy",
                 "claude-config.sh",
                 "settings.json"
             ]
@@ -271,7 +271,7 @@ class ClaudeConfigCopier:
         """复制单个文件"""
         try:
             # 特殊处理不同类型的文件
-            if src_path.name == "CLAUDE.md":
+            if src_path.name == "CLAUDE.md.to.copy":
                 return self.handle_claude_md(src_path, dest_path)
             elif src_path.name == "settings.json":
                 return SettingsJsonMerger.merge_settings(dest_path, src_path)
@@ -363,7 +363,12 @@ class ClaudeConfigCopier:
                 print(f"跳过不存在的项目: {item_name}")
                 continue
             
-            dest_path = self.target_dir / item_name
+            # 特殊处理：将 CLAUDE.md.to.copy 复制为 CLAUDE.md
+            if item_name == "CLAUDE.md.to.copy":
+                dest_path = self.target_dir / "CLAUDE.md"
+            else:
+                dest_path = self.target_dir / item_name
+            
             result = self.copy_item(src_path, dest_path)
             
             if result.success:

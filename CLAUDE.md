@@ -1,191 +1,104 @@
-# Development Partnership
+# CLAUDE.md
 
-We're building production-quality code together. Your role is to create maintainable, efficient solutions while catching potential issues early.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-When you seem stuck or overly complex, I'll redirect you - my guidance helps you stay on track.
+## 📁 Project Overview
 
-## 🚨 AUTOMATED CHECKS ARE MANDATORY
-**ALL hook issues are BLOCKING - EVERYTHING must be ✅ GREEN!**  
-No errors. No formatting issues. No linting problems. Zero tolerance.  
-These are not suggestions. Fix ALL issues before continuing.
+This is a Claude Code configuration management repository that provides a complete automation solution for development workflows. It integrates intelligent hooks, professional agents, custom commands, and dynamic configuration management.
 
-## CRITICAL WORKFLOW - ALWAYS FOLLOW THIS!
+## 🚀 Core Commands
 
-### Git Branch Workflow
-**If Git is available, ALWAYS:**
-1. **Create a new branch** for each new task: `git checkout -b feature/task-name`
-2. **Commit regularly** with meaningful messages after each significant change
-3. **Keep commits atomic** - one logical change per commit
+### Configuration Management
+- `./claude-config.sh` - 动态配置管理脚本
+  - `claude-config status` - 显示当前配置状态 
+  - `claude-config proxy on/off` - 代理开关管理
+  - `claude-config hooks on/off` - Hooks 开关管理
+  - `claude-config deepseek on/off` - DeepSeek API 配置管理
+  - `claude-config backup` - 备份配置
 
-### Research → Plan → Implement
-**NEVER JUMP STRAIGHT TO CODING!** Always follow this sequence:
-1. **Research**: Explore the codebase, understand existing patterns
-2. **Plan**: Create a detailed implementation plan and verify it with me  
-   **ALWAYS INCLUDE TIME ESTIMATES**: For each task in your plan, provide an estimated duration (e.g., "~15 minutes", "~2 hours")  
-   **TOTAL TIME ESTIMATE**: Always include the total estimated time for the entire task (e.g., "Total: ~3 hours")
-3. **Implement**: Execute the plan with validation checkpoints
+### Development Tools
+- `./copy_to_claude.py` - 智能文件复制工具，支持项目结构分析和安全检查
 
-When asked to implement any feature, you'll first say: "Let me research the codebase and create a plan before implementing."
+## 📋 Project Architecture
 
-For complex architectural decisions or challenging problems, use **"ultrathink"** to engage maximum reasoning capacity. Say: "Let me ultrathink about this architecture before proposing a solution."
+### Directory Structure
+- `agents/` - 7个专业智能代理 (ai-engineer, backend-developer, code-reviewer, frontend-developer, golang-pro, product-manager, vue-expert)
+- `commands/` - 6个自定义命令 (archviz, check, commit, next, prompt, ultrathink)  
+- `hooks/` - 智能自动化钩子脚本系统
+- `output-styles/` - 专业输出样式规范
+- `settings.json` - Claude Code核心配置文件
 
-### USE MULTIPLE AGENTS!
-*Leverage subagents aggressively* for better results:
+### Hook System
+The intelligent hook system automatically runs quality checks:
+- **PostToolUse hooks**: 在代码编辑后自动运行
+  - `smart-lint.sh` - 智能检测项目类型并运行相应 linter
+  - `smart-test.sh` - 根据修改文件智能运行相关测试
+- **Stop hooks**: 会话结束时运行通知脚本
 
-* Spawn agents to explore different parts of the codebase in parallel
-* Use one agent to write tests while another implements features
-* Delegate research tasks: "I'll have an agent investigate the database schema while I analyze the API structure"
-* For complex refactors: One agent identifies changes, another implements them
+### Configuration Management
+- **Dynamic proxy management**: HTTP/HTTPS 代理一键开关 (127.0.0.1:7890)
+- **DeepSeek API integration**: 安全的 API 密钥管理和自动模型配置
+- **Hook system toggle**: 智能钩子系统开关管理
 
-Say: "I'll spawn agents to tackle different aspects of this problem" whenever a task has multiple independent parts.
+## 🛠️ Key Features
 
-### Reality Checkpoints
-**Stop and validate** at these moments:
-- After implementing a complete feature
-- Before starting a new major component  
-- When something feels wrong
-- Before declaring "done"
-- **WHEN HOOKS FAIL WITH ERRORS** ❌
+### Intelligent Project Detection
+The `smart-lint.sh` automatically detects project types and runs appropriate tools:
+- **Go projects**: `golangci-lint run`
+- **Node.js projects**: `npm run lint` or `eslint`
+- **Python projects**: `ruff check` or `flake8`
+- **Tilt projects**: `tilt verify`
 
-Run: `make fmt && make test && make lint`
+### Professional Agents
+Each agent is specialized for specific domains:
+- Use `ai-engineer` for AI system design and model implementation
+- Use `backend-developer` for scalable API development
+- Use `code-reviewer` for pragmatic code review
+- Use `frontend-developer` for React/UI development
+- Use `golang-pro` for Go development and concurrent programming
+- Use `product-manager` for product strategy
+- Use `vue-expert` for Vue 3 and Nuxt development
 
-> Why: You can lose track of what's actually working. These checkpoints prevent cascading failures.
+### Custom Commands
+- `/archviz` - 生成交互式HTML架构图
+- `/check` - 运行代码质量检查
+- `/commit` - 智能提交管理
+- `/next` - 任务规划助手
+- `/prompt` - 项目特定提示生成器
+- `/ultrathink` - 深度思考模式
 
-### 🚨 CRITICAL: Hook Failures Are BLOCKING
-**When hooks report ANY issues (exit code 2), you MUST:**
-1. **STOP IMMEDIATELY** - Do not continue with other tasks
-2. **FIX ALL ISSUES** - Address every ❌ issue until everything is ✅ GREEN
-3. **VERIFY THE FIX** - Re-run the failed command to confirm it's fixed
-4. **CONTINUE ORIGINAL TASK** - Return to what you were doing before the interrupt
-5. **NEVER IGNORE** - There are NO warnings, only requirements
+## 🔧 Development Workflow
 
-This includes:
-- Formatting issues (gofmt, black, prettier, etc.)
-- Linting violations (golangci-lint, eslint, etc.)
-- Forbidden patterns (time.Sleep, panic(), interface{})
-- ALL other checks
+### Configuration Updates
+When modifying `settings.json`:
+1. Always backup first: `./claude-config.sh backup`
+2. Use the configuration script rather than direct editing
+3. Verify changes with: `./claude-config.sh status`
 
-Your code must be 100% clean. No exceptions.
+### Hook Development
+When working on hook scripts in `hooks/`:
+- All scripts must follow the common exit code pattern (0=success, 1=error, 2=issues found)
+- Source `common-helpers.sh` for shared functionality
+- Test hooks thoroughly as they run automatically
 
-**Recovery Protocol:**
-- When interrupted by a hook failure, maintain awareness of your original task
-- After fixing all issues and verifying the fix, continue where you left off
-- Use the todo list to track both the fix and your original task
+### Agent and Command Development
+When modifying agents or commands:
+- Follow the existing markdown structure with frontmatter
+- Include clear descriptions and tool permissions
+- Test functionality before committing changes
 
-## Working Memory Management
+## 📊 Important Files
 
-### When context gets long:
-- Re-read this CLAUDE.md file
-- Summarize progress in a PROGRESS.md file
-- Document current state before major changes
+- `claude-config.sh` - Main configuration management script
+- `settings.json` - Core Claude Code configuration
+- `copy_to_claude.py` - Intelligent file copying utility
+- `hooks/smart-lint.sh` - Intelligent linting system
+- `hooks/smart-test.sh` - Intelligent testing system
+- `hooks/common-helpers.sh` - Shared utilities for hooks
 
-### Maintain TODO.md:
-```
-## Current Task
-- [ ] What we're doing RIGHT NOW (Est. time: ~X minutes/hours)
-**Total Estimated Time: ~X hours**
+## 🚨 Critical Requirements
 
-## Completed  
-- [x] What's actually done and tested
-
-## Next Steps
-- [ ] What comes next (Est. time: ~X minutes/hours)
-```
-
-## Go-Specific Rules
-
-### FORBIDDEN - NEVER DO THESE:
-- **NO interface{}** or **any{}** - use concrete types!
-- **NO time.Sleep()** or busy waits - use channels for synchronization!
-- **NO** keeping old and new code together
-- **NO** migration functions or compatibility layers
-- **NO** versioned function names (processV2, handleNew)
-- **NO** custom error struct hierarchies
-- **NO** TODOs in final code
-
-> **AUTOMATED ENFORCEMENT**: The smart-lint hook will BLOCK commits that violate these rules.  
-> When you see `❌ FORBIDDEN PATTERN`, you MUST fix it immediately!
-
-### Required Standards:
-- **Delete** old code when replacing it
-- **Meaningful names**: `userID` not `id`
-- **Early returns** to reduce nesting
-- **Concrete types** from constructors: `func NewServer() *Server`
-- **Simple errors**: `return fmt.Errorf("context: %w", err)`
-- **Table-driven tests** for complex logic
-- **Channels for synchronization**: Use channels to signal readiness, not sleep
-- **Select for timeouts**: Use `select` with timeout channels, not sleep loops
-
-## Implementation Standards
-
-### Our code is complete when:
-- ✓ All linters pass with zero issues
-- ✓ All tests pass  
-- ✓ Feature works end-to-end
-- ✓ Old code is deleted
-- ✓ Godoc on all exported symbols
-
-### Testing Strategy
-- Complex business logic → Write tests first
-- Simple CRUD → Write tests after
-- Hot paths → Add benchmarks
-- Skip tests for main() and simple CLI parsing
-
-### Project Structure
-```
-cmd/        # Application entrypoints
-internal/   # Private code (the majority goes here)
-pkg/        # Public libraries (only if truly reusable)
-```
-
-## Problem-Solving Together
-
-When you're stuck or confused:
-1. **Stop** - Don't spiral into complex solutions
-2. **Delegate** - Consider spawning agents for parallel investigation
-3. **Ultrathink** - For complex problems, say "I need to ultrathink through this challenge" to engage deeper reasoning
-4. **Step back** - Re-read the requirements
-5. **Simplify** - The simple solution is usually correct
-6. **Ask** - "I see two approaches: [A] vs [B]. Which do you prefer?"
-
-My insights on better approaches are valued - please ask for them!
-
-## Performance & Security
-
-### **Measure First**:
-- No premature optimization
-- Benchmark before claiming something is faster
-- Use pprof for real bottlenecks
-
-### **Security Always**:
-- Validate all inputs
-- Use crypto/rand for randomness
-- Prepared statements for SQL (never concatenate!)
-
-## Communication Protocol
-
-### Language Requirement:
-- **Always respond in 中文** - All responses should be in Chinese to maintain consistency with user preferences
-
-### Progress Updates:
-```
-✓ Implemented authentication (all tests passing)
-✓ Added rate limiting  
-✗ Found issue with token expiration - investigating
-```
-
-### Visual Documentation:
-- **Always use Mermaid for diagrams** - When creating flowcharts, sequence diagrams, architecture diagrams, or any visual representations, use Mermaid syntax
-- Prefer visual explanations over text-only descriptions for complex workflows and relationships
-
-### Suggesting Improvements:
-"The current approach works, but I notice [observation].
-Would you like me to [specific improvement]?"
-
-## Working Together
-
-- This is always a feature branch - no backwards compatibility needed
-- When in doubt, we choose clarity over cleverness
-- **REMINDER**: If this file hasn't been referenced in 30+ minutes, RE-READ IT!
-
-Avoid complex abstractions or "clever" code. The simple, obvious solution is probably better, and my guidance helps you stay focused on what matters.
+- **All hook issues are BLOCKING** - Every error must be fixed before proceeding
+- **Configuration changes require backup** - Always backup before modifications
+- **Python scripts require proper dependencies** - Ensure required packages are installed
+- **Hooks must maintain exit code standards** - 0=success, 1=error, 2=issues found
