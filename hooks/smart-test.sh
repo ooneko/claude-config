@@ -192,6 +192,14 @@ run_python_tests() {
                 format_test_output "$test_output" "python" >&2
                 return 1
             fi
+        elif command -v python3 >/dev/null 2>&1; then
+            if ! test_output=$(
+                python3 -m unittest "$file" 2>&1); then
+                echo -e "${RED}❌ Tests failed in $file${NC}" >&2
+                echo -e "\n${RED}Failed test output:${NC}" >&2
+                format_test_output "$test_output" "python" >&2
+                return 1
+            fi
         elif command -v python >/dev/null 2>&1; then
             if ! test_output=$(
                 python -m unittest "$file" 2>&1); then
@@ -250,6 +258,15 @@ run_python_tests() {
                     if command -v pytest >/dev/null 2>&1; then
                         if ! test_output=$(
                             pytest -xvs "$test_file" -k "$base" 2>&1); then
+                            failed=1
+                            echo -e "${RED}❌ Focused tests failed for $base${NC}" >&2
+                            echo -e "\n${RED}Failed test output:${NC}" >&2
+                            format_test_output "$test_output" "python" >&2
+                            add_error "Focused tests failed for $base"
+                        fi
+                    elif command -v python3 >/dev/null 2>&1; then
+                        if ! test_output=$(
+                            python3 -m unittest "$test_file" 2>&1); then
                             failed=1
                             echo -e "${RED}❌ Focused tests failed for $base${NC}" >&2
                             echo -e "\n${RED}Failed test output:${NC}" >&2

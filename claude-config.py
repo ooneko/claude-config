@@ -40,7 +40,6 @@ class ClaudeConfigTool:
                 "hooks",
                 "output-styles",
                 "CLAUDE.md.to.copy",
-                "claude-config.sh",
                 "settings.json"
             ]
         
@@ -82,8 +81,23 @@ class ClaudeConfigTool:
         
         self.config_manager.show_status()
     
-    def handle_hooks_command(self, action: Optional[str] = None) -> None:
+    def handle_hooks_command(self, language: Optional[str] = None, action: Optional[str] = None) -> None:
         """处理 hooks 相关命令"""
+        # 如果指定了语言，则处理语言级别的 hooks 控制
+        if language and language in self.config_manager.SUPPORTED_LANGUAGES:
+            return self.handle_language_hooks_command(language, action)
+        
+        # 特殊处理 status 命令
+        if language == "status":
+            self.show_hooks_status()
+            return
+        
+        # 如果 language 不是支持的语言且不是 None，则视为 action
+        if language and language not in self.config_manager.SUPPORTED_LANGUAGES:
+            action = language
+            language = None
+        
+        # 全局 hooks 控制
         if action is None or action == "toggle":
             # 切换 hooks
             if self.config_manager.check_hooks_status():
@@ -104,8 +118,15 @@ class ClaudeConfigTool:
                 return
             else:
                 result = self.config_manager.disable_hooks()
+        elif action == "status":
+            self.show_hooks_status()
+            return
         else:
-            Color.print_colored(f"❌ 错误：未知的 hooks 操作 '{action}'", Color.RED)
+            if language:
+                Color.print_colored(f"❌ 错误：不支持的语言 '{language}'", Color.RED)
+                Color.print_colored(f"   支持的语言: {', '.join(self.config_manager.SUPPORTED_LANGUAGES)}", Color.YELLOW)
+            else:
+                Color.print_colored(f"❌ 错误：未知的 hooks 操作 '{action}'", Color.RED)
             print("   使用 'claude-config.py help' 查看帮助")
             return
         
@@ -116,6 +137,70 @@ class ClaudeConfigTool:
             Color.print_colored(f"❌ {result.message}", Color.RED)
         
         self.config_manager.show_status()
+    
+    def handle_language_hooks_command(self, language: str, action: Optional[str] = None) -> None:
+        """处理语言级别的 hooks 命令"""
+        if action is None or action == "toggle":
+            # 切换语言 hooks
+            current_status = self.config_manager.check_language_hook_status(language)
+            result = self.config_manager.set_language_hook_status(language, not current_status)
+        elif action in ["on", "enable"]:
+            if self.config_manager.check_language_hook_status(language):
+                Color.print_colored(f"ℹ️  {language} hooks 已经启用", Color.YELLOW)
+                self.show_hooks_status()
+                return
+            else:
+                result = self.config_manager.set_language_hook_status(language, True)
+        elif action in ["off", "disable"]:
+            if not self.config_manager.check_language_hook_status(language):
+                Color.print_colored(f"ℹ️  {language} hooks 已经禁用", Color.YELLOW)
+                self.show_hooks_status()
+                return
+            else:
+                result = self.config_manager.set_language_hook_status(language, False)
+        elif action == "status":
+            self.show_hooks_status()
+            return
+        else:
+            Color.print_colored(f"❌ 错误：未知的 {language} hooks 操作 '{action}'", Color.RED)
+            print("   使用 'claude-config.py help' 查看帮助")
+            return
+        
+        # 显示结果
+        if result.success:
+            Color.print_colored(f"✅ {result.message}", Color.GREEN)
+        else:
+            Color.print_colored(f"❌ {result.message}", Color.RED)
+        
+        self.show_hooks_status()
+    
+    def show_hooks_status(self) -> None:
+        """显示详细的 hooks 状态"""
+        print(f"\\n{Color.BLUE}🪝 Hooks 详细状态：{Color.NC}")
+        print("========================")
+        
+        # 全局 hooks 状态
+        if self.config_manager.check_hooks_status():
+            print(f"\\n全局状态：{Color.GREEN}✅ 已启用{Color.NC}")
+        else:
+            print(f"\\n全局状态：{Color.RED}❌ 已禁用{Color.NC}")
+            print("\\n要启用 hooks，请运行：claude-config.py hooks on")
+            return
+        
+        # 语言级别的 hooks 状态
+        print(f"\\n{Color.YELLOW}语言级别控制：{Color.NC}")
+        lang_status = self.config_manager.get_all_language_hook_status()
+        for lang in self.config_manager.SUPPORTED_LANGUAGES:
+            status = lang_status[lang]
+            if status:
+                print(f"   {Color.GREEN}{lang:<12}: ✅ 启用{Color.NC}")
+            else:
+                print(f"   {Color.RED}{lang:<12}: ❌ 禁用{Color.NC}")
+        
+        print(f"\\n{Color.YELLOW}使用示例：{Color.NC}")
+        print("   claude-config.py hooks go off      # 禁用 Go hooks")
+        print("   claude-config.py hooks python on   # 启用 Python hooks")
+        print("")
     
     def handle_deepseek_command(self, action: Optional[str] = None) -> None:
         """处理 DeepSeek 相关命令"""
@@ -181,6 +266,14 @@ class ClaudeConfigTool:
         Color.print_colored("  claude-config.py hooks              # 切换 hooks（开/关）", Color.GREEN)
         Color.print_colored("  claude-config.py hooks on           # 启用 hooks", Color.GREEN)
         Color.print_colored("  claude-config.py hooks off          # 禁用 hooks", Color.GREEN)
+        Color.print_colored("  claude-config.py hooks status       # 显示 hooks 详细状态", Color.GREEN)
+        print("")
+        print("语言级别 Hooks 控制：")
+        Color.print_colored("  claude-config.py hooks go off       # 禁用 Go hooks", Color.GREEN)
+        Color.print_colored("  claude-config.py hooks python on    # 启用 Python hooks", Color.GREEN)
+        Color.print_colored("  claude-config.py hooks javascript off # 禁用 JavaScript hooks", Color.GREEN)
+        Color.print_colored("  claude-config.py hooks rust on      # 启用 Rust hooks", Color.GREEN)
+        Color.print_colored("  支持语言: go, python, javascript, rust, nix, tilt", Color.YELLOW)
         print("")
         print("DeepSeek 配置管理：")
         Color.print_colored("  claude-config.py deepseek           # 切换 DeepSeek 配置（开/关）", Color.GREEN)
@@ -210,6 +303,9 @@ def parse_args():
   claude-config.py copy --agents --commands # 复制agents和commands目录
   claude-config.py proxy on                # 启用代理
   claude-config.py hooks off               # 禁用hooks
+  claude-config.py hooks go off            # 禁用Go hooks
+  claude-config.py hooks python on         # 启用Python hooks
+  claude-config.py hooks status            # 显示hooks详细状态
   claude-config.py deepseek reset          # 清除API密钥
         '''
     )
@@ -223,7 +319,14 @@ def parse_args():
         help='要执行的命令'
     )
     
-    # 子命令参数
+    # 对于 hooks 命令，第一个参数可能是语言名或操作
+    parser.add_argument(
+        'language_or_action',
+        nargs='?',
+        help='语言名称或操作 (go/python/javascript/rust/nix/tilt/on/off/status等)'
+    )
+    
+    # 第二个参数是具体操作
     parser.add_argument(
         'action',
         nargs='?',
@@ -257,13 +360,15 @@ def main():
             sys.exit(0 if success else 1)
         
         elif args.command == 'proxy':
-            tool.handle_proxy_command(args.action)
+            # 对于非 hooks 命令，language_or_action 就是 action
+            tool.handle_proxy_command(args.language_or_action)
         
         elif args.command == 'hooks':
-            tool.handle_hooks_command(args.action)
+            # 处理 hooks 命令，可能包含语言参数
+            tool.handle_hooks_command(args.language_or_action, args.action)
         
         elif args.command == 'deepseek':
-            tool.handle_deepseek_command(args.action)
+            tool.handle_deepseek_command(args.language_or_action)
         
         elif args.command == 'backup':
             result = tool.config_manager.backup_config()

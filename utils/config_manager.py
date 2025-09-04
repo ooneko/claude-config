@@ -214,6 +214,10 @@ class ConfigManager:
             return OperationResult(False, f"清除 API 密钥失败: {e}")
     
     # ===== Hooks 相关方法 =====
+    
+    # 支持的语言列表
+    SUPPORTED_LANGUAGES = ['go', 'python', 'javascript', 'rust', 'nix', 'tilt']
+    
     def check_hooks_status(self) -> bool:
         """检查 hooks 状态"""
         if not self._ensure_settings_exists():
@@ -306,6 +310,51 @@ class ConfigManager:
         else:
             return OperationResult(False, "禁用 hooks 失败")
     
+    # ===== 语言级别 Hooks 控制 =====
+    
+    def check_language_hook_status(self, language: str) -> bool:
+        """检查特定语言的 hook 状态"""
+        if not self._ensure_settings_exists():
+            return True  # 默认启用
+        
+        if language not in self.SUPPORTED_LANGUAGES:
+            return False
+        
+        settings = self._load_settings()
+        env = settings.get('env', {})
+        env_key = f"CLAUDE_HOOKS_{language.upper()}_ENABLED"
+        return env.get(env_key, "true").lower() == "true"
+    
+    def set_language_hook_status(self, language: str, enabled: bool) -> OperationResult:
+        """设置特定语言的 hook 状态"""
+        if not self._ensure_settings_exists():
+            return OperationResult(False, "设置文件不存在")
+        
+        if language not in self.SUPPORTED_LANGUAGES:
+            return OperationResult(False, f"不支持的语言: {language}\\n   支持的语言: {', '.join(self.SUPPORTED_LANGUAGES)}")
+        
+        settings = self._load_settings()
+        env = settings.get('env', {})
+        env_key = f"CLAUDE_HOOKS_{language.upper()}_ENABLED"
+        
+        # 设置状态
+        env[env_key] = "true" if enabled else "false"
+        settings['env'] = env
+        
+        if self._save_settings(settings):
+            status_text = "启用" if enabled else "禁用"
+            return OperationResult(True, f"已{status_text} {language} hooks")
+        else:
+            status_text = "启用" if enabled else "禁用"
+            return OperationResult(False, f"{status_text} {language} hooks 失败")
+    
+    def get_all_language_hook_status(self) -> Dict[str, bool]:
+        """获取所有语言的 hook 状态"""
+        result = {}
+        for lang in self.SUPPORTED_LANGUAGES:
+            result[lang] = self.check_language_hook_status(lang)
+        return result
+    
     def show_status(self) -> None:
         """显示配置状态"""
         print(f"\\n{Color.BLUE}📊 Claude 配置状态：{Color.NC}")
@@ -344,6 +393,17 @@ class ConfigManager:
             stop_count = len(hooks.get('Stop', [{}])[0].get('hooks', []))
             print(f"   PostToolUse hooks: {post_tool_count} 个")
             print(f"   Stop hooks: {stop_count} 个")
+            
+            # 显示语言级别的 hooks 状态
+            print(f"\\n   语言级别控制：")
+            env = settings.get('env', {})
+            for lang in self.SUPPORTED_LANGUAGES:
+                env_key = f"CLAUDE_HOOKS_{lang.upper()}_ENABLED"
+                status = env.get(env_key, "true")  # 默认启用
+                if status.lower() == "true":
+                    print(f"      {Color.GREEN}{lang}: ✅{Color.NC}")
+                else:
+                    print(f"      {Color.RED}{lang}: ❌{Color.NC}")
         else:
             print("   ⚫ 已禁用")
         

@@ -17,7 +17,7 @@ This is a Claude Code configuration management repository that provides a comple
   - `claude-config backup` - 备份配置
 
 ### Development Tools
-- `./copy_to_claude.py` - 智能文件复制工具，支持项目结构分析和安全检查
+- `python3 copy_to_claude.py` - 智能文件复制工具，支持项目结构分析和安全检查
 
 ## 📋 Project Architecture
 
@@ -46,7 +46,7 @@ The intelligent hook system automatically runs quality checks:
 The `smart-lint.sh` automatically detects project types and runs appropriate tools:
 - **Go projects**: `golangci-lint run`
 - **Node.js projects**: `npm run lint` or `eslint`
-- **Python projects**: `ruff check` or `flake8`
+- **Python projects**: `python3 -m ruff check` or `python3 -m flake8`
 - **Tilt projects**: `tilt verify`
 
 ### Professional Agents

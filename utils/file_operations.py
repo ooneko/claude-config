@@ -182,7 +182,6 @@ class FileOperations:
             "hooks",
             "output-styles",
             "CLAUDE.md.to.copy",
-            "claude-config.sh",
             "settings.json"
         ]
     
