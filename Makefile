@@ -1,55 +1,131 @@
-.PHONY: install test clean help
+# Variables
+BINARY_NAME=claude-config
+MAIN_PATH=./cmd/claude-config
+BUILD_DIR=bin
+GOARCH=amd64
 
-# Python 解释器
-PYTHON := python3
+# Default target
+.PHONY: all
+all: clean build
 
-# 测试相关变量
-TEST_DIR := tests
-TEST_PATTERN := test_*.py
+# Build the application
+.PHONY: build
+build:
+	@echo "Building $(BINARY_NAME)..."
+	go build -o $(BINARY_NAME) $(MAIN_PATH)
 
-# 安装和配置
-install:
-	@echo "配置 Shell 环境..."
-	@echo "检测当前 Shell..."
-	@if [ "$$SHELL" = "/bin/zsh" ] || [ "$$SHELL" = "/usr/bin/zsh" ]; then \
-		SHELL_RC=~/.zshrc; \
-	elif [ "$$SHELL" = "/bin/bash" ] || [ "$$SHELL" = "/usr/bin/bash" ]; then \
-		SHELL_RC=~/.bashrc; \
-	else \
-		echo "警告: 未识别的 Shell，默认使用 ~/.bashrc"; \
-		SHELL_RC=~/.bashrc; \
-	fi; \
-	echo "为 claude-config.py 创建别名到 $$SHELL_RC..."; \
-	if ! grep -q "alias claude-config=" "$$SHELL_RC" 2>/dev/null; then \
-		echo 'alias claude-config="python3 $$HOME/.claude/claude-config.py"' >> "$$SHELL_RC"; \
-		echo "✅ 别名已添加到 $$SHELL_RC"; \
-	else \
-		echo "✅ 别名已存在于 $$SHELL_RC"; \
-	fi; \
-	echo ""; \
-	echo "🎉 安装完成！"; \
-	echo "请运行以下命令使配置生效:"; \
-	echo "  source $$SHELL_RC"; \
-	echo ""; \
-	echo "或者重新打开终端，然后就可以在任何地方使用 'claude-config' 命令了"
+# Build for multiple platforms
+.PHONY: build-all
+build-all: clean
+	@echo "Building for multiple platforms..."
+	@mkdir -p $(BUILD_DIR)
+	GOOS=linux GOARCH=$(GOARCH) go build -o $(BUILD_DIR)/$(BINARY_NAME)-linux-$(GOARCH) $(MAIN_PATH)
+	GOOS=darwin GOARCH=$(GOARCH) go build -o $(BUILD_DIR)/$(BINARY_NAME)-darwin-$(GOARCH) $(MAIN_PATH)
 
-# 默认目标
-help:
-	@echo "可用的命令:"
-	@echo "  install  - 配置 Shell 环境和创建别名"
-	@echo "  test     - 运行所有单元测试"
-	@echo "  clean    - 清理临时文件"
-	@echo "  help     - 显示此帮助信息"
-
-# 运行测试
+# Run tests
+.PHONY: test
 test:
-	@echo "运行单元测试..."
-	@$(PYTHON) -m unittest discover -s $(TEST_DIR) -p $(TEST_PATTERN) -v
+	@echo "Running tests..."
+	go test -v ./...
 
-# 清理临时文件
+# Run tests with coverage
+.PHONY: test-coverage
+test-coverage:
+	@echo "Running tests with coverage..."
+	go test -v -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out -o coverage.html
+
+# Run tests only for git changed files (untracked + modified)
+.PHONY: test-changed
+test-changed:
+	@echo "Running tests for git changed files..."
+	@if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then \
+		CHANGED_DIRS=$$(git status --porcelain | grep -E '^\?\?|^ M|^M |^A ' | awk '{print $$2}' | grep '\.go$$' | xargs -I {} dirname {} | sort -u | sed 's|^|./|' | tr '\n' ' '); \
+		if [ -n "$$CHANGED_DIRS" ]; then \
+			echo "Testing changed directories: $$CHANGED_DIRS"; \
+			go test -v $$CHANGED_DIRS; \
+		else \
+			echo "No Go files changed in git, running full test suite..."; \
+			go test -v ./...; \
+		fi \
+	else \
+		echo "Not in a git repository or git not available, running full test suite..."; \
+		go test -v ./...; \
+	fi
+
+# Run go fmt
+.PHONY: fmt
+fmt:
+	@echo "Formatting code..."
+	go fmt ./...
+
+# Run go vet
+.PHONY: vet
+vet:
+	@echo "Running go vet..."
+	go vet ./...
+
+# Run golangci-lint (requires golangci-lint to be installed)
+.PHONY: lint
+lint:
+	@echo "Running linter..."
+	@if command -v golangci-lint >/dev/null 2>&1; then \
+		golangci-lint run; \
+	else \
+		echo "golangci-lint not installed. Install with: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest"; \
+	fi
+
+# Install dependencies
+.PHONY: deps
+deps:
+	@echo "Installing dependencies..."
+	go mod tidy
+	go mod download
+
+# Clean build artifacts
+.PHONY: clean
 clean:
-	@echo "清理临时文件..."
-	@find . -type f -name "*.pyc" -delete
-	@find . -type d -name "__pycache__" -exec rm -rf {} +
-	@find . -type f -name "*.pyo" -delete
-	@find . -type f -name "*~" -delete
+	@echo "Cleaning..."
+	rm -f $(BINARY_NAME)
+	rm -rf $(BUILD_DIR)
+	rm -f coverage.out coverage.html
+
+# Run the application
+.PHONY: run
+run: build
+	./$(BINARY_NAME)
+
+# Install the binary to $GOPATH/bin
+.PHONY: install
+install:
+	@echo "Installing $(BINARY_NAME)..."
+	go install $(MAIN_PATH)
+
+# Quick check (fmt, vet, test)
+.PHONY: check
+check: fmt vet test
+
+# Development workflow (clean, check, build)
+.PHONY: dev
+dev: clean check build
+
+# Show help
+.PHONY: help
+help:
+	@echo "Available targets:"
+	@echo "  all          - Clean and build (default)"
+	@echo "  build        - Build the application"
+	@echo "  build-all    - Build for multiple platforms"
+	@echo "  test         - Run tests"
+	@echo "  test-changed - Run tests only for git changed files"
+	@echo "  test-coverage- Run tests with coverage report"
+	@echo "  fmt          - Format code"
+	@echo "  vet          - Run go vet"
+	@echo "  lint         - Run golangci-lint"
+	@echo "  deps         - Install and tidy dependencies"
+	@echo "  clean        - Clean build artifacts"
+	@echo "  run          - Build and run the application"
+	@echo "  install      - Install binary to GOPATH/bin"
+	@echo "  check        - Quick check (fmt, vet, test)"
+	@echo "  dev          - Development workflow (clean, check, build)"
+	@echo "  help         - Show this help message"

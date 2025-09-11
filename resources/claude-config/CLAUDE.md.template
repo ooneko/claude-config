@@ -118,6 +118,18 @@ Your code must be 100% clean. No exceptions.
 
 ## Implementation Standards
 
+### **MANDATORY: Test-Driven Development (TDD)**
+**ALWAYS use Test-Driven Development approach - write tests BEFORE implementation:**
+
+1. **RED**: Write a failing test that defines the desired functionality
+2. **GREEN**: Write the minimal code to make the test pass
+3. **REFACTOR**: Improve the code while keeping tests green
+
+**This is NOT optional - every feature must follow TDD cycle:**
+- Write comprehensive test cases first
+- Implement only what's needed to pass the tests
+- Refactor with confidence knowing tests will catch regressions
+
 ### Our code is complete when:
 - ✓ All linters pass with zero issues
 - ✓ All tests pass  
@@ -126,10 +138,11 @@ Your code must be 100% clean. No exceptions.
 - ✓ Godoc on all exported symbols
 
 ### Testing Strategy
-- Complex business logic → Write tests first
-- Simple CRUD → Write tests after
+- **ALL features → Write tests FIRST (TDD mandatory)**
+- Complex business logic → Comprehensive test coverage
+- Simple CRUD → Basic test coverage but still TDD
 - Hot paths → Add benchmarks
-- Skip tests for main() and simple CLI parsing
+- Skip tests only for main() and simple CLI parsing
 
 ### Project Structure
 ```
