@@ -7,81 +7,200 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// showStatus displays the current configuration status
+// createStatusCmd creates the status command
+func createStatusCmd() *cobra.Command {
+	statusCmd := &cobra.Command{
+		Use:   "status",
+		Short: "显示当前配置状态",
+		Long:  `显示代理、检查功能、通知和DeepSeek的当前状态`,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return showStatus()
+		},
+	}
+
+	return statusCmd
+}
+
+// showStatus displays the current status of all services
 func showStatus() error {
 	ctx := context.Background()
-	status, err := configMgr.GetStatus(ctx)
-	if err != nil {
-		return fmt.Errorf("获取状态失败: %w", err)
-	}
 
-	fmt.Println("📊 Claude 配置状态：")
-	fmt.Println("====================")
+	fmt.Println("Claude 配置状态:")
+	fmt.Println("================")
 	fmt.Println()
 
-	// Proxy status
-	fmt.Print("🌐 代理状态：")
-	if status.ProxyEnabled {
-		fmt.Println(" ✅ 已启用")
-		if status.ProxyConfig != nil {
-			fmt.Printf("   代理地址：%s\n", status.ProxyConfig.HTTPProxy)
-		}
-	} else {
-		fmt.Println(" ❌ 已禁用")
+	// Check proxy status
+	if err := showProxyStatus(ctx); err != nil {
+		fmt.Printf("❌ 代理状态检查失败: %v\n", err)
 	}
 	fmt.Println()
 
-	// DeepSeek status
-	fmt.Print("🤖 DeepSeek 状态：")
-	if status.DeepSeekEnabled {
-		fmt.Println(" ✅ 已启用")
-		if status.DeepSeekConfig != nil {
-			// Mask API key for security
-			maskedToken := maskAPIKey(status.DeepSeekConfig.AuthToken)
-			fmt.Printf("   ANTHROPIC_AUTH_TOKEN: %s\n", maskedToken)
-			fmt.Printf("   ANTHROPIC_BASE_URL: %s\n", status.DeepSeekConfig.BaseURL)
-		}
-	} else {
-		fmt.Println(" ❌ 已禁用")
+	// Check hooks/check status
+	if err := showCheckStatus(ctx); err != nil {
+		fmt.Printf("❌ 检查功能状态检查失败: %v\n", err)
 	}
 	fmt.Println()
 
-	// Hooks status
-	fmt.Print("🪝 Hooks 总体状态：")
-	if status.HooksEnabled {
-		fmt.Println(" ✅ 已启用")
-		fmt.Println()
+	// Check notify status
+	if err := showNotifyStatus(ctx); err != nil {
+		fmt.Printf("❌ 通知状态检查失败: %v\n", err)
+	}
+	fmt.Println()
 
-		// Hook 类型控制
-		if status.HooksConfig != nil {
-			fmt.Println("Hook 类型控制：")
-			if len(status.HooksConfig.PostToolUse) > 0 {
-				fmt.Println("  check   : ✅ 检查 hooks (代码检查、测试)")
-			} else {
-				fmt.Println("  check   : ❌ 检查 hooks (代码检查、测试)")
-			}
-			if len(status.HooksConfig.Stop) > 0 {
-				fmt.Println("  notify  : ✅ 通知 hooks (完成通知)")
-			} else {
-				fmt.Println("  notify  : ❌ 通知 hooks (完成通知)")
-			}
-			fmt.Println()
-		}
-
-	} else {
-		fmt.Println(" ❌ 已禁用")
+	// Check DeepSeek status
+	if err := showDeepSeekStatus(ctx); err != nil {
+		fmt.Printf("❌ DeepSeek状态检查失败: %v\n", err)
 	}
 
 	return nil
 }
 
-// createStatusCmd creates the status command
-func createStatusCmd() *cobra.Command {
-	return &cobra.Command{
-		Use:   "status",
-		Short: "显示当前配置状态",
-		RunE: func(cmd *cobra.Command, args []string) error {
-			return showStatus()
-		},
+// showProxyStatus shows the current proxy status
+func showProxyStatus(ctx context.Context) error {
+	isEnabled, err := proxyMgr.IsEnabled(ctx)
+	if err != nil {
+		return fmt.Errorf("获取代理状态失败: %w", err)
 	}
+
+	if isEnabled {
+		config, err := proxyMgr.GetConfig(ctx)
+		if err != nil {
+			return fmt.Errorf("获取代理配置失败: %w", err)
+		}
+		fmt.Printf("🌐 代理状态: ✅ 已启用 (%s)\n", config.HTTPProxy)
+	} else {
+		fmt.Println("🌐 代理状态: ❌ 已禁用")
+	}
+
+	return nil
+}
+
+// showCheckStatus shows the current check/hooks status
+func showCheckStatus(ctx context.Context) error {
+	isEnabled, err := isCheckEnabled(ctx)
+	if err != nil {
+		return fmt.Errorf("获取检查功能状态失败: %w", err)
+	}
+
+	if isEnabled {
+		fmt.Println("🔍 检查功能: ✅ 已启用 (smart-lint.sh, smart-test.sh)")
+	} else {
+		fmt.Println("🔍 检查功能: ❌ 已禁用")
+	}
+
+	return nil
+}
+
+// showNotifyStatus shows the current notify status
+func showNotifyStatus(ctx context.Context) error {
+	isEnabled, ntfyTopic, err := isNotifyEnabled(ctx)
+	if err != nil {
+		return fmt.Errorf("获取通知状态失败: %w", err)
+	}
+
+	if isEnabled {
+		if ntfyTopic != "" {
+			fmt.Printf("📱 通知状态: ✅ 已启用 (Topic: %s)\n", ntfyTopic)
+		} else {
+			fmt.Println("📱 通知状态: ⚠️  hooks已启用但未配置NTFY_TOPIC")
+		}
+	} else {
+		fmt.Println("📱 通知状态: ❌ 已禁用")
+	}
+
+	return nil
+}
+
+// showDeepSeekStatus shows the current DeepSeek status
+func showDeepSeekStatus(ctx context.Context) error {
+	isEnabled, err := deepSeekMgr.IsEnabled(ctx)
+	if err != nil {
+		return fmt.Errorf("获取DeepSeek状态失败: %w", err)
+	}
+
+	hasAPIKey, err := deepSeekMgr.HasAPIKey(ctx)
+	if err != nil {
+		return fmt.Errorf("获取DeepSeek API密钥状态失败: %w", err)
+	}
+
+	if isEnabled {
+		fmt.Println("🤖 DeepSeek状态: ✅ 已启用")
+	} else if hasAPIKey {
+		fmt.Println("🤖 DeepSeek状态: ⚠️  已配置API密钥但未启用")
+	} else {
+		fmt.Println("🤖 DeepSeek状态: ❌ 未配置")
+	}
+
+	return nil
+}
+
+// isCheckEnabled checks if the check functionality is enabled
+func isCheckEnabled(ctx context.Context) (bool, error) {
+	settings, err := configMgr.Load(ctx)
+	if err != nil {
+		return false, fmt.Errorf("读取配置失败: %w", err)
+	}
+
+	// Check if PostToolUse hooks exist and contain smart-lint.sh or smart-test.sh
+	if settings.Hooks == nil || settings.Hooks.PostToolUse == nil {
+		return false, nil
+	}
+
+	smartLintCommand := "~/.claude/hooks/smart-lint.sh"
+	smartTestCommand := "~/.claude/hooks/smart-test.sh"
+
+	for _, rule := range settings.Hooks.PostToolUse {
+		if rule.Matcher == "Write|Edit|MultiEdit" {
+			hasSmartLint := false
+			hasSmartTest := false
+			
+			for _, hook := range rule.Hooks {
+				if hook.Command == smartLintCommand {
+					hasSmartLint = true
+				}
+				if hook.Command == smartTestCommand {
+					hasSmartTest = true
+				}
+			}
+			
+			// Consider enabled if we have at least one of the smart hooks
+			if hasSmartLint || hasSmartTest {
+				return true, nil
+			}
+		}
+	}
+
+	return false, nil
+}
+
+// isNotifyEnabled checks if the notify functionality is enabled
+func isNotifyEnabled(ctx context.Context) (enabled bool, ntfyTopic string, err error) {
+	settings, err := configMgr.Load(ctx)
+	if err != nil {
+		return false, "", fmt.Errorf("读取配置失败: %w", err)
+	}
+
+	// Get NTFY_TOPIC from env
+	if settings.Env != nil {
+		ntfyTopic = settings.Env["NTFY_TOPIC"]
+	}
+
+	// Check if NTFY hooks exist in Stop hooks
+	if settings.Hooks == nil || settings.Hooks.Stop == nil {
+		return false, ntfyTopic, nil
+	}
+
+	ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh"
+
+	for _, rule := range settings.Hooks.Stop {
+		if rule.Matcher == "" { // Empty matcher for stop hooks
+			for _, hook := range rule.Hooks {
+				if hook.Command == ntfyCommand {
+					return true, ntfyTopic, nil
+				}
+			}
+		}
+	}
+
+	return false, ntfyTopic, nil
 }

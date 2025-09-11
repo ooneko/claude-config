@@ -62,16 +62,7 @@ func createInstallCmd() *cobra.Command {
 	installCmd := &cobra.Command{
 		Use:   "install",
 		Short: "安装配置文件",
-		Long: `安装Claude Code配置文件到 ~/.claude 目录
-
-支持选择性安装特定组件:
-  --all          安装所有配置文件 (默认)
-  --agents       仅安装 agents 
-  --commands     仅安装 commands
-  --hooks        仅安装 hooks
-  --output-styles 仅安装 output-styles
-  --settings     仅安装 settings.json
-  --claude       仅安装 CLAUDE.md`,
+		Long:  `安装Claude Code配置文件到 ~/.claude 目录`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return runInstall(cmd)
 		},

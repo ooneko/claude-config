@@ -44,10 +44,6 @@ func createDeepSeekCmd() *cobra.Command {
 		Use:   "deepseek <command>",
 		Short: "DeepSeek API 配置",
 		Long:  "管理 DeepSeek API 配置和密钥，支持安全的密钥存储",
-		Example: `  claude-config deepseek on <api-key>     # 启用 DeepSeek (提供密钥)
-  claude-config deepseek on               # 启用 DeepSeek (使用已保存密钥)
-  claude-config deepseek off              # 禁用 DeepSeek
-  claude-config deepseek reset            # 重置并清除 API 密钥`,
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Help()
 		},

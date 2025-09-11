@@ -2,7 +2,7 @@
 BINARY_NAME=claude-config
 MAIN_PATH=./cmd/claude-config
 BUILD_DIR=bin
-GOARCH=amd64
+GOARCH=$(shell go env GOARCH)
 
 # Default target
 .PHONY: all
@@ -95,11 +95,23 @@ clean:
 run: build
 	./$(BINARY_NAME)
 
-# Install the binary to $GOPATH/bin
+# Install the binary to ~/go/bin
 .PHONY: install
 install:
 	@echo "Installing $(BINARY_NAME)..."
-	go install $(MAIN_PATH)
+	@GOBIN=$$HOME/go/bin go install $(MAIN_PATH)
+	@if ! echo "$$PATH" | grep -q "$$HOME/go/bin"; then \
+		echo ""; \
+		echo "⚠️  ~/go/bin is not in your PATH!"; \
+		echo "Add this line to your shell profile (~/.bashrc, ~/.zshrc, ~/.profile):"; \
+		echo ""; \
+		echo "export PATH=\"\$$HOME/go/bin:\$$PATH\""; \
+		echo ""; \
+		echo "Then run: source ~/.bashrc (or your shell profile)"; \
+		echo ""; \
+	else \
+		echo "✅ $(BINARY_NAME) installed successfully to ~/go/bin"; \
+	fi
 
 # Quick check (fmt, vet, test)
 .PHONY: check
