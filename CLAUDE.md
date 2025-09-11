@@ -3,32 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
-This is `claude-config`, a unified configuration management tool for Claude Code. It provides configuration management, proxy setup, hooks system control, NTFY notifications, DeepSeek API integration, and file operations.
-
-## Architecture
-
-### Core Structure
-```
-cmd/claude-config/     # CLI application entrypoint and command implementations
-internal/              # Private packages
-  ├── config/         # Configuration management
-  ├── proxy/          # HTTP/HTTPS proxy management  
-  ├── check/          # Hooks system validation
-  ├── deepseek/       # DeepSeek API integration
-  ├── file/           # File operations and merging
-  ├── install/        # Installation and resource management
-  └── claude/         # Core interfaces and types
-resources/             # Template files, hooks, agents, and default configurations
-```
-
-### Key Managers
-The application uses a manager pattern with these core components:
-- `ConfigManager` - Handles Claude configuration settings
-- `ProxyManager` - Manages HTTP/HTTPS proxy configurations
-- `CheckManager` - Controls hooks system validation
-- `DeepSeekManager` - Manages DeepSeek API integration
-
-All managers are initialized in `main.go:init()` and operate on `~/.claude` directory.
+`claude-config` is a Go-based unified configuration management tool for Claude Code. It provides configuration management, proxy setup, hooks system validation, DeepSeek API integration, NTFY notifications, and resource installation through a manager-based architecture.
 
 ## Development Commands
 
@@ -36,69 +11,181 @@ All managers are initialized in `main.go:init()` and operate on `~/.claude` dire
 ```bash
 # Build the application
 go build ./cmd/claude-config
+# Or using make
+make build
 
-# Run all tests (note: some tests currently failing due to type issues)
+# Install to ~/go/bin
+make install
+
+# Run all tests
 go test ./...
+# Or using make
+make test
 
-# Run tests for specific package
+# Run tests for specific packages
 go test ./internal/config
 go test ./internal/proxy
 go test ./internal/file
+
+# Run tests only for git-changed files (useful during development)
+make test-changed
+
+# Run tests with coverage
+make test-coverage
 ```
 
-### Legacy Python Support
-The project maintains Python compatibility through a Makefile:
+### Code Quality and Development
 ```bash
-# Install shell aliases for Python version
-make install
+# Format, lint, and test (complete workflow)
+make check
 
-# Run Python tests
-make test
+# Format code
+make fmt
 
-# Clean temporary files  
-make clean
+# Run static analysis
+make vet
+
+# Run linter (requires golangci-lint)
+make lint
+
+# Development workflow: clean, check, build
+make dev
 ```
 
-## CLI Commands Structure
+### Cross-platform Building
+```bash
+# Build for multiple platforms
+make build-all
 
-The CLI is built with Cobra and provides these main commands:
-- `status` - Show current configuration status
-- `proxy` - Configure HTTP/HTTPS proxy settings
-- `check` - Manage hooks system validation
-- `deepseek` - DeepSeek API configuration
-- `notify` - NTFY notification management
-- `install` - Install configuration files and resources
-- `backup` - Backup and restore configurations
+# Manual cross-compilation examples
+GOOS=linux GOARCH=amd64 go build ./cmd/claude-config
+GOOS=darwin GOARCH=amd64 go build ./cmd/claude-config
+GOOS=windows GOARCH=amd64 go build ./cmd/claude-config
+```
 
-## Resource Management
+## Architecture
 
-The `resources/` directory contains:
-- **agents/** - Claude Code agent definitions (code-reviewer, golang-pro, etc.)
-- **commands/** - Custom Claude commands (archviz, check, commit, etc.)
-- **hooks/** - Shell hook scripts for linting, testing, and notifications
-- **output-styles/** - Output formatting configurations
-- **settings.json** - Default Claude settings
-- **CLAUDE.md.template** - Template for project-specific Claude configurations
+### Manager Pattern
+The application uses a manager-based architecture initialized in `main.go:init()`:
 
-Resources are managed through the install system and can be deployed to user's `~/.claude` directory.
+```go
+// Key managers (all operate on ~/.claude directory)
+configMgr   claude.ConfigManager  // Configuration management
+proxyMgr    claude.ProxyManager   // HTTP/HTTPS proxy management  
+checkMgr    *check.Manager        // Hooks system validation
+deepSeekMgr claude.DeepSeekManager // DeepSeek API integration
+```
 
-## Testing Strategy
+All managers implement interfaces defined in `internal/claude/interfaces.go` and work with context-based operations.
 
-- Use table-driven tests for complex logic
-- Focus on testing manager interfaces and file operations
-- Current test coverage includes file merging, configuration management, and proxy settings
-- Some tests are currently failing due to type mismatches that need resolution
+### Core Package Structure
+```
+cmd/claude-config/     # CLI entrypoint and command implementations
+├── main.go           # Manager initialization and application entry
+├── commands.go       # Cobra command structure and routing
+├── status.go         # Status command - shows configuration state
+├── proxy.go          # Proxy management command
+├── check.go          # Hooks system management
+├── deepseek.go       # DeepSeek API configuration
+├── install.go        # Resource installation command
+└── backup.go         # Backup and restore functionality
 
-## Key Patterns
+internal/             # Private packages following Go conventions
+├── claude/          # Core interfaces and shared types
+├── config/          # Settings.json management and configuration
+├── proxy/           # HTTP/HTTPS proxy configuration management
+├── check/           # Hooks system validation and control
+├── deepseek/        # DeepSeek API client and configuration
+├── file/            # File operations, merging, and atomic operations
+└── install/         # Resource installation with embedded files
+
+resources/           # Embedded resources using go:embed
+└── claude-config/   # Resources deployed to ~/.claude
+    ├── agents/      # Claude Code agent definitions
+    ├── commands/    # Custom Claude commands
+    ├── hooks/       # Shell hook scripts for development workflows
+    └── settings.json # Default Claude settings template
+```
+
+### Resource Management System
+The resource system uses Go's `embed` package to bundle files at compile time. Resources are installed atomically to `~/.claude` with backup and conflict resolution:
+
+- **Embedded Resources**: Files bundled into binary using `//go:embed`
+- **Template Processing**: Dynamic content generation with customization
+- **Configuration Merging**: Intelligent merging of settings.json with conflict resolution
+- **Atomic Operations**: All installations are atomic with rollback capability
+
+### Configuration Directory Structure
+All operations target `~/.claude` as the base configuration directory:
+```
+~/.claude/
+├── settings.json              # Main Claude settings (merged intelligently)
+├── claude_config.toml         # Tool-specific configuration
+├── agents/                    # Custom agent definitions
+├── commands/                  # Custom commands
+├── hooks/                     # Development hooks (linting, testing)
+└── output-styles/             # Output formatting styles
+```
+
+## CLI Command Architecture
+
+Built with Cobra framework, commands follow this pattern:
+- Each command has dedicated implementation file in `cmd/claude-config/`
+- Commands are registered in `initCommands()` function in `commands.go`
+- All commands operate through manager interfaces for testability
+- Interactive commands use consistent prompting patterns
+
+### Available Commands
+- `status` - Comprehensive configuration status across all managers
+- `proxy` - Interactive proxy configuration with connectivity validation
+- `check` - Hooks system management with language-specific validation  
+- `deepseek` - DeepSeek API configuration and connection testing
+- `install` - Resource installation with selective component installation
+- `backup` - Configuration backup and restore with versioning
+
+## Testing Architecture
+
+### Test Strategy
+- **Manager Interface Testing**: Focus on testing through interfaces defined in `internal/claude/`
+- **Table-Driven Tests**: Used extensively for complex logic validation
+- **Context-Based Testing**: All managers use context for cancellation and timeouts
+- **File Operation Testing**: Comprehensive testing of atomic operations and merging logic
+
+### Test Organization
+```bash
+# Test packages individually (faster during development)
+go test ./internal/config      # Configuration management tests
+go test ./internal/proxy       # Proxy functionality tests  
+go test ./internal/file        # File operations and merging tests
+go test ./internal/install     # Resource installation tests
+go test ./internal/deepseek    # DeepSeek API integration tests
+```
+
+## Key Development Patterns
+
+### Manager Initialization
+All managers are initialized in `main.go:init()` with the Claude directory path:
+```go
+claudeDir := filepath.Join(homeDir, ".claude")
+configMgr = config.NewManager(claudeDir)
+```
+
+### Context Usage
+All manager operations use context for proper cancellation and timeout handling:
+```go
+func (m *Manager) Operation(ctx context.Context) error {
+    // Implementation with context awareness
+}
+```
+
+### Interface-Based Design
+Core functionality is defined through interfaces in `internal/claude/interfaces.go`, enabling:
+- Easy testing with mock implementations  
+- Clear separation of concerns
+- Consistent API across all managers
 
 ### Error Handling
-Use simple error wrapping:
+Use simple error wrapping with context:
 ```go
 return fmt.Errorf("operation failed: %w", err)
 ```
-
-### Configuration Paths
-All managers work with `~/.claude` as base directory, passed during initialization.
-
-### File Operations
-Use the `file` package for atomic operations, merging configurations, and handling Claude-specific file formats.
