@@ -13,9 +13,9 @@
 #   event_type    Either "notification" or "stop"
 #
 # CONFIGURATION
-#   Requires ~/.config/claude-code-ntfy/config.yaml with:
-#     ntfy_topic: your-topic-name
-#     ntfy_server: https://ntfy.sh (optional, defaults to public server)
+#   Configuration is read from ~/.claude/settings.json:
+#     env.NTFY_TOPIC: your-topic-name (required)
+#     env.NTFY_SERVER: https://ntfy.sh (optional, defaults to public server)
 #
 # ENVIRONMENT
 #   CLAUDE_HOOK_PAYLOAD   JSON payload from Claude Code (for notifications)
@@ -49,31 +49,25 @@ if [[ "${CLAUDE_HOOKS_NTFY_ENABLED:-true}" != "true" ]]; then
     exit 0
 fi
 
-# Configuration file location
-CONFIG_FILE="${CLAUDE_HOOKS_NTFY_CONFIG:-$HOME/.config/claude-code-ntfy/config.yaml}"
+# Function to get configuration from Claude settings
+get_config_from_claude() {
+    local claude_settings="$HOME/.claude/settings.json"
+    if [[ -f "$claude_settings" ]] && command -v jq >/dev/null 2>&1; then
+        # Get NTFY_TOPIC from Claude settings env
+        NTFY_TOPIC=$(jq -r '.env.NTFY_TOPIC // empty' "$claude_settings" 2>/dev/null | grep -v '^null$' || echo "")
+        # Get NTFY_SERVER from Claude settings env, default to public server
+        NTFY_SERVER=$(jq -r '.env.NTFY_SERVER // "https://ntfy.sh"' "$claude_settings" 2>/dev/null)
+    fi
+}
 
-# Check if config file exists
-if [[ ! -f "$CONFIG_FILE" ]]; then
-    echo "Warning: Ntfy config not found at $CONFIG_FILE" >&2
-    echo "Create it with:" >&2
-    echo "  ntfy_topic: your-topic-name" >&2
-    echo "  ntfy_server: https://ntfy.sh" >&2
-    exit 0  # Exit gracefully to not block Claude
-fi
-
-# Check if yq is available
-if ! command -v yq >/dev/null 2>&1; then
-    echo "Warning: yq not found, cannot parse ntfy config" >&2
-    exit 0
-fi
-
-# Extract configuration with error handling
-NTFY_TOPIC=$(yq '.ntfy_topic' "$CONFIG_FILE" 2>/dev/null | grep -v '^null$' || echo "")
-NTFY_SERVER=$(yq '.ntfy_server // "https://ntfy.sh"' "$CONFIG_FILE" 2>/dev/null || echo "https://ntfy.sh")
+# Extract configuration from Claude settings
+get_config_from_claude
 
 # Validate required configuration
 if [[ -z "$NTFY_TOPIC" ]]; then
-    echo "Warning: ntfy_topic not configured in $CONFIG_FILE" >&2
+    echo "Warning: NTFY_TOPIC not configured in ~/.claude/settings.json env section" >&2
+    echo "Add NTFY_TOPIC to your Claude settings like:" >&2
+    echo '  "env": { "NTFY_TOPIC": "your-topic-name" }' >&2
     exit 0
 fi
 
@@ -89,7 +83,7 @@ if [[ -f "$RATE_LIMIT_FILE" ]]; then
         exit 0
     fi
 fi
-echo "$(date +%s)" > "$RATE_LIMIT_FILE"
+date +%s > "$RATE_LIMIT_FILE"
 
 # Get context information
 CWD=$(pwd)
@@ -112,8 +106,10 @@ get_terminal_title() {
         # Check if we're in a tmux session
         if [[ -n "${TMUX:-}" ]]; then
             # Get the current pane's window name
-            local window_name=$(tmux display-message -p '#W' 2>/dev/null || echo "")
-            local pane_title=$(tmux display-message -p '#{pane_title}' 2>/dev/null || echo "")
+            local window_name
+            window_name=$(tmux display-message -p '#W' 2>/dev/null || echo "")
+            local pane_title
+            pane_title=$(tmux display-message -p '#{pane_title}' 2>/dev/null || echo "")
             
             if [[ -n "$window_name" ]]; then
                 title="$window_name"
@@ -126,7 +122,7 @@ get_terminal_title() {
     elif [[ "${TERM_PROGRAM:-}" == "kitty" ]] && command -v kitty >/dev/null 2>&1; then
         # Kitty: Get window title using kitty remote control
         # This requires allow_remote_control to be enabled in kitty.conf
-        title=$(kitty @ ls | jq -r '.[] | select(.is_focused) | .tabs[] | select(.is_focused) | .title' 2>/dev/null || echo "")
+        title=$(kitty @ ls 2>/dev/null | jq -r '.[] | select(.is_focused) | .tabs[] | select(.is_focused) | .title' 2>/dev/null || echo "")
         if [[ -z "$title" ]]; then
             # Fallback: get from environment if remote control is disabled
             title="${KITTY_WINDOW_TITLE:-Kitty}"
@@ -141,13 +137,14 @@ get_terminal_title() {
         fi
     elif [[ -n "${DISPLAY:-}" ]] && command -v xprop >/dev/null 2>&1; then
         # Linux with X11: Get window title
-        local window_id=$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null | awk '{print $5}')
+        local window_id
+        window_id=$(xprop -root _NET_ACTIVE_WINDOW 2>/dev/null | awk '{print $5}')
         if [[ -n "$window_id" && "$window_id" != "0x0" ]]; then
             title=$(xprop -id "$window_id" WM_NAME 2>/dev/null | cut -d'"' -f2 || echo "")
         fi
     elif [[ -n "${WAYLAND_DISPLAY:-}" ]] && command -v swaymsg >/dev/null 2>&1; then
         # Wayland with Sway: Get focused window title
-        title=$(swaymsg -t get_tree | jq -r '.. | select(.focused? == true) | .name' 2>/dev/null || echo "")
+        title=$(swaymsg -t get_tree 2>/dev/null | jq -r '.. | select(.focused? == true) | .name' 2>/dev/null || echo "")
     fi
     
     clean_terminal_title "$title"

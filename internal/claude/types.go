@@ -68,7 +68,6 @@ type ConfigStatus struct {
 	BackupFiles     []*BackupInfo   `json:"backup_files,omitempty"`
 }
 
-
 // MarshalJSON implements json.Marshaler for Settings
 func (s *Settings) MarshalJSON() ([]byte, error) {
 	type alias Settings

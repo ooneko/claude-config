@@ -218,7 +218,6 @@ func TestConfigManager_GetStatus(t *testing.T) {
 	assert.True(t, status.DeepSeekEnabled)
 	assert.True(t, status.HooksEnabled)
 
-
 	// Check proxy config
 	require.NotNil(t, status.ProxyConfig)
 	assert.Equal(t, "http://127.0.0.1:7890", status.ProxyConfig.HTTPProxy)

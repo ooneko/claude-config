@@ -63,7 +63,6 @@ func TestBackupInfo(t *testing.T) {
 	}
 }
 
-
 func TestSettings_MarshalJSON(t *testing.T) {
 	settings := &Settings{
 		IncludeCoAuthoredBy: true,

@@ -35,7 +35,6 @@ type ProxyManager interface {
 	GetConfig(ctx context.Context) (*ProxyConfig, error)
 }
 
-
 // DeepSeekManager defines the interface for DeepSeek API management
 type DeepSeekManager interface {
 	// Enable enables DeepSeek configuration with the given API key

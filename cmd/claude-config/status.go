@@ -153,7 +153,7 @@ func isCheckEnabled(ctx context.Context) (bool, error) {
 		if rule.Matcher == "Write|Edit|MultiEdit" {
 			hasSmartLint := false
 			hasSmartTest := false
-			
+
 			for _, hook := range rule.Hooks {
 				if hook.Command == smartLintCommand {
 					hasSmartLint = true
@@ -162,7 +162,7 @@ func isCheckEnabled(ctx context.Context) (bool, error) {
 					hasSmartTest = true
 				}
 			}
-			
+
 			// Consider enabled if we have at least one of the smart hooks
 			if hasSmartLint || hasSmartTest {
 				return true, nil
