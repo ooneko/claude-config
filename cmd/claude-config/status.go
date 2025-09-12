@@ -83,7 +83,7 @@ func showCheckStatus(ctx context.Context) error {
 	}
 
 	if isEnabled {
-		fmt.Println("🔍 检查功能: ✅ 已启用 (smart-lint.sh, smart-test.sh)")
+		fmt.Println("🔍 检查功能: ✅ 已启用 ")
 	} else {
 		fmt.Println("🔍 检查功能: ❌ 已禁用")
 	}
