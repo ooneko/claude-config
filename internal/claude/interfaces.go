@@ -33,6 +33,9 @@ type ProxyManager interface {
 
 	// GetConfig returns current proxy configuration
 	GetConfig(ctx context.Context) (*ProxyConfig, error)
+
+	// LoadSavedConfig loads saved proxy configuration from file
+	LoadSavedConfig(ctx context.Context) (*ProxyConfig, error)
 }
 
 // DeepSeekManager defines the interface for DeepSeek API management

@@ -100,10 +100,17 @@ func (m *Manager) installClaudeMd() error {
 	return m.resources.ExtractFile("CLAUDE.md.template", targetPath)
 }
 
-// installStatuslineJs 安装statusline.js文件 - 总是覆盖现有文件
+// installStatuslineJs 安装statusline.js文件 - 总是覆盖现有文件，并设置可执行权限
 func (m *Manager) installStatuslineJs() error {
 	targetPath := filepath.Join(m.claudeDir, "statusline.js")
-	return m.resources.ExtractFile("statusline.js", targetPath)
+
+	// 提取文件
+	if err := m.resources.ExtractFile("statusline.js", targetPath); err != nil {
+		return err
+	}
+
+	// 设置可执行权限 (0755)
+	return os.Chmod(targetPath, 0755)
 }
 
 // ResourceManager embed资源管理器

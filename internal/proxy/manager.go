@@ -222,3 +222,8 @@ func (m *Manager) loadProxyConfig() (*claude.ProxyConfig, error) {
 
 	return &config, nil
 }
+
+// LoadSavedConfig loads saved proxy configuration from file
+func (m *Manager) LoadSavedConfig(ctx context.Context) (*claude.ProxyConfig, error) {
+	return m.loadProxyConfig()
+}
