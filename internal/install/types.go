@@ -11,12 +11,13 @@ type InstallOptions struct {
 	OutputStyles bool // 仅安装output-styles
 	Settings     bool // 仅安装settings.json
 	Claude       bool // 仅安装CLAUDE.md
+	Statusline   bool // 仅安装statusline.js
 }
 
 // Validate 验证安装选项
 func (opts InstallOptions) Validate() error {
 	if !opts.All && !opts.Agents && !opts.Commands && !opts.Hooks &&
-		!opts.OutputStyles && !opts.Settings && !opts.Claude {
+		!opts.OutputStyles && !opts.Settings && !opts.Claude && !opts.Statusline {
 		return fmt.Errorf("必须至少选择一个安装选项")
 	}
 	return nil
@@ -27,7 +28,7 @@ func (opts InstallOptions) GetSelectedComponents() []string {
 	var components []string
 
 	if opts.All {
-		return []string{"agents", "commands", "hooks", "output-styles", "settings.json", "CLAUDE.md.template"}
+		return []string{"agents", "commands", "hooks", "output-styles", "settings.json", "CLAUDE.md.template", "statusline.js"}
 	}
 
 	if opts.Agents {
@@ -47,6 +48,9 @@ func (opts InstallOptions) GetSelectedComponents() []string {
 	}
 	if opts.Claude {
 		components = append(components, "CLAUDE.md.template")
+	}
+	if opts.Statusline {
+		components = append(components, "statusline.js")
 	}
 
 	return components

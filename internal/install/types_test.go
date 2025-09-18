@@ -57,7 +57,7 @@ func TestInstallOptions_GetSelectedComponents(t *testing.T) {
 			options: InstallOptions{All: true},
 			expected: []string{
 				"agents", "commands", "hooks", "output-styles",
-				"settings.json", "CLAUDE.md.template",
+				"settings.json", "CLAUDE.md.template", "statusline.js",
 			},
 		},
 		{
@@ -74,11 +74,11 @@ func TestInstallOptions_GetSelectedComponents(t *testing.T) {
 			name: "所有单独选项",
 			options: InstallOptions{
 				Agents: true, Commands: true, Hooks: true,
-				OutputStyles: true, Settings: true, Claude: true,
+				OutputStyles: true, Settings: true, Claude: true, Statusline: true,
 			},
 			expected: []string{
 				"agents", "commands", "hooks", "output-styles",
-				"settings.json", "CLAUDE.md.template",
+				"settings.json", "CLAUDE.md.template", "statusline.js",
 			},
 		},
 		{

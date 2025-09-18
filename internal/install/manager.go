@@ -63,6 +63,8 @@ func (m *Manager) installComponent(ctx context.Context, component string) error 
 		return m.installSettingsJson()
 	case "CLAUDE.md.template":
 		return m.installClaudeMd()
+	case "statusline.js":
+		return m.installStatuslineJs()
 	default:
 		return fmt.Errorf("未知组件: %s", component)
 	}
@@ -96,6 +98,12 @@ func (m *Manager) installSettingsJson() error {
 func (m *Manager) installClaudeMd() error {
 	targetPath := filepath.Join(m.claudeDir, "CLAUDE.md")
 	return m.resources.ExtractFile("CLAUDE.md.template", targetPath)
+}
+
+// installStatuslineJs 安装statusline.js文件 - 总是覆盖现有文件
+func (m *Manager) installStatuslineJs() error {
+	targetPath := filepath.Join(m.claudeDir, "statusline.js")
+	return m.resources.ExtractFile("statusline.js", targetPath)
 }
 
 // ResourceManager embed资源管理器

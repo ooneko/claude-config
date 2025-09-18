@@ -23,10 +23,11 @@ func runInstall(cmd *cobra.Command) error {
 	outputStylesFlag, _ := cmd.Flags().GetBool("output-styles")
 	settingsFlag, _ := cmd.Flags().GetBool("settings")
 	claudeFlag, _ := cmd.Flags().GetBool("claude")
+	statuslineFlag, _ := cmd.Flags().GetBool("statusline")
 
 	// 如果没有指定任何选项，默认安装所有
 	if !allFlag && !agentsFlag && !commandsFlag && !hooksFlag &&
-		!outputStylesFlag && !settingsFlag && !claudeFlag {
+		!outputStylesFlag && !settingsFlag && !claudeFlag && !statuslineFlag {
 		options.All = true
 	} else {
 		options.All = allFlag
@@ -36,6 +37,7 @@ func runInstall(cmd *cobra.Command) error {
 		options.OutputStyles = outputStylesFlag
 		options.Settings = settingsFlag
 		options.Claude = claudeFlag
+		options.Statusline = statuslineFlag
 	}
 
 	// 验证选项
@@ -76,6 +78,7 @@ func createInstallCmd() *cobra.Command {
 	installCmd.Flags().Bool("output-styles", false, "仅安装output-styles")
 	installCmd.Flags().Bool("settings", false, "仅安装settings.json")
 	installCmd.Flags().Bool("claude", false, "仅安装CLAUDE.md")
+	installCmd.Flags().Bool("statusline", false, "仅安装statusline.js")
 
 	return installCmd
 }
