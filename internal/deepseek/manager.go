@@ -170,21 +170,6 @@ func (m *Manager) saveAPIKey(apiKey string) error {
 	return nil
 }
 
-// loadAPIKey loads API key from the secure file
-func (m *Manager) loadAPIKey() (string, error) {
-	apiKeyPath := filepath.Join(m.claudeDir, ".deepseek_api_key")
-
-	data, err := os.ReadFile(apiKeyPath)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", fmt.Errorf("API key file not found")
-		}
-		return "", fmt.Errorf("failed to read API key file: %w", err)
-	}
-
-	return string(data), nil
-}
-
 // loadSettings loads settings from settings.json
 func (m *Manager) loadSettings() (*claude.Settings, error) {
 	settingsPath := filepath.Join(m.claudeDir, "settings.json")

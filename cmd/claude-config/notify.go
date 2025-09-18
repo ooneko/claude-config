@@ -17,7 +17,7 @@ func createNotifyCmd() *cobra.Command {
 		Long:  `管理NTFY通知配置，支持启用/禁用通知功能`,
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("使用 'claude-config notify on' 启用通知或 'claude-config notify off' 禁用通知")
-			cmd.Help()
+			_ = cmd.Help()
 		},
 	}
 
@@ -71,7 +71,7 @@ func enableNTFY() error {
 	ntfyTopic := settings.Env["NTFY_TOPIC"]
 	if ntfyTopic == "" {
 		fmt.Print("请输入NTFY Topic: ")
-		fmt.Scanln(&ntfyTopic)
+		_, _ = fmt.Scanln(&ntfyTopic)
 
 		ntfyTopic = strings.TrimSpace(ntfyTopic)
 		if ntfyTopic == "" {

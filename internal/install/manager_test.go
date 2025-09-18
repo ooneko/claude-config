@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -136,7 +137,7 @@ func TestResourceManager_ListEmbeddedFiles(t *testing.T) {
 	for _, expected := range expectedFiles {
 		found := false
 		for _, file := range files {
-			if file == expected || filepath.HasPrefix(file, expected) {
+			if file == expected || strings.HasPrefix(file, expected) {
 				found = true
 				break
 			}

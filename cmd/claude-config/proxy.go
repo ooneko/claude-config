@@ -35,7 +35,7 @@ func createProxyCmd() *cobra.Command {
 		Short: "代理管理",
 		Long:  "管理 HTTP/HTTPS 代理设置 (127.0.0.1:7890)",
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+			_ = cmd.Help()
 		},
 	}
 

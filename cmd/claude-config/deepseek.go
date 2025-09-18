@@ -45,7 +45,7 @@ func createDeepSeekCmd() *cobra.Command {
 		Short: "DeepSeek API 配置",
 		Long:  "管理 DeepSeek API 配置和密钥，支持安全的密钥存储",
 		Run: func(cmd *cobra.Command, args []string) {
-			cmd.Help()
+			_ = cmd.Help()
 		},
 	}
 

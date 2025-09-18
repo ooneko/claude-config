@@ -15,7 +15,7 @@ func createRootCmd() *cobra.Command {
 			// 没有子命令时显示帮助信息
 			fmt.Println("欢迎使用 Claude 配置管理工具！")
 			fmt.Println()
-			cmd.Help()
+			_ = cmd.Help()
 		},
 	}
 

@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ooneko/claude-config/resources"
 )
@@ -123,7 +124,7 @@ func (rm *ResourceManager) ListEmbeddedFiles() ([]string, error) {
 		}
 
 		// 移除claude-config前缀
-		if filepath.HasPrefix(path, "claude-config/") {
+		if strings.HasPrefix(path, "claude-config/") {
 			relativePath := path[len("claude-config/"):]
 			if d.IsDir() {
 				files = append(files, relativePath+"/")

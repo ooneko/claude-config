@@ -74,8 +74,8 @@ func (m *Manager) DisableCheck(ctx context.Context) error {
 	settings.Hooks.PostToolUse = nil
 
 	// If all hooks are removed, set hooks to nil
-	if (settings.Hooks.PostToolUse == nil || len(settings.Hooks.PostToolUse) == 0) &&
-		(settings.Hooks.Stop == nil || len(settings.Hooks.Stop) == 0) {
+	if len(settings.Hooks.PostToolUse) == 0 &&
+		len(settings.Hooks.Stop) == 0 {
 		settings.Hooks = nil
 	}
 

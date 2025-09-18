@@ -105,14 +105,31 @@ run_go_direct_lint() {
                 exclude_args="${exclude_args} --skip-files=${pattern}"
             done < ".claude-hooks-ignore"
         fi
-        
-        local lint_output
-        local files_arg=$(echo "$changed_go_files" | tr '\n' ' ')
-        local lint_cmd="golangci-lint run --timeout=2m${exclude_args} ${files_arg}"
-        log_debug "Running: $lint_cmd"
-        if ! lint_output=$($lint_cmd 2>&1); then
+
+        # Group files by directory to avoid "named files must all be in one directory" error
+        local lint_output=""
+        local has_errors=false
+
+        # Get unique directories containing changed Go files
+        local directories=$(echo "$changed_go_files" | xargs -I {} dirname {} | sort -u)
+
+        for dir in $directories; do
+            # Get files in this directory
+            local dir_files=$(echo "$changed_go_files" | grep "^${dir}/" | tr '\n' ' ')
+            if [[ -n "$dir_files" ]]; then
+                local lint_cmd="golangci-lint run --timeout=2m${exclude_args} ${dir_files}"
+                log_debug "Running: $lint_cmd"
+                local dir_output
+                if ! dir_output=$($lint_cmd 2>&1); then
+                    has_errors=true
+                    lint_output="${lint_output}${dir_output}\n"
+                fi
+            fi
+        done
+
+        if [[ "$has_errors" == true ]]; then
             add_error "golangci-lint found issues in changed files"
-            echo "$lint_output" >&2
+            echo -e "$lint_output" >&2
         fi
     elif command_exists go; then
         # For go vet, we need to check if we can run it on specific files
