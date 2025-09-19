@@ -1,49 +1,18 @@
-Analyze the current code changes and perform the following Git operations carefully:
+# Claude Command: Commit
 
-1. First, thoroughly examine the repository status with `git status` to identify:
-   - Modified files
-   - Deleted files
-   - Untracked files (categorize them by relevance)
+This command helps you create well-formatted commits with conventional commit messages and emoji.
 
-2. For untracked files, analyze their relationship to the current changes:
-   - Determine which untracked files are logically related to the modified files
-   - Identify dependencies between tracked changes and new files
-   - Exclude unrelated untracked files (e.g., temporary files, logs)
+## Usage
 
-3. Only add the relevant untracked files using selective commands:
-   - `git add path/to/specific_file` for individual files
-   - `git add dir/related_files/` for directories of related files
-   - Avoid using `git add .` or `git add *` to prevent over-inclusion
-
-4. Verify unit test coverage for modified files:
-   - Check that all modified Go files have corresponding test files
-   - Run `go test ./...` to ensure all tests pass
-   - For new functionality, ensure test coverage exists before committing
-   - If tests are missing, add them or document why they're not needed
-
-5. Create a detailed commit message that:
-   - Clearly describes the purpose of the changes
-   - Lists both modified and newly added relevant files
-   - Explains the relationship between changes and added files
-   - Mentions test coverage status for modified files
-   - Example: "feat: add user profile image support\n\n- Modified user model to handle image URLs\n- Added new image upload service (new file)\n- Updated API endpoints to support images\n- Added comprehensive unit tests for all changes"
-
-6. Verify the staged changes with `git diff --cached` to ensure:
-   - Only relevant changes are included
-   - No unrelated files are accidentally staged
-   - All necessary dependencies are accounted for
-
-7. Commit with `git commit -m "[descriptive message]"`
-
-8. Push to remote repository with `git push origin [branch-name]`
-
-## Usage Examples
-
-### Basic commit workflow
-```bash
+To create a commit, just type:
+```
 /commit
 ```
-Automatically analyzes current changes and generates intelligent commit message.
+
+Or with options:
+```
+/commit --no-verify
+```
 
 ### Commit with additional reference
 ```bash
@@ -68,10 +37,179 @@ All tests passing: ✓
 [SQCEE-DOX-8949] dox add makefile
 ```
 
-Key considerations:
-- Be judicious about which untracked files to include
-- Maintain clear relationships between changes
-- Document added files in commit message
-- Ensure comprehensive test coverage for all code changes
-- Double-check staged changes before committing
-- When using `/commit [message]`, the provided message is appended to the auto-generated commit content
+## What This Command Does
+
+1. Unless specified with `--no-verify`, automatically runs pre-commit checks:
+   - `make lint` to ensure code quality
+   - `make build` to verify the build succeeds
+   - `make test` to run all tests
+2. Checks current git branch name for version information:
+   - Extracts version numbers from branch names like `release/v0.1.0`, `hotfix/v1.2.3`, `feature/v2.0.0`
+   - Incorporates version into commit message format: `<type>(version): <description>`
+3. Examines repository status with `git status` to identify:
+   - Modified files
+   - Deleted files
+   - Untracked files
+   - Currently staged files
+4. **Intelligent file staging logic**:
+   - **If files are already staged**: Only commits the manually staged files
+   - **If no files are staged**: Automatically analyzes and selectively adds relevant files:
+     - Determines which untracked files are logically related to modified files
+     - Identifies dependencies between tracked changes and new files
+     - Excludes unrelated untracked files (e.g., temporary files, logs)
+     - Uses selective `git add path/to/specific_file` commands instead of `git add .`
+5. Verifies unit test coverage for modified files:
+   - Checks that all modified Go files have corresponding test files
+   - Ensures test coverage exists for new functionality
+   - Documents test status in commit message
+6. Performs a `git diff --cached` to understand what changes are being committed
+7. Analyzes the diff to determine if multiple distinct logical changes are present
+8. If multiple distinct changes are detected, suggests breaking the commit into multiple smaller commits
+9. For each commit (or the single commit if not split), creates a commit message using emoji conventional commit format that:
+   - Clearly describes the purpose of the changes
+   - Lists both modified and newly added relevant files
+   - Explains the relationship between changes and added files
+   - Mentions test coverage status for modified files
+
+## Best Practices for Commits
+
+- **Verify before committing**: Ensure code is linted, builds correctly, and documentation is updated
+- **Atomic commits**: Each commit should contain related changes that serve a single purpose
+- **Split large changes**: If changes touch multiple concerns, split them into separate commits
+- **Conventional commit format**: Use the format `<type>: <description>` or `<type>(version): <description>` where type is one of:
+  - `feat`: A new feature
+  - `fix`: A bug fix
+  - `docs`: Documentation changes
+  - `style`: Code style changes (formatting, etc)
+  - `refactor`: Code changes that neither fix bugs nor add features
+  - `perf`: Performance improvements
+  - `test`: Adding or fixing tests
+  - `chore`: Changes to the build process, tools, etc.
+- **Version-aware commits**: When working on version-specific branches (e.g., `release/v0.1.0`, `hotfix/v1.2.3`), the version number is automatically extracted and included in the commit format as `<type>(version): <description>` (e.g., `feat(0.1.0): add new feature`)
+- **Present tense, imperative mood**: Write commit messages as commands (e.g., "add feature" not "added feature")
+- **Concise first line**: Keep the first line under 72 characters
+- **Emoji**: Each commit type is paired with an appropriate emoji:
+  - ✨ `feat`: New feature
+  - 🐛 `fix`: Bug fix
+  - 📝 `docs`: Documentation
+  - 💄 `style`: Formatting/style
+  - ♻️ `refactor`: Code refactoring
+  - ⚡️ `perf`: Performance improvements
+  - ✅ `test`: Tests
+  - 🔧 `chore`: Tooling, configuration
+  - 🚀 `ci`: CI/CD improvements
+  - 🗑️ `revert`: Reverting changes
+  - 🧪 `test`: Add a failing test
+  - 🚨 `fix`: Fix compiler/linter warnings
+  - 🔒️ `fix`: Fix security issues
+  - 👥 `chore`: Add or update contributors
+  - 🚚 `refactor`: Move or rename resources
+  - 🏗️ `refactor`: Make architectural changes
+  - 🔀 `chore`: Merge branches
+  - 📦️ `chore`: Add or update compiled files or packages
+  - ➕ `chore`: Add a dependency
+  - ➖ `chore`: Remove a dependency
+  - 🌱 `chore`: Add or update seed files
+  - 🧑‍💻 `chore`: Improve developer experience
+  - 🧵 `feat`: Add or update code related to multithreading or concurrency
+  - 🔍️ `feat`: Improve SEO
+  - 🏷️ `feat`: Add or update types
+  - 💬 `feat`: Add or update text and literals
+  - 🌐 `feat`: Internationalization and localization
+  - 👔 `feat`: Add or update business logic
+  - 📱 `feat`: Work on responsive design
+  - 🚸 `feat`: Improve user experience / usability
+  - 🩹 `fix`: Simple fix for a non-critical issue
+  - 🥅 `fix`: Catch errors
+  - 👽️ `fix`: Update code due to external API changes
+  - 🔥 `fix`: Remove code or files
+  - 🎨 `style`: Improve structure/format of the code
+  - 🚑️ `fix`: Critical hotfix
+  - 🎉 `chore`: Begin a project
+  - 🔖 `chore`: Release/Version tags
+  - 🚧 `wip`: Work in progress
+  - 💚 `fix`: Fix CI build
+  - 📌 `chore`: Pin dependencies to specific versions
+  - 👷 `ci`: Add or update CI build system
+  - 📈 `feat`: Add or update analytics or tracking code
+  - ✏️ `fix`: Fix typos
+  - ⏪️ `revert`: Revert changes
+  - 📄 `chore`: Add or update license
+  - 💥 `feat`: Introduce breaking changes
+  - 🍱 `assets`: Add or update assets
+  - ♿️ `feat`: Improve accessibility
+  - 💡 `docs`: Add or update comments in source code
+  - 🗃️ `db`: Perform database related changes
+  - 🔊 `feat`: Add or update logs
+  - 🔇 `fix`: Remove logs
+  - 🤡 `test`: Mock things
+  - 🥚 `feat`: Add or update an easter egg
+  - 🙈 `chore`: Add or update .gitignore file
+  - 📸 `test`: Add or update snapshots
+  - ⚗️ `experiment`: Perform experiments
+  - 🚩 `feat`: Add, update, or remove feature flags
+  - 💫 `ui`: Add or update animations and transitions
+  - ⚰️ `refactor`: Remove dead code
+  - 🦺 `feat`: Add or update code related to validation
+  - ✈️ `feat`: Improve offline support
+
+## Guidelines for Splitting Commits
+
+When analyzing the diff, consider splitting commits based on these criteria:
+
+1. **Different concerns**: Changes to unrelated parts of the codebase
+2. **Different types of changes**: Mixing features, fixes, refactoring, etc.
+3. **File patterns**: Changes to different types of files (e.g., source code vs documentation)
+4. **Logical grouping**: Changes that would be easier to understand or review separately
+5. **Size**: Very large changes that would be clearer if broken down
+
+## Examples
+
+Good commit messages:
+- ✨ feat: add user authentication system
+- 🐛 fix: resolve memory leak in rendering process
+- 📝 docs: update API documentation with new endpoints
+- ♻️ refactor: simplify error handling logic in parser
+- 🚨 fix: resolve linter warnings in component files
+- 🧑‍💻 chore: improve developer tooling setup process
+- 👔 feat: implement business logic for transaction validation
+- 🩹 fix: address minor styling inconsistency in header
+- 🚑️ fix: patch critical security vulnerability in auth flow
+- 🎨 style: reorganize component structure for better readability
+- 🔥 fix: remove deprecated legacy code
+- 🦺 feat: add input validation for user registration form
+- 💚 fix: resolve failing CI pipeline tests
+- 📈 feat: implement analytics tracking for user engagement
+- 🔒️ fix: strengthen authentication password requirements
+- ♿️ feat: improve form accessibility for screen readers
+
+Version-aware commit messages (when on version branches):
+- ✨ feat(0.1.0): add user authentication system
+- 🐛 fix(1.2.3): resolve memory leak in rendering process
+- 📝 docs(2.0.0): update API documentation with new endpoints
+- 🚑️ fix(1.1.1): patch critical security vulnerability in auth flow
+
+Example of splitting commits:
+- First commit: ✨ feat: add new solc version type definitions
+- Second commit: 📝 docs: update documentation for new solc versions
+- Third commit: 🔧 chore: update go.mod dependencies
+- Fourth commit: 🏷️ feat: add type definitions for new API endpoints
+- Fifth commit: 🧵 feat: improve concurrency handling in worker threads
+- Sixth commit: 🚨 fix: resolve linting issues in new code
+- Seventh commit: ✅ test: add unit tests for new solc version features
+- Eighth commit: 🔒️ fix: update dependencies with security vulnerabilities
+
+## Command Options
+
+- `--no-verify`: Skip running the pre-commit checks (lint, build, test)
+
+## Important Notes
+
+- By default, pre-commit checks (`make lint`, `make build`, `make test`) will run to ensure code quality
+- If these checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
+- If specific files are already staged, the command will only commit those files
+- If no files are staged, it will automatically stage all modified and new files
+- The commit message will be constructed based on the changes detected
+- Before committing, the command will review the diff to identify if multiple commits would be more appropriate
+- If suggesting multiple commits, it will help you stage and commit the changes separately
+- Always reviews the commit diff to ensure the message matches the changes
