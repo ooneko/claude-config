@@ -37,9 +37,41 @@ Analyze the current code changes and perform the following Git operations carefu
 
 8. Push to remote repository with `git push origin [branch-name]`
 
+## Usage Examples
+
+### Basic commit workflow
+```bash
+/commit
+```
+Automatically analyzes current changes and generates intelligent commit message.
+
+### Commit with additional reference
+```bash
+/commit "[SQCEE-DOX-8949] dox add makefile"
+```
+When additional reference is provided:
+- System still auto-generates commit title and detailed description
+- The provided reference is appended to the end of the commit content
+- All validation steps (tests, linting, file analysis) are still performed
+
+### Example commit message format:
+```
+feat: add Makefile support for build automation
+
+- Added Makefile with build, test, and lint targets
+- Updated documentation for build process
+- Added make install target for easy deployment
+
+Test coverage: All modified files covered
+All tests passing: ✓
+
+[SQCEE-DOX-8949] dox add makefile
+```
+
 Key considerations:
 - Be judicious about which untracked files to include
 - Maintain clear relationships between changes
 - Document added files in commit message
 - Ensure comprehensive test coverage for all code changes
 - Double-check staged changes before committing
+- When using `/commit [message]`, the provided message is appended to the auto-generated commit content
