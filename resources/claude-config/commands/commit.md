@@ -12,6 +12,8 @@ To create a commit, just type:
 Or with options:
 ```
 /commit --no-verify
+/commit --no-push
+/commit --no-verify --no-push
 ```
 
 ### Commit with additional reference
@@ -70,6 +72,11 @@ All tests passing: ✓
    - Lists both modified and newly added relevant files
    - Explains the relationship between changes and added files
    - Mentions test coverage status for modified files
+10. Unless specified with `--no-push`, automatically pushes the commit to the remote repository:
+    - Checks if the current branch has an upstream remote branch
+    - If no upstream exists, sets up tracking with `git push -u origin <branch>`
+    - If upstream exists, pushes with `git push`
+    - Verifies the push was successful and displays the result
 
 ## Best Practices for Commits
 
@@ -202,6 +209,7 @@ Example of splitting commits:
 ## Command Options
 
 - `--no-verify`: Skip running the pre-commit checks (lint, build, test)
+- `--no-push`: Skip automatically pushing the commit to the remote repository
 
 ## Important Notes
 
@@ -213,3 +221,7 @@ Example of splitting commits:
 - Before committing, the command will review the diff to identify if multiple commits would be more appropriate
 - If suggesting multiple commits, it will help you stage and commit the changes separately
 - Always reviews the commit diff to ensure the message matches the changes
+- **By default, commits are automatically pushed to the remote repository**
+- Use `--no-push` to skip the automatic push if you want to push manually later
+- For new branches without upstream, the command will set up tracking with `git push -u origin <branch>`
+- Push failures will be reported but won't rollback the local commit
