@@ -16,24 +16,34 @@ lint_go() {
     
     log_info "Running Go linting..."
     
-    # Check if Makefile exists with fmt and lint targets
+    # Check if Makefile exists with fmt, lint, and vet targets
     if [[ -f "Makefile" ]]; then
         local has_fmt=$(grep -E "^fmt:" Makefile 2>/dev/null || echo "")
         local has_lint=$(grep -E "^lint:" Makefile 2>/dev/null || echo "")
-        
+        local has_vet=$(grep -E "^vet:" Makefile 2>/dev/null || echo "")
+
         if [[ -n "$has_fmt" && -n "$has_lint" ]]; then
             log_info "Using Makefile targets"
-            
+
             local fmt_output
             if ! fmt_output=$(make fmt 2>&1); then
                 add_error "Go formatting failed (make fmt)"
                 echo "$fmt_output" >&2
             fi
-            
+
             local lint_output
             if ! lint_output=$(make lint 2>&1); then
                 add_error "Go linting failed (make lint)"
                 echo "$lint_output" >&2
+            fi
+
+            # Run make vet if target exists
+            if [[ -n "$has_vet" ]]; then
+                local vet_output
+                if ! vet_output=$(make vet 2>&1); then
+                    add_error "Go vet failed (make vet)"
+                    echo "$vet_output" >&2
+                fi
             fi
         else
             # Fallback to direct commands
