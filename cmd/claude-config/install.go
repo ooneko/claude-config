@@ -24,6 +24,7 @@ func runInstall(cmd *cobra.Command) error {
 	settingsFlag, _ := cmd.Flags().GetBool("settings")
 	claudeFlag, _ := cmd.Flags().GetBool("claude")
 	statuslineFlag, _ := cmd.Flags().GetBool("statusline")
+	forceFlag, _ := cmd.Flags().GetBool("force")
 
 	// 如果没有指定任何选项，默认安装所有
 	if !allFlag && !agentsFlag && !commandsFlag && !hooksFlag &&
@@ -39,6 +40,9 @@ func runInstall(cmd *cobra.Command) error {
 		options.Claude = claudeFlag
 		options.Statusline = statuslineFlag
 	}
+
+	// 设置 Force 选项
+	options.Force = forceFlag
 
 	// 验证选项
 	if err := options.Validate(); err != nil {
@@ -79,6 +83,7 @@ func createInstallCmd() *cobra.Command {
 	installCmd.Flags().Bool("settings", false, "仅安装settings.json")
 	installCmd.Flags().Bool("claude", false, "仅安装CLAUDE.md")
 	installCmd.Flags().Bool("statusline", false, "仅安装statusline.js")
+	installCmd.Flags().Bool("force", false, "强制覆盖已存在的文件")
 
 	return installCmd
 }

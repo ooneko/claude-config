@@ -62,6 +62,17 @@ func TestManager_Install(t *testing.T) {
 			},
 		},
 		{
+			name: "Force选项测试 - 强制覆盖",
+			options: InstallOptions{
+				Agents: true,
+				Force:  true,
+			},
+			wantErr: false,
+			checkFn: func(t *testing.T, claudeDir string) {
+				assert.DirExists(t, filepath.Join(claudeDir, "agents"))
+			},
+		},
+		{
 			name:    "无效选项",
 			options: InstallOptions{
 				// 所有选项都为false
@@ -98,14 +109,14 @@ func TestManager_installComponent(t *testing.T) {
 	ctx := context.Background()
 
 	// 测试未知组件
-	err := manager.installComponent(ctx, "unknown-component")
+	err := manager.installComponent(ctx, "unknown-component", false)
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "未知组件")
 
 	// 测试取消上下文
 	cancelCtx, cancel := context.WithCancel(ctx)
 	cancel()
-	err = manager.installComponent(cancelCtx, "agents")
+	err = manager.installComponent(cancelCtx, "agents", false)
 	assert.Error(t, err)
 	assert.Equal(t, context.Canceled, err)
 }

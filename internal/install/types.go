@@ -12,6 +12,7 @@ type InstallOptions struct {
 	Settings     bool // 仅安装settings.json
 	Claude       bool // 仅安装CLAUDE.md
 	Statusline   bool // 仅安装statusline.js
+	Force        bool // 强制覆盖已存在的文件
 }
 
 // Validate 验证安装选项

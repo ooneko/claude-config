@@ -40,7 +40,7 @@ func (m *Manager) Install(ctx context.Context, options InstallOptions) error {
 	components := options.GetSelectedComponents()
 
 	for _, component := range components {
-		if err := m.installComponent(ctx, component); err != nil {
+		if err := m.installComponent(ctx, component, options.Force); err != nil {
 			return fmt.Errorf("安装组件%s失败: %w", component, err)
 		}
 	}
@@ -49,7 +49,7 @@ func (m *Manager) Install(ctx context.Context, options InstallOptions) error {
 }
 
 // installComponent 安装单个组件
-func (m *Manager) installComponent(ctx context.Context, component string) error {
+func (m *Manager) installComponent(ctx context.Context, component string, force bool) error {
 	select {
 	case <-ctx.Done():
 		return ctx.Err()
@@ -58,21 +58,30 @@ func (m *Manager) installComponent(ctx context.Context, component string) error 
 
 	switch component {
 	case "agents", "commands", "hooks", "output-styles":
-		return m.installDirectory(component)
+		return m.installDirectory(component, force)
 	case "settings.json":
 		return m.installSettingsJson()
 	case "CLAUDE.md.template":
-		return m.installClaudeMd()
+		return m.installClaudeMd(force)
 	case "statusline.js":
-		return m.installStatuslineJs()
+		return m.installStatuslineJs(force)
 	default:
 		return fmt.Errorf("未知组件: %s", component)
 	}
 }
 
-// installDirectory 安装目录 - 总是覆盖现有目录
-func (m *Manager) installDirectory(dirName string) error {
+// installDirectory 安装目录 - 根据force参数决定是否覆盖现有目录
+func (m *Manager) installDirectory(dirName string, force bool) error {
 	targetDir := filepath.Join(m.claudeDir, dirName)
+
+	// 如果不强制覆盖，检查目录是否存在
+	if !force {
+		if _, err := os.Stat(targetDir); err == nil {
+			fmt.Printf("⚠️  目录 %s 已存在，跳过安装（使用 --force 强制覆盖）\n", dirName)
+			return nil
+		}
+	}
+
 	return m.resources.ExtractDirectory(dirName, targetDir)
 }
 
@@ -95,14 +104,23 @@ func (m *Manager) installSettingsJson() error {
 }
 
 // installClaudeMd 安装CLAUDE.md文件 - 总是覆盖现有文件
-func (m *Manager) installClaudeMd() error {
+func (m *Manager) installClaudeMd(force bool) error {
 	targetPath := filepath.Join(m.claudeDir, "CLAUDE.md")
+	// CLAUDE.md 默认总是覆盖，不受force参数影响
 	return m.resources.ExtractFile("CLAUDE.md.template", targetPath)
 }
 
-// installStatuslineJs 安装statusline.js文件 - 总是覆盖现有文件，并设置可执行权限
-func (m *Manager) installStatuslineJs() error {
+// installStatuslineJs 安装statusline.js文件 - 根据force参数决定是否覆盖现有文件，并设置可执行权限
+func (m *Manager) installStatuslineJs(force bool) error {
 	targetPath := filepath.Join(m.claudeDir, "statusline.js")
+
+	// 如果不强制覆盖，检查文件是否存在
+	if !force {
+		if _, err := os.Stat(targetPath); err == nil {
+			fmt.Printf("⚠️  文件 statusline.js 已存在，跳过安装（使用 --force 强制覆盖）\n")
+			return nil
+		}
+	}
 
 	// 提取文件
 	if err := m.resources.ExtractFile("statusline.js", targetPath); err != nil {
