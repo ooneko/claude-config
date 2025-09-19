@@ -82,17 +82,32 @@ run_go_tests() {
             return 0
         fi
         
-        # If this IS a test file, run it directly
+        # If this IS a test file, run tests for its package
         if [[ "$target" =~ _test\.go$ ]]; then
-            echo -e "${BLUE}🧪 Running test file directly: $target${NC}" >&2
-            local test_output
-            if ! test_output=$($GO_TEST_CMD "$target" 2>&1); then
-                echo -e "${RED}❌ Tests failed in $target${NC}" >&2
-                echo -e "\n${RED}Failed test output:${NC}" >&2
-                format_test_output "$test_output" "go" >&2
+            echo -e "${BLUE}🧪 Running tests for package containing: $target${NC}" >&2
+            local pkg_dir=$(dirname "$target")
+
+            # Check if package can be built first
+            if ! go list "$pkg_dir" >/dev/null 2>&1; then
+                echo -e "${RED}❌ Package $pkg_dir has build errors${NC}" >&2
+                local build_output
+                if ! build_output=$(go list "$pkg_dir" 2>&1); then
+                    echo -e "\n${RED}Build errors:${NC}" >&2
+                    echo "$build_output" >&2
+                fi
+                add_error "Package $pkg_dir has build errors"
                 return 1
             fi
-            echo -e "${GREEN}✅ Tests passed in $target${NC}" >&2
+
+            local test_output
+            if ! test_output=$($GO_TEST_CMD "$pkg_dir" 2>&1); then
+                echo -e "${RED}❌ Tests failed in $pkg_dir${NC}" >&2
+                echo -e "\n${RED}Failed test output:${NC}" >&2
+                format_test_output "$test_output" "go" >&2
+                add_error "Tests failed in $pkg_dir"
+                return 1
+            fi
+            echo -e "${GREEN}✅ Tests passed in $pkg_dir${NC}" >&2
             return 0
         fi
     fi
@@ -120,11 +135,25 @@ run_go_tests() {
                 # Focused tests only make sense for specific files
                 if [[ "$is_package_path" == "false" ]]; then
                     if [[ "$test_file_exists" == "true" ]]; then
+                        # Check if package can be built first
+                        if ! go list "$dir" >/dev/null 2>&1; then
+                            echo -e "${RED}❌ Package $dir has build errors${NC}" >&2
+                            local build_output
+                            if ! build_output=$(go list "$dir" 2>&1); then
+                                echo -e "\n${RED}Build errors:${NC}" >&2
+                                echo "$build_output" >&2
+                            fi
+                            add_error "Package $dir has build errors"
+                            return 1
+                        fi
+
                         echo -e "${BLUE}🧪 Running focused tests for $base...${NC}" >&2
                         tests_run=$((tests_run + 1))
-                        
+
+                        # Use more precise test name pattern to avoid false matches
+                        local test_pattern="^Test${base}$|^Test${base}[^A-Za-z0-9_]"
                         local test_output
-                        if ! test_output=$($GO_TEST_CMD -run "Test.*${base}" "$dir" 2>&1); then
+                        if ! test_output=$($GO_TEST_CMD -run "$test_pattern" "$dir" 2>&1); then
                             failed=1
                             echo -e "${RED}❌ Focused tests failed for $base${NC}" >&2
                             echo -e "\n${RED}Failed test output:${NC}" >&2
@@ -145,14 +174,26 @@ run_go_tests() {
                 if [[ "${CLAUDE_HOOKS_ENABLE_RACE}" == "true" ]]; then
                     race_msg=" (with race detection)"
                 fi
+                # Check if package can be built first
+                if ! go list "$dir" >/dev/null 2>&1; then
+                    echo -e "${RED}❌ Package $dir has build errors${NC}" >&2
+                    local build_output
+                    if ! build_output=$(go list "$dir" 2>&1); then
+                        echo -e "\n${RED}Build errors:${NC}" >&2
+                        echo "$build_output" >&2
+                    fi
+                    add_error "Package $dir has build errors"
+                    return 1
+                fi
+
                 echo -e "${BLUE}📦 Running package tests${race_msg} in $dir...${NC}" >&2
                 tests_run=$((tests_run + 1))
-                
+
                 # Debug: show the actual command being run
                 if [[ "${CLAUDE_HOOKS_DEBUG:-0}" == "1" ]]; then
                     echo "DEBUG: Running command: $GO_TEST_CMD -short \"$dir\"" >&2
                 fi
-                
+
                 local test_output
                 if ! test_output=$($GO_TEST_CMD -short "$dir" 2>&1); then
                     failed=1
