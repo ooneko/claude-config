@@ -2,14 +2,14 @@
 
 [中文文档](README_CN.md) | [English Documentation](README.md)
 
-A modern, unified configuration management tool for Claude Code written in Go. Provides comprehensive management for Claude Code settings, proxy setup, hooks system control, DeepSeek API integration, NTFY notifications, and resource installation.
+A modern, unified configuration management tool for Claude Code written in Go. Provides comprehensive management for Claude Code settings, proxy setup, validation system control, AI provider integration, NTFY notifications, and resource installation.
 
 ## Features
 
 - **Configuration Management** - Manage Claude Code settings and configurations
 - **Proxy Setup** - Configure HTTP/HTTPS proxy settings with validation
-- **Hooks System** - Advanced hooks system validation and management
-- **DeepSeek API Integration** - Seamless DeepSeek API configuration and testing
+- **Validation System** - Advanced development workflow validation and management
+- **AI Provider Integration** - Multi-provider AI API configuration and management (DeepSeek, Kimi, GLM4.5)
 - **NTFY Notifications** - Configure notification systems for development workflows
 - **Resource Management** - Install and manage agents, commands, hooks, and templates
 - **Backup & Restore** - Complete configuration backup and restoration system
@@ -73,14 +73,20 @@ claude-config status
 # Configure proxy settings (interactive)
 claude-config proxy
 
-# Manage hooks system validation
+# Manage validation system
 claude-config check
 
-# Configure DeepSeek API integration
-claude-config deepseek
+# Configure NTFY notifications
+claude-config notify
+
+# Configure AI provider integration
+claude-config ai
 
 # Setup NTFY notifications
 claude-config notify
+
+# Manage validation system
+claude-config check
 
 # Install resources (agents, commands, hooks, templates)
 claude-config install
@@ -106,14 +112,94 @@ claude-config proxy
 claude-config install
 # Installs: agents, commands, hooks, output-styles, settings
 
-# Test DeepSeek API connection
-claude-config deepseek
+# Configure AI provider (DeepSeek, Kimi, GLM4.5)
+claude-config ai on deepseek
 # Interactive setup and connection testing
 
-# Enable hooks system with validation
-claude-config check
-# Configures hooks with language-specific linting and testing
+# Enable validation system
+claude-config check on
+# Configures validation with language-specific linting and testing
 ```
+
+## Command Reference
+
+### Main Commands
+
+#### `status` - Show Configuration Status
+```bash
+claude-config status
+```
+Displays comprehensive status of all configurations including proxy, AI providers, validation system, and notifications.
+
+#### `proxy` - Proxy Management
+```bash
+# Interactive proxy configuration
+claude-config proxy on
+
+# Disable proxy
+claude-config proxy off
+
+# Toggle proxy status
+claude-config proxy toggle
+```
+Manages HTTP/HTTPS proxy settings with validation and connectivity testing.
+
+#### `ai` - AI Provider Management
+```bash
+# Enable specific AI provider (with API key prompt if needed)
+claude-config ai on deepseek
+claude-config ai on kimi
+claude-config ai on zhipu
+
+# Disable all AI providers
+claude-config ai off
+
+# Reset specific provider (removes API key)
+claude-config ai reset deepseek
+
+# List all supported providers
+claude-config ai list
+
+# Show current AI provider status
+claude-config ai
+```
+Supports multiple AI providers: DeepSeek, Kimi (Moonshot), and GLM4.5 (ZhipuAI).
+
+#### `check` - Validation System Management
+```bash
+# Enable validation system
+claude-config check on
+
+# Disable validation system
+claude-config check off
+```
+Manages development validation for linting, testing, and code quality checks.
+
+#### `notify` - NTFY Notifications
+```bash
+# Enable NTFY notifications
+claude-config notify on
+
+# Disable NTFY notifications
+claude-config notify off
+```
+Configures NTFY notification system for development workflows.
+
+#### `install` - Resource Installation
+```bash
+# Install all resources
+claude-config install
+
+# Install with force flag (overwrite existing)
+claude-config install --force
+```
+Installs agents, commands, validation hooks, output-styles, and settings to `~/.claude`.
+
+#### `backup` - Configuration Backup
+```bash
+claude-config backup
+```
+Creates backups and restores Claude Code configurations.
 
 ## Project Structure
 
@@ -124,16 +210,16 @@ claude-config/
 │   ├── commands.go            # Command structure and initialization
 │   ├── status.go              # Status command implementation
 │   ├── proxy.go               # Proxy management command
-│   ├── check.go               # Hooks system management
-│   ├── deepseek.go            # DeepSeek API integration
+│   ├── check.go               # Validation system management
+│   ├── aiprovider.go          # AI provider integration
 │   ├── notify.go              # NTFY notifications setup
 │   ├── install.go             # Resource installation command
 │   └── backup.go              # Backup and restore functionality
 ├── internal/                   # Private packages (Go internal convention)
 │   ├── config/                # Configuration file management
 │   ├── proxy/                 # HTTP/HTTPS proxy management
-│   ├── check/                 # Hooks system validation
-│   ├── deepseek/              # DeepSeek API client and configuration
+│   ├── check/                 # Validation system
+│   ├── aiprovider/            # AI provider client and configuration
 │   ├── file/                  # File operations and merging utilities
 │   ├── install/               # Resource installation and management
 │   └── claude/                # Core interfaces and shared types
@@ -195,8 +281,8 @@ The application uses a manager-based architecture with these core components:
 
 - **ConfigManager** (`internal/config`) - Handles Claude configuration settings
 - **ProxyManager** (`internal/proxy`) - Manages HTTP/HTTPS proxy configurations
-- **CheckManager** (`internal/check`) - Controls hooks system validation
-- **DeepSeekManager** (`internal/deepseek`) - Manages DeepSeek API integration
+- **CheckManager** (`internal/check`) - Controls validation system
+- **AIProviderManager** (`internal/aiprovider`) - Manages multi-provider AI API integration
 
 All managers are initialized in `main.go:init()` and operate on the `~/.claude` directory.
 
@@ -216,7 +302,7 @@ All operations work with `~/.claude` as the base configuration directory:
 ├── claude_config.toml         # Tool-specific configuration
 ├── agents/                    # Custom agent definitions
 ├── commands/                  # Custom commands
-├── hooks/                     # Validation hooks
+├── hooks/                     # Development validation hooks
 └── output-styles/             # Output formatting styles
 ```
 

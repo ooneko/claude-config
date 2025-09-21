@@ -2,14 +2,14 @@
 
 [中文文档](README_CN.md) | [English Documentation](README.md)
 
-一个用Go编写的现代化、统一的Claude Code配置管理工具。提供Claude Code设置、代理配置、钩子系统控制、DeepSeek API集成、NTFY通知和资源安装的全面管理功能。
+一个用Go编写的现代化、统一的Claude Code配置管理工具。提供Claude Code设置、代理配置、验证系统控制、AI提供商集成、NTFY通知和资源安装的全面管理功能。
 
 ## 功能特性
 
 - **配置管理** - 管理Claude Code设置和配置
 - **代理设置** - 配置HTTP/HTTPS代理设置并进行验证
-- **钩子系统** - 高级钩子系统验证和管理
-- **DeepSeek API集成** - 无缝DeepSeek API配置和测试
+- **验证系统** - 高级开发工作流验证和管理
+- **AI提供商集成** - 多提供商AI API配置和管理（DeepSeek、Kimi、GLM4.5）
 - **NTFY通知** - 为开发工作流配置通知系统
 - **资源管理** - 安装和管理代理、命令、钩子和模板
 - **备份与恢复** - 完整的配置备份和恢复系统
@@ -73,14 +73,20 @@ claude-config status
 # 配置代理设置（交互式）
 claude-config proxy
 
-# 管理钩子系统验证
+# 管理验证系统
 claude-config check
 
-# 配置DeepSeek API集成
-claude-config deepseek
+# 配置NTFY通知
+claude-config notify
+
+# 配置AI提供商集成
+claude-config ai
 
 # 设置NTFY通知
 claude-config notify
+
+# 管理验证系统
+claude-config check
 
 # 安装资源（代理、命令、钩子、模板）
 claude-config install
@@ -106,14 +112,94 @@ claude-config proxy
 claude-config install
 # 安装：代理、命令、钩子、输出样式、设置
 
-# 测试DeepSeek API连接
-claude-config deepseek
+# 配置AI提供商（DeepSeek、Kimi、GLM4.5）
+claude-config ai on deepseek
 # 交互式设置和连接测试
 
-# 启用钩子系统并进行验证
-claude-config check
-# 配置钩子，支持特定语言的代码检查和测试
+# 启用验证系统
+claude-config check on
+# 配置验证，支持特定语言的代码检查和测试
 ```
+
+## 命令参考
+
+### 主要命令
+
+#### `status` - 显示配置状态
+```bash
+claude-config status
+```
+显示所有配置的综合状态，包括代理、AI提供商、验证系统和通知。
+
+#### `proxy` - 代理管理
+```bash
+# 交互式代理配置
+claude-config proxy on
+
+# 禁用代理
+claude-config proxy off
+
+# 切换代理状态
+claude-config proxy toggle
+```
+管理HTTP/HTTPS代理设置并进行验证和连接测试。
+
+#### `ai` - AI提供商管理
+```bash
+# 启用特定AI提供商（如需要会提示输入API密钥）
+claude-config ai on deepseek
+claude-config ai on kimi
+claude-config ai on zhipu
+
+# 禁用所有AI提供商
+claude-config ai off
+
+# 重置特定提供商（删除API密钥）
+claude-config ai reset deepseek
+
+# 列出所有支持的提供商
+claude-config ai list
+
+# 显示当前AI提供商状态
+claude-config ai
+```
+支持多个AI提供商：DeepSeek、Kimi（Moonshot）和GLM4.5（ZhipuAI）。
+
+#### `check` - 验证系统管理
+```bash
+# 启用验证系统
+claude-config check on
+
+# 禁用验证系统
+claude-config check off
+```
+管理代码检查、测试和代码质量检查的开发验证。
+
+#### `notify` - NTFY通知
+```bash
+# 启用NTFY通知
+claude-config notify on
+
+# 禁用NTFY通知
+claude-config notify off
+```
+为开发工作流配置NTFY通知系统。
+
+#### `install` - 资源安装
+```bash
+# 安装所有资源
+claude-config install
+
+# 使用强制标志安装（覆盖现有文件）
+claude-config install --force
+```
+将代理、命令、验证钩子、输出样式和设置安装到`~/.claude`。
+
+#### `backup` - 配置备份
+```bash
+claude-config backup
+```
+创建备份并恢复Claude Code配置。
 
 ## 项目结构
 
@@ -124,16 +210,16 @@ claude-config/
 │   ├── commands.go            # 命令结构和初始化
 │   ├── status.go              # 状态命令实现
 │   ├── proxy.go               # 代理管理命令
-│   ├── check.go               # 钩子系统管理
-│   ├── deepseek.go            # DeepSeek API集成
+│   ├── check.go               # 验证系统管理
+│   ├── aiprovider.go          # AI提供商集成
 │   ├── notify.go              # NTFY通知设置
 │   ├── install.go             # 资源安装命令
 │   └── backup.go              # 备份和恢复功能
 ├── internal/                   # 私有包（Go internal约定）
 │   ├── config/                # 配置文件管理
 │   ├── proxy/                 # HTTP/HTTPS代理管理
-│   ├── check/                 # 钩子系统验证
-│   ├── deepseek/              # DeepSeek API客户端和配置
+│   ├── check/                 # 验证系统
+│   ├── aiprovider/            # AI提供商客户端和配置
 │   ├── file/                  # 文件操作和合并工具
 │   ├── install/               # 资源安装和管理
 │   └── claude/                # 核心接口和共享类型
@@ -195,8 +281,8 @@ golangci-lint run
 
 - **ConfigManager** (`internal/config`) - 处理Claude配置设置
 - **ProxyManager** (`internal/proxy`) - 管理HTTP/HTTPS代理配置
-- **CheckManager** (`internal/check`) - 控制钩子系统验证
-- **DeepSeekManager** (`internal/deepseek`) - 管理DeepSeek API集成
+- **CheckManager** (`internal/check`) - 控制验证系统
+- **AIProviderManager** (`internal/aiprovider`) - 管理多提供商AI API集成
 
 所有管理器都在`main.go:init()`中初始化，并在`~/.claude`目录上运行。
 
@@ -216,7 +302,7 @@ golangci-lint run
 ├── claude_config.toml         # 工具特定配置
 ├── agents/                    # 自定义代理定义
 ├── commands/                  # 自定义命令
-├── hooks/                     # 验证钩子
+├── hooks/                     # 开发验证钩子
 └── output-styles/             # 输出格式样式
 ```
 
