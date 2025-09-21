@@ -10,10 +10,10 @@ type ConfigManager interface {
 	// Save saves the configuration to settings.json
 	Save(ctx context.Context, config *Settings) error
 
-	// GetStatus returns the current configuration status
+	// GetStatus returns current configuration status
 	GetStatus(ctx context.Context) (*ConfigStatus, error)
 
-	// Backup creates a backup of the current configuration
+	// Backup creates a backup of configuration
 	Backup(ctx context.Context) (*BackupInfo, error)
 }
 
@@ -38,25 +38,31 @@ type ProxyManager interface {
 	LoadSavedConfig(ctx context.Context) (*ProxyConfig, error)
 }
 
-// DeepSeekManager defines the interface for DeepSeek API management
-type DeepSeekManager interface {
-	// Enable enables DeepSeek configuration with the given API key
-	Enable(ctx context.Context, apiKey string) error
+// AIProviderManager defines the interface for managing multiple AI providers
+type AIProviderManager interface {
+	// Enable enables an AI provider with the given API key
+	Enable(ctx context.Context, provider ProviderType, apiKey string) error
 
-	// Disable disables DeepSeek configuration (keeps API key)
-	Disable(ctx context.Context) error
+	// Reset removes the API key and disables the provider
+	Reset(ctx context.Context, provider ProviderType) error
 
-	// Reset removes the API key and disables DeepSeek
-	Reset(ctx context.Context) error
+	// Off disables all AI providers completely
+	Off(ctx context.Context) error
 
-	// IsEnabled returns whether DeepSeek is currently enabled
-	IsEnabled(ctx context.Context) (bool, error)
+	// On restores the previously active AI provider
+	On(ctx context.Context) error
 
-	// HasAPIKey returns whether an API key is stored
-	HasAPIKey(ctx context.Context) (bool, error)
+	// HasAPIKey returns whether an API key is stored for the provider
+	HasAPIKey(ctx context.Context, provider ProviderType) (bool, error)
 
-	// GetConfig returns current DeepSeek configuration
-	GetConfig(ctx context.Context) (*DeepSeekConfig, error)
+	// GetProviderConfig returns current configuration for a provider
+	GetProviderConfig(ctx context.Context, provider ProviderType) (*ProviderConfig, error)
+
+	// GetActiveProvider returns the currently active provider
+	GetActiveProvider(ctx context.Context) (ProviderType, error)
+
+	// ListSupportedProviders returns all supported provider types
+	ListSupportedProviders() []ProviderType
 }
 
 // FileOperations defines the interface for file operations
@@ -69,18 +75,6 @@ type FileOperations interface {
 
 	// MergeSettings intelligently merges settings.json files
 	MergeSettings(ctx context.Context, source, dest *Settings) (*Settings, error)
-}
-
-// BackupManager defines the interface for backup operations
-type BackupManager interface {
-	// Create creates a backup of the Claude configuration directory
-	Create(ctx context.Context) (*BackupInfo, error)
-
-	// List lists available backup files
-	List(ctx context.Context) ([]*BackupInfo, error)
-
-	// Restore restores from a backup file
-	Restore(ctx context.Context, backupPath string) error
 }
 
 // CopyOptions represents options for copy operations

@@ -2,6 +2,7 @@ package claude
 
 import (
 	"encoding/json"
+	"strings"
 	"time"
 )
 
@@ -34,38 +35,85 @@ type HookItem struct {
 // StatusLineConfig represents status line configuration
 type StatusLineConfig map[string]interface{}
 
+// ProviderType represents the type of AI provider
+type ProviderType string
+
+const (
+	ProviderNone     ProviderType = ""
+	ProviderDeepSeek ProviderType = "deepseek"
+	ProviderKimi     ProviderType = "kimi"
+	ProviderZhiPu    ProviderType = "ZhiPu"
+)
+
+// String returns the string representation of ProviderType
+func (p ProviderType) String() string {
+	return string(p)
+}
+
+// IsValid checks if the provider type is valid
+func (p ProviderType) IsValid() bool {
+	switch p {
+	case ProviderDeepSeek, ProviderKimi, ProviderZhiPu:
+		return true
+	default:
+		return false
+	}
+}
+
+// NormalizeProviderName converts user input to the correct ProviderType
+// This allows case-insensitive provider names for better user experience
+func NormalizeProviderName(input string) ProviderType {
+	switch strings.ToLower(input) {
+	case "deepseek":
+		return ProviderDeepSeek
+	case "kimi":
+		return ProviderKimi
+	case "zhipu", "zhipu-ai":
+		return ProviderZhiPu
+	default:
+		// If exact match, return as-is for backwards compatibility
+		p := ProviderType(input)
+		if p.IsValid() {
+			return p
+		}
+		return ProviderNone
+	}
+}
+
+// ProviderConfig represents configuration for an AI provider
+type ProviderConfig struct {
+	Type           ProviderType `json:"type"`
+	AuthToken      string       `json:"auth_token"`
+	BaseURL        string       `json:"base_url"`
+	Model          string       `json:"model"`
+	SmallFastModel string       `json:"small_fast_model"`
+}
+
 // ProxyConfig represents proxy configuration
 type ProxyConfig struct {
 	HTTPProxy  string `json:"http_proxy"`
 	HTTPSProxy string `json:"https_proxy"`
 }
 
-// DeepSeekConfig represents DeepSeek API configuration
-type DeepSeekConfig struct {
-	AuthToken      string `json:"auth_token"`
-	BaseURL        string `json:"base_url"`
-	Model          string `json:"model"`
-	SmallFastModel string `json:"small_fast_model"`
+// ConfigStatus represents configuration status information
+type ConfigStatus struct {
+	ConfigExists    bool         `json:"config_exists"`
+	ConfigPath      string       `json:"config_path"`
+	LastModified    string       `json:"last_modified,omitempty"`
+	HooksConfigured bool         `json:"hooks_configured"`
+	HooksEnabled    bool         `json:"hooks_enabled"`
+	ProxyEnabled    bool         `json:"proxy_enabled"`
+	ProxyConfig     *ProxyConfig `json:"proxy_config,omitempty"`
+	DeepSeekEnabled bool         `json:"deepseek_enabled"`
 }
 
-// BackupInfo represents backup file information
+// BackupInfo represents backup operation result
 type BackupInfo struct {
 	Filename    string    `json:"filename"`
-	FilePath    string    `json:"filepath"` // 完整的备份文件路径
-	Timestamp   time.Time `json:"timestamp"`
+	FilePath    string    `json:"file_path"`
+	ContentType string    `json:"content_type"`
 	Size        int64     `json:"size"`
-	ContentType string    `json:"content_type"` // "directory" 或 "settings"
-}
-
-// ConfigStatus represents the current configuration status
-type ConfigStatus struct {
-	ProxyEnabled    bool            `json:"proxy_enabled"`
-	ProxyConfig     *ProxyConfig    `json:"proxy_config,omitempty"`
-	DeepSeekEnabled bool            `json:"deepseek_enabled"`
-	DeepSeekConfig  *DeepSeekConfig `json:"deepseek_config,omitempty"`
-	HooksEnabled    bool            `json:"hooks_enabled"`
-	HooksConfig     *HooksConfig    `json:"hooks_config,omitempty"`
-	BackupFiles     []*BackupInfo   `json:"backup_files,omitempty"`
+	Timestamp   time.Time `json:"timestamp"`
 }
 
 // MarshalJSON implements json.Marshaler for Settings

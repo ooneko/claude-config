@@ -29,7 +29,7 @@ func initCommands(rootCmd *cobra.Command) {
 		createStatusCmd(),
 		createProxyCmd(),
 		createCheckCmd(),
-		createDeepSeekCmd(),
+		createAIProviderCmd(),
 		createNotifyCmd(),
 		createInstallCmd(),
 		createBackupCmd(),

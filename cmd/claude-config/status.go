@@ -12,7 +12,7 @@ func createStatusCmd() *cobra.Command {
 	statusCmd := &cobra.Command{
 		Use:   "status",
 		Short: "显示当前配置状态",
-		Long:  `显示代理、检查功能、通知和DeepSeek的当前状态`,
+		Long:  `显示代理、检查功能和通知的当前状态`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return showStatus()
 		},
@@ -47,10 +47,8 @@ func showStatus() error {
 	}
 	fmt.Println()
 
-	// Check DeepSeek status
-	if err := showDeepSeekStatus(ctx); err != nil {
-		fmt.Printf("❌ DeepSeek状态检查失败: %v\n", err)
-	}
+	// Check AI provider status
+	showAIProviderStatus()
 
 	return nil
 }
@@ -106,29 +104,6 @@ func showNotifyStatus(ctx context.Context) error {
 		}
 	} else {
 		fmt.Println("📱 通知状态: ❌ 已禁用")
-	}
-
-	return nil
-}
-
-// showDeepSeekStatus shows the current DeepSeek status
-func showDeepSeekStatus(ctx context.Context) error {
-	isEnabled, err := deepSeekMgr.IsEnabled(ctx)
-	if err != nil {
-		return fmt.Errorf("获取DeepSeek状态失败: %w", err)
-	}
-
-	hasAPIKey, err := deepSeekMgr.HasAPIKey(ctx)
-	if err != nil {
-		return fmt.Errorf("获取DeepSeek API密钥状态失败: %w", err)
-	}
-
-	if isEnabled {
-		fmt.Println("🤖 DeepSeek状态: ✅ 已启用")
-	} else if hasAPIKey {
-		fmt.Println("🤖 DeepSeek状态: ⚠️  已配置API密钥但未启用")
-	} else {
-		fmt.Println("🤖 DeepSeek状态: ❌ 未配置")
 	}
 
 	return nil

@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ooneko/claude-config/internal/aiprovider"
 	"github.com/ooneko/claude-config/internal/check"
 	"github.com/ooneko/claude-config/internal/claude"
 	"github.com/ooneko/claude-config/internal/config"
-	"github.com/ooneko/claude-config/internal/deepseek"
 	"github.com/ooneko/claude-config/internal/proxy"
 )
 
@@ -16,10 +16,10 @@ var (
 	claudeDir string
 
 	// Managers
-	configMgr   claude.ConfigManager
-	proxyMgr    claude.ProxyManager
-	checkMgr    *check.Manager
-	deepSeekMgr claude.DeepSeekManager
+	configMgr     claude.ConfigManager
+	proxyMgr      claude.ProxyManager
+	checkMgr      *check.Manager
+	aiProviderMgr claude.AIProviderManager
 )
 
 func init() {
@@ -35,7 +35,7 @@ func init() {
 	configMgr = config.NewManager(claudeDir)
 	proxyMgr = proxy.NewManager(claudeDir)
 	checkMgr = check.NewManager(claudeDir)
-	deepSeekMgr = deepseek.NewManager(claudeDir)
+	aiProviderMgr = aiprovider.NewManager(claudeDir)
 }
 
 func main() {

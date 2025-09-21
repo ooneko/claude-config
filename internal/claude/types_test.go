@@ -2,66 +2,10 @@ package claude
 
 import (
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
-
-func TestBackupInfo(t *testing.T) {
-	now := time.Now()
-
-	tests := []struct {
-		name     string
-		backup   *BackupInfo
-		expected *BackupInfo
-	}{
-		{
-			name: "complete backup info",
-			backup: &BackupInfo{
-				Filename:    "claude-config-backup-20250110_143052.tar.gz",
-				FilePath:    "/Users/test/claude-config-backup-20250110_143052.tar.gz",
-				Timestamp:   now,
-				Size:        1024,
-				ContentType: "directory",
-			},
-			expected: &BackupInfo{
-				Filename:    "claude-config-backup-20250110_143052.tar.gz",
-				FilePath:    "/Users/test/claude-config-backup-20250110_143052.tar.gz",
-				Timestamp:   now,
-				Size:        1024,
-				ContentType: "directory",
-			},
-		},
-		{
-			name: "settings backup info",
-			backup: &BackupInfo{
-				Filename:    "settings.json.backup.20250110_143052",
-				FilePath:    "/Users/test/.claude/settings.json.backup.20250110_143052",
-				Timestamp:   now,
-				Size:        512,
-				ContentType: "settings",
-			},
-			expected: &BackupInfo{
-				Filename:    "settings.json.backup.20250110_143052",
-				FilePath:    "/Users/test/.claude/settings.json.backup.20250110_143052",
-				Timestamp:   now,
-				Size:        512,
-				ContentType: "settings",
-			},
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.expected.Filename, tt.backup.Filename)
-			assert.Equal(t, tt.expected.FilePath, tt.backup.FilePath)
-			assert.Equal(t, tt.expected.Timestamp, tt.backup.Timestamp)
-			assert.Equal(t, tt.expected.Size, tt.backup.Size)
-			assert.Equal(t, tt.expected.ContentType, tt.backup.ContentType)
-		})
-	}
-}
 
 func TestSettings_MarshalJSON(t *testing.T) {
 	settings := &Settings{
@@ -130,4 +74,129 @@ func TestSettings_UnmarshalJSON(t *testing.T) {
 	require.Len(t, settings.Hooks.PostToolUse[0].Hooks, 1)
 	assert.Equal(t, "command", settings.Hooks.PostToolUse[0].Hooks[0].Type)
 	assert.Equal(t, "~/.claude/hooks/smart-lint.sh", settings.Hooks.PostToolUse[0].Hooks[0].Command)
+}
+
+func TestNormalizeProviderName(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected ProviderType
+	}{
+		// Case-insensitive matches
+		{
+			name:     "deepseek lowercase",
+			input:    "deepseek",
+			expected: ProviderDeepSeek,
+		},
+		{
+			name:     "deepseek uppercase",
+			input:    "DEEPSEEK",
+			expected: ProviderDeepSeek,
+		},
+		{
+			name:     "deepseek mixed case",
+			input:    "DeepSeek",
+			expected: ProviderDeepSeek,
+		},
+		{
+			name:     "kimi lowercase",
+			input:    "kimi",
+			expected: ProviderKimi,
+		},
+		{
+			name:     "kimi uppercase",
+			input:    "KIMI",
+			expected: ProviderKimi,
+		},
+		{
+			name:     "zhipu lowercase",
+			input:    "zhipu",
+			expected: ProviderZhiPu,
+		},
+		{
+			name:     "zhipu uppercase",
+			input:    "ZHIPU",
+			expected: ProviderZhiPu,
+		},
+		{
+			name:     "zhipu with hyphen",
+			input:    "zhipu-ai",
+			expected: ProviderZhiPu,
+		},
+		{
+			name:     "zhipu with hyphen uppercase",
+			input:    "ZHIPU-AI",
+			expected: ProviderZhiPu,
+		},
+		// Backwards compatibility
+		{
+			name:     "exact match ZhiPu",
+			input:    "ZhiPu",
+			expected: ProviderZhiPu,
+		},
+		// Invalid cases
+		{
+			name:     "invalid provider",
+			input:    "invalid",
+			expected: ProviderNone,
+		},
+		{
+			name:     "empty string",
+			input:    "",
+			expected: ProviderNone,
+		},
+		{
+			name:     "partial match",
+			input:    "deep",
+			expected: ProviderNone,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := NormalizeProviderName(tt.input)
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+func TestProviderType_IsValid(t *testing.T) {
+	tests := []struct {
+		name     string
+		provider ProviderType
+		expected bool
+	}{
+		{
+			name:     "valid deepseek",
+			provider: ProviderDeepSeek,
+			expected: true,
+		},
+		{
+			name:     "valid kimi",
+			provider: ProviderKimi,
+			expected: true,
+		},
+		{
+			name:     "valid zhipu",
+			provider: ProviderZhiPu,
+			expected: true,
+		},
+		{
+			name:     "invalid none",
+			provider: ProviderNone,
+			expected: false,
+		},
+		{
+			name:     "invalid custom",
+			provider: ProviderType("custom"),
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := tt.provider.IsValid()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
 }
