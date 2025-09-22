@@ -36,6 +36,9 @@ type ProxyManager interface {
 
 	// LoadSavedConfig loads saved proxy configuration from file
 	LoadSavedConfig(ctx context.Context) (*ProxyConfig, error)
+
+	// Reset removes saved proxy configuration and disables proxy
+	Reset(ctx context.Context) error
 }
 
 // AIProviderManager defines the interface for managing multiple AI providers

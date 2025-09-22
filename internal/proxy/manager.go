@@ -227,3 +227,21 @@ func (m *Manager) loadProxyConfig() (*claude.ProxyConfig, error) {
 func (m *Manager) LoadSavedConfig(ctx context.Context) (*claude.ProxyConfig, error) {
 	return m.loadProxyConfig()
 }
+
+// Reset removes saved proxy configuration and disables proxy
+func (m *Manager) Reset(ctx context.Context) error {
+	// First disable proxy
+	if err := m.Disable(ctx); err != nil {
+		return fmt.Errorf("failed to disable proxy: %w", err)
+	}
+
+	// Remove saved proxy configuration file
+	configPath := filepath.Join(m.claudeDir, ".proxy_config")
+	if _, err := os.Stat(configPath); err == nil {
+		if err := os.Remove(configPath); err != nil {
+			return fmt.Errorf("failed to remove proxy config file: %w", err)
+		}
+	}
+
+	return nil
+}

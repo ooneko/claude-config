@@ -102,6 +102,20 @@ func createProxyCmd() *cobra.Command {
 		},
 	}
 
-	proxyCmd.AddCommand(proxyOnCmd, proxyOffCmd, proxyToggleCmd)
+	proxyResetCmd := &cobra.Command{
+		Use:   "reset",
+		Short: "重置代理配置",
+		Long:  "删除保存的代理配置文件并禁用代理",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := context.Background()
+			if err := proxyMgr.Reset(ctx); err != nil {
+				return err
+			}
+			fmt.Println("✅ 代理配置已重置")
+			return nil
+		},
+	}
+
+	proxyCmd.AddCommand(proxyOnCmd, proxyOffCmd, proxyToggleCmd, proxyResetCmd)
 	return proxyCmd
 }
