@@ -4,6 +4,8 @@ We build production code together. I handle implementation details while you gui
 
 ## Core Workflow: Research → Plan → Implement → Validate
 
+**Always respond in 中文** - All responses should be in Chinese to maintain consistency with user preferences
+
 **Start every feature with:** "Let me research the codebase and create a plan before implementing."
 
 1. **Research** - Understand existing patterns and architecture
