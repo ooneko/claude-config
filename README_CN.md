@@ -67,6 +67,9 @@ go build ./cmd/claude-config
 ### 主要命令
 
 ```bash
+# 安装资源（代理、命令、钩子、模板）
+claude-config install
+
 # 显示当前配置状态
 claude-config status
 
@@ -82,15 +85,6 @@ claude-config notify
 # 配置AI提供商集成
 claude-config ai
 
-# 设置NTFY通知
-claude-config notify
-
-# 管理验证系统
-claude-config check
-
-# 安装资源（代理、命令、钩子、模板）
-claude-config install
-
 # 备份和恢复配置
 claude-config backup
 ```
@@ -100,6 +94,10 @@ claude-config backup
 ### 命令示例
 
 ```bash
+# 安装所有可用资源到~/.claude
+claude-config install
+# 安装：代理、命令、钩子、输出样式、设置
+
 # 检查所有配置的当前状态
 claude-config status
 
@@ -107,10 +105,6 @@ claude-config status
 claude-config proxy
 # 设置HTTP_PROXY和HTTPS_PROXY环境变量
 # 验证代理连接性
-
-# 安装所有可用资源到~/.claude
-claude-config install
-# 安装：代理、命令、钩子、输出样式、设置
 
 # 配置AI提供商（DeepSeek、Kimi、GLM4.5）
 claude-config ai on deepseek

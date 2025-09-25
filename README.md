@@ -67,6 +67,9 @@ go build ./cmd/claude-config
 ### Main Commands
 
 ```bash
+# Install resources (agents, commands, hooks, templates)
+claude-config install
+
 # Show current configuration status
 claude-config status
 
@@ -82,15 +85,6 @@ claude-config notify
 # Configure AI provider integration
 claude-config ai
 
-# Setup NTFY notifications
-claude-config notify
-
-# Manage validation system
-claude-config check
-
-# Install resources (agents, commands, hooks, templates)
-claude-config install
-
 # Backup and restore configurations
 claude-config backup
 ```
@@ -100,6 +94,10 @@ claude-config backup
 ### Command Examples
 
 ```bash
+# Install all available resources to ~/.claude
+claude-config install
+# Installs: agents, commands, hooks, output-styles, settings
+
 # Check current status of all configurations
 claude-config status
 
@@ -107,10 +105,6 @@ claude-config status
 claude-config proxy
 # Sets up HTTP_PROXY and HTTPS_PROXY environment variables
 # Validates proxy connectivity
-
-# Install all available resources to ~/.claude
-claude-config install
-# Installs: agents, commands, hooks, output-styles, settings
 
 # Configure AI provider (DeepSeek, Kimi, GLM4.5)
 claude-config ai on deepseek

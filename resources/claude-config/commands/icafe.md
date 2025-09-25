@@ -16,6 +16,8 @@ With options:
 /icafe --title="Custom title"
 ```
 
+**Note**: This command only supports two card types: `bug` and `story`.
+
 ## What This Command Does
 
 1. **Analyze Git Status and Changes**:
