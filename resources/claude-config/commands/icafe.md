@@ -16,7 +16,6 @@ With options:
 /icafe --title="Custom title"
 ```
 
-**Note**: This command only supports two card types: `bug` and `story`.
 
 ## What This Command Does
 
@@ -33,10 +32,11 @@ With options:
    - Auto-generate clear titles and description content
    - Extract key information like affected modules and features
 
-3. **Card Type Detection Logic**:
+3. **Card Type Detection Logic**: 
    - **Bug Type**: Detects error fixes, patches, rollbacks with keywords
    - **Story Type**: Detects new features, enhancements, refactoring with keywords
-   - **Smart Analysis**: Infers type based on code diff patterns
+   **Note**: This command only supports two card types: `bug` and `story`
+   
 
 4. **iCafe MCP Integration**:
    - Call iCafe MCP service to create cards
