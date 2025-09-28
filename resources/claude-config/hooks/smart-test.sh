@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
-# smarter-test.sh - Intelligent test runner with make test-changed support
+# smarter-test.sh - Intelligent test runner with make test support
 #
 # SYNOPSIS
 #   PostToolUse hook that runs tests when files are edited
 #
 # DESCRIPTION
 #   When Claude edits a file, this hook intelligently runs tests:
-#   - First checks for 'make test-changed' target and uses it if available
-#   - Falls back to original smart-test.sh logic if make test-changed not found
+#   - First checks for 'make test' target and uses it if available
+#   - Falls back to original smart-test.sh logic if make test not found
 #   - Provides same configuration options as smart-test.sh
+#
+# EXIT CODES
+#   0 - Success (all checks passed - everything is ✅ GREEN)
+#   1 - General error (missing dependencies, etc.)
+#   2 - ANY issues found - ALL must be fixed
 #
 # CONFIGURATION
 #   CLAUDE_HOOKS_TEST_ON_EDIT - Enable/disable (default: true)
@@ -16,11 +21,43 @@
 #   CLAUDE_HOOKS_ENABLE_RACE - Enable race detection (default: true)
 #   CLAUDE_HOOKS_FAIL_ON_MISSING_TESTS - Fail if test file missing (default: false)
 
-set -euo pipefail
+# Don't use set -e - we need to control exit codes carefully like smart-lint.sh
+set +e
 
 # Source common helpers
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/common-helpers.sh"
+
+# ============================================================================
+# ERROR TRACKING (extends common-helpers.sh)
+# ============================================================================
+
+# Use the CLAUDE_HOOKS_ERRORS array from common-helpers.sh but with a different name for summary
+declare -a CLAUDE_HOOKS_SUMMARY=()
+
+# Override add_error to also add to summary
+add_error() {
+    local message="$1"
+    CLAUDE_HOOKS_ERROR_COUNT+=1
+    CLAUDE_HOOKS_ERRORS+=("${RED}❌${NC} $message")
+    CLAUDE_HOOKS_SUMMARY+=("${RED}❌${NC} $message")
+}
+
+print_summary() {
+    if [[ $CLAUDE_HOOKS_ERROR_COUNT -gt 0 ]]; then
+        # Only show failures when there are errors
+        echo -e "\n${BLUE}═══ Test Summary ═══${NC}" >&2
+        for item in "${CLAUDE_HOOKS_SUMMARY[@]}"; do
+            echo -e "$item" >&2
+        done
+
+        echo -e "\n${RED}Found $CLAUDE_HOOKS_ERROR_COUNT test issue(s) that MUST be fixed!${NC}" >&2
+        echo -e "${RED}════════════════════════════════════════════${NC}" >&2
+        echo -e "${RED}❌ ALL TEST ISSUES ARE BLOCKING ❌${NC}" >&2
+        echo -e "${RED}════════════════════════════════════════════${NC}" >&2
+        echo -e "${RED}Fix EVERYTHING above until all tests are ✅ GREEN${NC}" >&2
+    fi
+}
 
 # ============================================================================
 # CONFIGURATION LOADING
@@ -28,20 +65,40 @@ source "${SCRIPT_DIR}/common-helpers.sh"
 
 load_config() {
     # Global defaults
+    export CLAUDE_HOOKS_ENABLED="${CLAUDE_HOOKS_ENABLED:-true}"
+    export CLAUDE_HOOKS_FAIL_FAST="${CLAUDE_HOOKS_FAIL_FAST:-false}"
+    export CLAUDE_HOOKS_SHOW_TIMING="${CLAUDE_HOOKS_SHOW_TIMING:-false}"
+
     export CLAUDE_HOOKS_TEST_ON_EDIT="${CLAUDE_HOOKS_TEST_ON_EDIT:-true}"
     export CLAUDE_HOOKS_TEST_MODES="${CLAUDE_HOOKS_TEST_MODES:-focused,package}"
     export CLAUDE_HOOKS_ENABLE_RACE="${CLAUDE_HOOKS_ENABLE_RACE:-true}"
     export CLAUDE_HOOKS_FAIL_ON_MISSING_TESTS="${CLAUDE_HOOKS_FAIL_ON_MISSING_TESTS:-false}"
     export CLAUDE_HOOKS_TEST_VERBOSE="${CLAUDE_HOOKS_TEST_VERBOSE:-false}"
-    
-    # Load project config if available
-    if type -t load_project_config &>/dev/null; then
-        load_project_config
+
+    # Language enables
+    export CLAUDE_HOOKS_GO_ENABLED="${CLAUDE_HOOKS_GO_ENABLED:-true}"
+    export CLAUDE_HOOKS_PYTHON_ENABLED="${CLAUDE_HOOKS_PYTHON_ENABLED:-true}"
+    export CLAUDE_HOOKS_JS_ENABLED="${CLAUDE_HOOKS_JS_ENABLED:-true}"
+    export CLAUDE_HOOKS_RUST_ENABLED="${CLAUDE_HOOKS_RUST_ENABLED:-true}"
+    export CLAUDE_HOOKS_NIX_ENABLED="${CLAUDE_HOOKS_NIX_ENABLED:-true}"
+
+    # Project-specific overrides
+    if [[ -f ".claude-hooks-config.sh" ]]; then
+        source ".claude-hooks-config.sh" || {
+            log_error "Failed to load .claude-hooks-config.sh"
+            exit 2
+        }
     fi
-    
-    # Quick exit if disabled
+
+    # Quick exit if hooks are disabled
+    if [[ "$CLAUDE_HOOKS_ENABLED" != "true" ]]; then
+        log_info "Claude hooks are disabled"
+        exit 0
+    fi
+
+    # Quick exit if test on edit is disabled
     if [[ "$CLAUDE_HOOKS_TEST_ON_EDIT" != "true" ]]; then
-        echo "DEBUG: Test on edit disabled, exiting" >&2
+        log_info "Test on edit disabled, exiting"
         exit 0
     fi
 }
@@ -89,44 +146,50 @@ fi
 load_config
 
 # ============================================================================
-# MAKE TEST-CHANGED DETECTION
+# MAKE TEST DETECTION
 # ============================================================================
 
-check_make_test_changed() {
+check_make_test() {
     # Check if we're in a directory with a Makefile
     if [[ ! -f "Makefile" ]]; then
         return 1
     fi
-    
-    # Check if Makefile contains test-changed target
-    if grep -q "^\.PHONY: test-changed" Makefile && grep -q "^test-changed:" Makefile; then
+
+    # Check if Makefile contains test target
+    if grep -q "^\.PHONY: test" Makefile && grep -q "^test:" Makefile; then
         return 0
     fi
-    
+
     return 1
 }
 
-run_make_test_changed() {
-    echo -e "${BLUE}🔧 Found 'make test-changed' target, using it for optimized testing...${NC}" >&2
-    
+run_make_test() {
+    echo -e "${BLUE}🔧 Found 'make test' target, using it for testing...${NC}" >&2
+
     local test_output
     local exit_code=0
-    
-    # Run make test-changed and capture output
-    if ! test_output=$(make test-changed 2>&1); then
+
+    # Run make test and capture output
+    if ! test_output=$(make test 2>&1); then
         exit_code=$?
-        echo -e "${RED}❌ 'make test-changed' failed${NC}" >&2
+        add_error "'make test' failed with exit code $exit_code"
         echo -e "\n${RED}Failed test output:${NC}" >&2
-        echo "$test_output" >&2
+        # Filter to show only failed tests if possible
+        if echo "$test_output" | grep -q "FAIL\|ERROR\|FAILED"; then
+            echo "$test_output" | grep -E "(^FAIL|^ERROR|^FAILED|\bFAIL\b|\bERROR\b|\bFAILED\b)" >&2
+            echo -e "\n${YELLOW}📝 Full output available with CLAUDE_HOOKS_TEST_VERBOSE=true${NC}" >&2
+        else
+            echo "$test_output" >&2
+        fi
         return $exit_code
     fi
-    
-    echo -e "${GREEN}✅ 'make test-changed' completed successfully${NC}" >&2
+
+    echo -e "${GREEN}✅ 'make test' completed successfully${NC}" >&2
     if [[ "${CLAUDE_HOOKS_TEST_VERBOSE:-false}" == "true" ]]; then
-        echo -e "\n${BLUE}Test output:${NC}" >&2
+        echo -e "\n${BLUE}Full test output:${NC}" >&2
         echo "$test_output" >&2
     fi
-    
+
     return 0
 }
 
@@ -135,8 +198,8 @@ run_make_test_changed() {
 # ============================================================================
 
 run_fallback_tests() {
-    echo -e "${YELLOW}📋 'make test-changed' not available, using fallback testing logic...${NC}" >&2
-    
+    echo -e "${YELLOW}📋 'make test' not available, using fallback testing logic...${NC}" >&2
+
     # Source the original smart-test.sh if available
     if [[ -f "${SCRIPT_DIR}/smart-test.sh" ]]; then
         # We need to be careful here - we're already running from a hook context
@@ -145,7 +208,7 @@ run_fallback_tests() {
             # If sourcing fails, run basic Go tests
             run_basic_go_tests
         }
-        
+
         # If main function is available from smart-test.sh, call it
         if type -t main &>/dev/null; then
             main
@@ -159,29 +222,35 @@ run_fallback_tests() {
 
 run_basic_go_tests() {
     echo -e "${BLUE}🧪 Running basic Go tests...${NC}" >&2
-    
+
     local test_output
     local exit_code=0
-    
+
     if [[ "$FILE_PATH" =~ \.go$ ]] || [[ "$FILE_PATH" == "./..." ]]; then
         # Run Go tests
         if ! test_output=$(go test -v ./... 2>&1); then
             exit_code=$?
-            echo -e "${RED}❌ Go tests failed${NC}" >&2
+            add_error "Go tests failed with exit code $exit_code"
             echo -e "\n${RED}Failed test output:${NC}" >&2
-            echo "$test_output" >&2
+            # Filter to show only failed tests
+            if echo "$test_output" | grep -q "FAIL\|FAIL:"; then
+                echo "$test_output" | grep -E "(^--- FAIL:|FAIL:|\bFAIL\b)" >&2
+                echo -e "\n${YELLOW}📝 Full output available with CLAUDE_HOOKS_TEST_VERBOSE=true${NC}" >&2
+            else
+                echo "$test_output" >&2
+            fi
             return $exit_code
         fi
-        
+
         echo -e "${GREEN}✅ Go tests passed${NC}" >&2
         if [[ "${CLAUDE_HOOKS_TEST_VERBOSE:-false}" == "true" ]]; then
-            echo -e "\n${BLUE}Test output:${NC}" >&2
+            echo -e "\n${BLUE}Full test output:${NC}" >&2
             echo "$test_output" >&2
         fi
     else
         echo -e "${YELLOW}ℹ️  No Go files to test${NC}" >&2
     fi
-    
+
     return 0
 }
 
@@ -189,29 +258,74 @@ run_basic_go_tests() {
 # MAIN EXECUTION
 # ============================================================================
 
+# Parse command line options
+FAST_MODE=false
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        --debug)
+            export CLAUDE_HOOKS_DEBUG=1
+            shift
+            ;;
+        --fast)
+            FAST_MODE=true
+            shift
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            exit 2
+            ;;
+    esac
+done
+
+# Print header
+echo "" >&2
+echo "🧪 Test Check - Running tests..." >&2
+echo "────────────────────────────────────────────" >&2
+
+# Load configuration
+load_config
+
+# Start timing
+START_TIME=$(time_start)
+
 main() {
     echo -e "${CYAN}🚀 Enhanced Test Hook - Checking for optimized test commands...${NC}" >&2
-    
-    local failed=0
-    
-    # First, try to use make test-changed if available
-    if check_make_test_changed; then
-        run_make_test_changed || failed=1
+
+    # First, try to use make test if available
+    if check_make_test; then
+        run_make_test
     else
         # Fall back to original smart-test logic
-        run_fallback_tests || failed=1
+        run_fallback_tests
     fi
-    
-    if [[ $failed -ne 0 ]]; then
-        echo -e "${RED}❌ Tests failed. Please fix the issues before continuing.${NC}" >&2
-        exit 2
+
+    # Show timing if enabled
+    time_end "$START_TIME"
+
+    # Print summary
+    print_summary
+
+    # Return exit code - any issues mean failure
+    if [[ $CLAUDE_HOOKS_ERROR_COUNT -gt 0 ]]; then
+        return 2
     else
-        echo -e "${GREEN}✅ All tests passed. Continue with your task.${NC}" >&2
-        exit 0
+        return 0
     fi
 }
 
-# Only run main if we're being executed directly (not sourced)
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    main
+# Run main function
+main
+exit_code=$?
+
+# Final message and exit - always exit with 2 so Claude sees the continuation message
+if [[ $exit_code -eq 2 ]]; then
+    echo -e "\n${RED}🛑 FAILED - Fix all test issues above! 🛑${NC}" >&2
+    echo -e "${YELLOW}📋 NEXT STEPS:${NC}" >&2
+    echo -e "${YELLOW}  1. Fix the test issues listed above${NC}" >&2
+    echo -e "${YELLOW}  2. Verify the fix by running the test command again${NC}" >&2
+    echo -e "${YELLOW}  3. Continue with your original task${NC}" >&2
+    exit 2
+else
+    echo -e "\n${YELLOW}👉 All tests passed. Continue with your task.${NC}" >&2
+    exit 2
 fi
