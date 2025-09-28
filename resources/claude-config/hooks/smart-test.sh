@@ -174,13 +174,8 @@ run_make_test() {
         exit_code=$?
         add_error "'make test' failed with exit code $exit_code"
         echo -e "\n${RED}Failed test output:${NC}" >&2
-        # Filter to show only failed tests if possible
-        if echo "$test_output" | grep -q "FAIL\|ERROR\|FAILED"; then
-            echo "$test_output" | grep -E "(^FAIL|^ERROR|^FAILED|\bFAIL\b|\bERROR\b|\bFAILED\b)" >&2
-            echo -e "\n${YELLOW}📝 Full output available with CLAUDE_HOOKS_TEST_VERBOSE=true${NC}" >&2
-        else
-            echo "$test_output" >&2
-        fi
+        # Always show full output when make test fails - it may contain important debugging info
+        echo "$test_output" >&2
         return $exit_code
     fi
 
@@ -191,33 +186,6 @@ run_make_test() {
     fi
 
     return 0
-}
-
-# ============================================================================
-# FALLBACK TO SMART-TEST LOGIC
-# ============================================================================
-
-run_fallback_tests() {
-    echo -e "${YELLOW}📋 'make test' not available, using fallback testing logic...${NC}" >&2
-
-    # Source the original smart-test.sh if available
-    if [[ -f "${SCRIPT_DIR}/smart-test.sh" ]]; then
-        # We need to be careful here - we're already running from a hook context
-        # So we'll use the main function from smart-test.sh if it exists
-        source "${SCRIPT_DIR}/smart-test.sh" 2>/dev/null || {
-            # If sourcing fails, run basic Go tests
-            run_basic_go_tests
-        }
-
-        # If main function is available from smart-test.sh, call it
-        if type -t main &>/dev/null; then
-            main
-        else
-            run_basic_go_tests
-        fi
-    else
-        run_basic_go_tests
-    fi
 }
 
 run_basic_go_tests() {
@@ -232,13 +200,8 @@ run_basic_go_tests() {
             exit_code=$?
             add_error "Go tests failed with exit code $exit_code"
             echo -e "\n${RED}Failed test output:${NC}" >&2
-            # Filter to show only failed tests
-            if echo "$test_output" | grep -q "FAIL\|FAIL:"; then
-                echo "$test_output" | grep -E "(^--- FAIL:|FAIL:|\bFAIL\b)" >&2
-                echo -e "\n${YELLOW}📝 Full output available with CLAUDE_HOOKS_TEST_VERBOSE=true${NC}" >&2
-            else
-                echo "$test_output" >&2
-            fi
+            # Always show full output when Go tests fail - it may contain important debugging info
+            echo "$test_output" >&2
             return $exit_code
         fi
 
@@ -295,8 +258,9 @@ main() {
     if check_make_test; then
         run_make_test
     else
-        # Fall back to original smart-test logic
-        run_fallback_tests
+        # Fall back to basic Go tests
+        echo -e "${YELLOW}📋 'make test' not available, running basic Go tests...${NC}" >&2
+        run_basic_go_tests
     fi
 
     # Show timing if enabled
@@ -326,6 +290,6 @@ if [[ $exit_code -eq 2 ]]; then
     echo -e "${YELLOW}  3. Continue with your original task${NC}" >&2
     exit 2
 else
-    echo -e "\n${YELLOW}👉 All tests passed. Continue with your task.${NC}" >&2
+    echo -e "\n${GREEN}✅ All tests passed. Continue with your task.${NC}" >&2
     exit 2
 fi
