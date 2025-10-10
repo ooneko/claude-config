@@ -23,7 +23,7 @@ func NewManager(claudeDir string) *Manager {
 }
 
 // EnableCheck enables code checking hooks (PostToolUse hooks)
-func (m *Manager) EnableCheck(ctx context.Context) error {
+func (m *Manager) EnableCheck(_ context.Context) error {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return fmt.Errorf("failed to load settings: %w", err)
@@ -54,7 +54,7 @@ func (m *Manager) EnableCheck(ctx context.Context) error {
 }
 
 // DisableCheck disables code checking hooks (PostToolUse hooks)
-func (m *Manager) DisableCheck(ctx context.Context) error {
+func (m *Manager) DisableCheck(_ context.Context) error {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return fmt.Errorf("failed to load settings: %w", err)

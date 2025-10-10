@@ -12,7 +12,7 @@ func createBackupCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "backup",
 		Short: "备份配置",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			backupInfo, err := configMgr.Backup(ctx)
 			if err != nil {

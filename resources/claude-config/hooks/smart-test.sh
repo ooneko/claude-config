@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# smarter-test.sh - Intelligent test runner with make test support
+# smart-test.sh - Intelligent test runner for Go projects
 #
 # SYNOPSIS
 #   PostToolUse hook that runs tests when files are edited
 #
 # DESCRIPTION
-#   When Claude edits a file, this hook intelligently runs tests:
-#   - First checks for 'make test' target and uses it if available
-#   - Falls back to original smart-test.sh logic if make test not found
-#   - Provides same configuration options as smart-test.sh
+#   When Claude edits Go files, this hook:
+#   - Extracts directories from $CLAUDE_FILE_PATHS
+#   - Runs Go tests only for affected directories
+#   - Only outputs FAILED test results to reduce noise
 #
 # EXIT CODES
 #   0 - Success (all checks passed - everything is ✅ GREEN)
@@ -17,9 +17,8 @@
 #
 # CONFIGURATION
 #   CLAUDE_HOOKS_TEST_ON_EDIT - Enable/disable (default: true)
-#   CLAUDE_HOOKS_TEST_MODES - Comma-separated: focused,package,all,integration
 #   CLAUDE_HOOKS_ENABLE_RACE - Enable race detection (default: true)
-#   CLAUDE_HOOKS_FAIL_ON_MISSING_TESTS - Fail if test file missing (default: false)
+#   CLAUDE_HOOKS_TEST_VERBOSE - Show all test output (default: false)
 
 # Don't use set -e - we need to control exit codes carefully like smart-lint.sh
 set +e
@@ -107,113 +106,87 @@ load_config() {
 # HOOK INPUT PARSING
 # ============================================================================
 
-# Check if we have input (hook mode) or running standalone (CLI mode)
-if [ -t 0 ]; then
-    # No input on stdin - CLI mode
-    FILE_PATH="./..."
-else
-    # Read JSON input from stdin
-    INPUT=$(cat)
-    
-    # Check if input is valid JSON
-    if echo "$INPUT" | jq . >/dev/null 2>&1; then
-        # Extract relevant fields
-        TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // empty')
-        TOOL_INPUT=$(echo "$INPUT" | jq -r '.tool_input // empty')
-        
-        # Only process edit-related tools
-        if [[ ! "$TOOL_NAME" =~ ^(Edit|Write|MultiEdit)$ ]]; then
-            exit 0
-        fi
-        
-        # Extract file path(s)
-        if [[ "$TOOL_NAME" == "MultiEdit" ]]; then
-            # MultiEdit has a different structure
-            FILE_PATH=$(echo "$TOOL_INPUT" | jq -r '.file_path // empty')
-        else
-            FILE_PATH=$(echo "$TOOL_INPUT" | jq -r '.file_path // empty')
-        fi
-        
-        # Skip if no file path
-        [[ -z "$FILE_PATH" ]] && exit 0
-    else
-        # Not valid JSON - treat as CLI mode
-        FILE_PATH="./..."
+# Extract directories from $CLAUDE_FILE_PATHS
+get_test_directories() {
+    local dirs=()
+
+    # Check if CLAUDE_FILE_PATHS is set (from Claude Code environment)
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        # Parse JSON array and extract directories for Go files
+        while IFS= read -r file_path; do
+            # Only process Go files
+            if [[ "$file_path" =~ \.go$ ]]; then
+                local dir=$(dirname "$file_path")
+                # Skip if directory already in list
+                if [[ ! " ${dirs[@]} " =~ " ${dir} " ]]; then
+                    dirs+=("$dir")
+                fi
+            fi
+        done < <(echo "$CLAUDE_FILE_PATHS" | jq -r '.[]' 2>/dev/null)
     fi
-fi
+
+    # If no directories found, test current directory
+    if [[ ${#dirs[@]} -eq 0 ]]; then
+        dirs=(".")
+    fi
+
+    printf '%s\n' "${dirs[@]}"
+}
 
 # Load configuration
 load_config
 
 # ============================================================================
-# MAKE TEST DETECTION
+# GO TEST EXECUTION
 # ============================================================================
 
-check_make_test() {
-    # Check if we're in a directory with a Makefile
-    if [[ ! -f "Makefile" ]]; then
-        return 1
-    fi
+run_go_tests_for_directories() {
+    echo -e "${BLUE}🧪 Running Go tests for affected directories...${NC}" >&2
 
-    # Check if Makefile contains test target
-    if grep -q "^\.PHONY: test" Makefile && grep -q "^test:" Makefile; then
-        return 0
-    fi
-
-    return 1
-}
-
-run_make_test() {
-    echo -e "${BLUE}🔧 Found 'make test' target, using it for testing...${NC}" >&2
-
+    local directories=("$@")
     local test_output
     local exit_code=0
+    local failed_tests=""
 
-    # Run make test and capture output
-    if ! test_output=$(make test 2>&1); then
-        exit_code=$?
-        add_error "'make test' failed with exit code $exit_code"
-        echo -e "\n${RED}Failed test output:${NC}" >&2
-        # Always show full output when make test fails - it may contain important debugging info
-        echo "$test_output" >&2
+    # Build test command flags
+    local test_flags="-json"
+    if [[ "${CLAUDE_HOOKS_ENABLE_RACE:-true}" == "true" ]]; then
+        test_flags="$test_flags -race"
+    fi
+
+    # Test each directory
+    for dir in "${directories[@]}"; do
+        echo -e "${CYAN}  Testing: $dir${NC}" >&2
+
+        # Run go test and capture output
+        if ! test_output=$(cd "$dir" && go test $test_flags ./... 2>&1); then
+            exit_code=$?
+        fi
+
+        # Parse JSON output to extract only failed tests
+        local failures=$(echo "$test_output" | jq -r 'select(.Action == "fail" and .Test != null) | "    ❌ \(.Package).\(.Test)"' 2>/dev/null)
+
+        if [[ -n "$failures" ]]; then
+            failed_tests+="${RED}Failed tests in $dir:${NC}\n"
+            failed_tests+="$failures\n\n"
+            add_error "Tests failed in directory: $dir"
+        fi
+
+        # If verbose mode, show all output
+        if [[ "${CLAUDE_HOOKS_TEST_VERBOSE:-false}" == "true" ]]; then
+            echo -e "\n${BLUE}Full test output for $dir:${NC}" >&2
+            echo "$test_output" >&2
+        fi
+    done
+
+    # Show failed tests summary
+    if [[ -n "$failed_tests" ]]; then
+        echo -e "\n${RED}═══ Failed Tests ═══${NC}" >&2
+        echo -e "$failed_tests" >&2
         return $exit_code
     fi
 
-    echo -e "${GREEN}✅ 'make test' completed successfully${NC}" >&2
-    if [[ "${CLAUDE_HOOKS_TEST_VERBOSE:-false}" == "true" ]]; then
-        echo -e "\n${BLUE}Full test output:${NC}" >&2
-        echo "$test_output" >&2
-    fi
-
-    return 0
-}
-
-run_basic_go_tests() {
-    echo -e "${BLUE}🧪 Running basic Go tests...${NC}" >&2
-
-    local test_output
-    local exit_code=0
-
-    if [[ "$FILE_PATH" =~ \.go$ ]] || [[ "$FILE_PATH" == "./..." ]]; then
-        # Run Go tests
-        if ! test_output=$(go test -v ./... 2>&1); then
-            exit_code=$?
-            add_error "Go tests failed with exit code $exit_code"
-            echo -e "\n${RED}Failed test output:${NC}" >&2
-            # Always show full output when Go tests fail - it may contain important debugging info
-            echo "$test_output" >&2
-            return $exit_code
-        fi
-
-        echo -e "${GREEN}✅ Go tests passed${NC}" >&2
-        if [[ "${CLAUDE_HOOKS_TEST_VERBOSE:-false}" == "true" ]]; then
-            echo -e "\n${BLUE}Full test output:${NC}" >&2
-            echo "$test_output" >&2
-        fi
-    else
-        echo -e "${YELLOW}ℹ️  No Go files to test${NC}" >&2
-    fi
-
+    echo -e "${GREEN}✅ All Go tests passed${NC}" >&2
     return 0
 }
 
@@ -252,16 +225,28 @@ load_config
 START_TIME=$(time_start)
 
 main() {
-    echo -e "${CYAN}🚀 Enhanced Test Hook - Checking for optimized test commands...${NC}" >&2
+    echo -e "${CYAN}🚀 Smart Test Hook - Testing affected directories...${NC}" >&2
 
-    # First, try to use make test if available
-    if check_make_test; then
-        run_make_test
-    else
-        # Fall back to basic Go tests
-        echo -e "${YELLOW}📋 'make test' not available, running basic Go tests...${NC}" >&2
-        run_basic_go_tests
+    # Get directories to test from CLAUDE_FILE_PATHS
+    local test_dirs=()
+    while IFS= read -r dir; do
+        test_dirs+=("$dir")
+    done < <(get_test_directories)
+
+    # Skip if Go is not enabled
+    if [[ "${CLAUDE_HOOKS_GO_ENABLED:-true}" != "true" ]]; then
+        echo -e "${YELLOW}ℹ️  Go testing disabled${NC}" >&2
+        return 0
     fi
+
+    # Check if we have any Go directories to test
+    if [[ ${#test_dirs[@]} -eq 0 ]]; then
+        echo -e "${YELLOW}ℹ️  No Go files to test${NC}" >&2
+        return 0
+    fi
+
+    # Run tests for the directories
+    run_go_tests_for_directories "${test_dirs[@]}"
 
     # Show timing if enabled
     time_end "$START_TIME"

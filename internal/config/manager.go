@@ -28,7 +28,7 @@ func NewManager(claudeDir string) *Manager {
 }
 
 // Load loads the current configuration from settings.json
-func (m *Manager) Load(ctx context.Context) (*claude.Settings, error) {
+func (m *Manager) Load(_ context.Context) (*claude.Settings, error) {
 	settingsPath := filepath.Join(m.claudeDir, "settings.json")
 
 	// If file doesn't exist, return default settings
@@ -52,7 +52,7 @@ func (m *Manager) Load(ctx context.Context) (*claude.Settings, error) {
 }
 
 // Save saves the configuration to settings.json
-func (m *Manager) Save(ctx context.Context, config *claude.Settings) error {
+func (m *Manager) Save(_ context.Context, config *claude.Settings) error {
 	settingsPath := filepath.Join(m.claudeDir, "settings.json")
 
 	// Ensure directory exists
@@ -119,7 +119,7 @@ func (m *Manager) GetStatus(ctx context.Context) (*claude.ConfigStatus, error) {
 }
 
 // Backup creates a backup of configuration
-func (m *Manager) Backup(ctx context.Context) (*claude.BackupInfo, error) {
+func (m *Manager) Backup(_ context.Context) (*claude.BackupInfo, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get home directory: %w", err)

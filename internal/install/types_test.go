@@ -6,30 +6,30 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestInstallOptions_Validate(t *testing.T) {
+func TestOptions_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
-		options InstallOptions
+		options Options
 		wantErr bool
 	}{
 		{
 			name:    "有效选项 - All",
-			options: InstallOptions{All: true},
+			options: Options{All: true},
 			wantErr: false,
 		},
 		{
 			name:    "有效选项 - 特定组件",
-			options: InstallOptions{Agents: true, Commands: true},
+			options: Options{Agents: true, Commands: true},
 			wantErr: false,
 		},
 		{
 			name:    "有效选项 - 单个组件",
-			options: InstallOptions{Settings: true},
+			options: Options{Settings: true},
 			wantErr: false,
 		},
 		{
 			name:    "无效选项 - 全部为false",
-			options: InstallOptions{},
+			options: Options{},
 			wantErr: true,
 		},
 	}
@@ -46,15 +46,15 @@ func TestInstallOptions_Validate(t *testing.T) {
 	}
 }
 
-func TestInstallOptions_GetSelectedComponents(t *testing.T) {
+func TestOptions_GetSelectedComponents(t *testing.T) {
 	tests := []struct {
 		name     string
-		options  InstallOptions
+		options  Options
 		expected []string
 	}{
 		{
 			name:    "All选项",
-			options: InstallOptions{All: true},
+			options: Options{All: true},
 			expected: []string{
 				"agents", "commands", "hooks", "output-styles",
 				"settings.json", "CLAUDE.md.template", "statusline.js",
@@ -62,17 +62,17 @@ func TestInstallOptions_GetSelectedComponents(t *testing.T) {
 		},
 		{
 			name:     "仅agents",
-			options:  InstallOptions{Agents: true},
+			options:  Options{Agents: true},
 			expected: []string{"agents"},
 		},
 		{
 			name:     "agents和commands",
-			options:  InstallOptions{Agents: true, Commands: true},
+			options:  Options{Agents: true, Commands: true},
 			expected: []string{"agents", "commands"},
 		},
 		{
 			name: "所有单独选项",
-			options: InstallOptions{
+			options: Options{
 				Agents: true, Commands: true, Hooks: true,
 				OutputStyles: true, Settings: true, Claude: true, Statusline: true,
 			},
@@ -83,7 +83,7 @@ func TestInstallOptions_GetSelectedComponents(t *testing.T) {
 		},
 		{
 			name:     "仅settings",
-			options:  InstallOptions{Settings: true},
+			options:  Options{Settings: true},
 			expected: []string{"settings.json"},
 		},
 	}

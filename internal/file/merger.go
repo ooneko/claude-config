@@ -7,12 +7,12 @@ import (
 	"github.com/ooneko/claude-config/internal/claude"
 )
 
-// SettingsJsonMerger implements intelligent merging of settings.json files
-type SettingsJsonMerger struct{}
+// SettingsJSONMerger implements intelligent merging of settings.json files
+type SettingsJSONMerger struct{}
 
-// NewSettingsJsonMerger creates a new settings merger
-func NewSettingsJsonMerger() *SettingsJsonMerger {
-	return &SettingsJsonMerger{}
+// NewSettingsJSONMerger creates a new settings merger
+func NewSettingsJSONMerger() *SettingsJSONMerger {
+	return &SettingsJSONMerger{}
 }
 
 // MergeSettings intelligently merges source settings into destination settings
@@ -20,7 +20,7 @@ func NewSettingsJsonMerger() *SettingsJsonMerger {
 // 1. Proxy configuration protection: user's proxy settings have priority
 // 2. Environment variable merging: preserve existing settings
 // 3. Hooks intelligent merging: merge by matcher, avoid duplicates
-func (m *SettingsJsonMerger) MergeSettings(dest, source *claude.Settings) (*claude.Settings, error) {
+func (m *SettingsJSONMerger) MergeSettings(dest, source *claude.Settings) (*claude.Settings, error) {
 	if dest == nil {
 		dest = &claude.Settings{}
 	}
@@ -48,7 +48,7 @@ func (m *SettingsJsonMerger) MergeSettings(dest, source *claude.Settings) (*clau
 }
 
 // mergeEnvironmentVariables merges env vars with proxy configuration protection
-func (m *SettingsJsonMerger) mergeEnvironmentVariables(destEnv, sourceEnv map[string]string) map[string]string {
+func (m *SettingsJSONMerger) mergeEnvironmentVariables(destEnv, sourceEnv map[string]string) map[string]string {
 	if destEnv == nil && sourceEnv == nil {
 		return nil
 	}
@@ -77,7 +77,7 @@ func (m *SettingsJsonMerger) mergeEnvironmentVariables(destEnv, sourceEnv map[st
 }
 
 // mergeHooksConfig intelligently merges hooks configurations
-func (m *SettingsJsonMerger) mergeHooksConfig(destHooks, sourceHooks *claude.HooksConfig) (*claude.HooksConfig, error) {
+func (m *SettingsJSONMerger) mergeHooksConfig(destHooks, sourceHooks *claude.HooksConfig) (*claude.HooksConfig, error) {
 	if destHooks == nil && sourceHooks == nil {
 		return nil, nil
 	}
@@ -107,7 +107,7 @@ func (m *SettingsJsonMerger) mergeHooksConfig(destHooks, sourceHooks *claude.Hoo
 }
 
 // mergeHookRules merges hook rules by matcher, avoiding duplicates
-func (m *SettingsJsonMerger) mergeHookRules(destRules, sourceRules []*claude.HookRule) ([]*claude.HookRule, error) {
+func (m *SettingsJSONMerger) mergeHookRules(destRules, sourceRules []*claude.HookRule) ([]*claude.HookRule, error) {
 	if len(destRules) == 0 && len(sourceRules) == 0 {
 		return nil, nil
 	}
@@ -166,7 +166,7 @@ func (m *SettingsJsonMerger) mergeHookRules(destRules, sourceRules []*claude.Hoo
 }
 
 // matchersOverlap checks if two normalized matcher patterns overlap
-func (m *SettingsJsonMerger) matchersOverlap(matcher1, matcher2 string) bool {
+func (m *SettingsJSONMerger) matchersOverlap(matcher1, matcher2 string) bool {
 	if matcher1 == matcher2 {
 		return true
 	}
@@ -197,7 +197,7 @@ func (m *SettingsJsonMerger) matchersOverlap(matcher1, matcher2 string) bool {
 }
 
 // mergeHookRule merges two hook rules with the same matcher
-func (m *SettingsJsonMerger) mergeHookRule(destRule, sourceRule *claude.HookRule) (*claude.HookRule, error) {
+func (m *SettingsJSONMerger) mergeHookRule(destRule, sourceRule *claude.HookRule) (*claude.HookRule, error) {
 	// Use the more comprehensive matcher pattern
 	matcher := m.choosePreferredMatcher(destRule.Matcher, sourceRule.Matcher)
 
@@ -228,7 +228,7 @@ func (m *SettingsJsonMerger) mergeHookRule(destRule, sourceRule *claude.HookRule
 }
 
 // normalizeMatcherPattern normalizes matcher patterns for comparison
-func (m *SettingsJsonMerger) normalizeMatcherPattern(matcher string) string {
+func (m *SettingsJSONMerger) normalizeMatcherPattern(matcher string) string {
 	if matcher == "" {
 		return ""
 	}
@@ -260,7 +260,7 @@ func (m *SettingsJsonMerger) normalizeMatcherPattern(matcher string) string {
 }
 
 // choosePreferredMatcher chooses the more comprehensive matcher pattern
-func (m *SettingsJsonMerger) choosePreferredMatcher(matcher1, matcher2 string) string {
+func (m *SettingsJSONMerger) choosePreferredMatcher(matcher1, matcher2 string) string {
 	norm1 := m.normalizeMatcherPattern(matcher1)
 	norm2 := m.normalizeMatcherPattern(matcher2)
 
@@ -283,6 +283,6 @@ func (m *SettingsJsonMerger) choosePreferredMatcher(matcher1, matcher2 string) s
 }
 
 // isProxyVar checks if a variable is a proxy-related variable
-func (m *SettingsJsonMerger) isProxyVar(key string) bool {
+func (m *SettingsJSONMerger) isProxyVar(key string) bool {
 	return key == "http_proxy" || key == "https_proxy"
 }

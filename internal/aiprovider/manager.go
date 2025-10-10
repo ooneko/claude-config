@@ -32,7 +32,7 @@ func NewManager(claudeDir string) claude.AIProviderManager {
 }
 
 // Enable enables an AI provider with the given API key
-func (m *Manager) Enable(ctx context.Context, provider ProviderType, apiKey string) error {
+func (m *Manager) Enable(_ context.Context, provider ProviderType, apiKey string) error {
 	if !provider.IsValid() {
 		return fmt.Errorf("unsupported provider: %s", provider)
 	}
@@ -81,7 +81,7 @@ func (m *Manager) Enable(ctx context.Context, provider ProviderType, apiKey stri
 }
 
 // Reset removes the API key and disables the provider
-func (m *Manager) Reset(ctx context.Context, provider ProviderType) error {
+func (m *Manager) Reset(_ context.Context, provider ProviderType) error {
 	// First disable the provider by clearing environment variables
 	settings, err := m.loadSettings()
 	if err != nil {
@@ -186,7 +186,7 @@ func (m *Manager) On(ctx context.Context) error {
 }
 
 // HasAPIKey returns whether an API key is stored for the provider
-func (m *Manager) HasAPIKey(ctx context.Context, provider ProviderType) (bool, error) {
+func (m *Manager) HasAPIKey(_ context.Context, provider ProviderType) (bool, error) {
 	apiKeyPath := m.getAPIKeyPath(provider)
 	_, err := os.Stat(apiKeyPath)
 	if os.IsNotExist(err) {
@@ -199,7 +199,7 @@ func (m *Manager) HasAPIKey(ctx context.Context, provider ProviderType) (bool, e
 }
 
 // GetProviderConfig returns current configuration for a provider
-func (m *Manager) GetProviderConfig(ctx context.Context, provider ProviderType) (*ProviderConfig, error) {
+func (m *Manager) GetProviderConfig(_ context.Context, provider ProviderType) (*ProviderConfig, error) {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load settings: %w", err)
@@ -226,7 +226,7 @@ func (m *Manager) GetProviderConfig(ctx context.Context, provider ProviderType) 
 }
 
 // GetActiveProvider returns the currently active provider
-func (m *Manager) GetActiveProvider(ctx context.Context) (ProviderType, error) {
+func (m *Manager) GetActiveProvider(_ context.Context) (ProviderType, error) {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return ProviderNone, fmt.Errorf("failed to load settings: %w", err)

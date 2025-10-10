@@ -15,7 +15,7 @@ func createNotifyCmd() *cobra.Command {
 		Use:   "notify",
 		Short: "NTFY通知配置管理",
 		Long:  `管理NTFY通知配置，支持启用/禁用通知功能`,
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			fmt.Println("使用 'claude-config notify on' 启用通知或 'claude-config notify off' 禁用通知")
 			_ = cmd.Help()
 		},
@@ -34,7 +34,7 @@ func createNotifyOnCmd() *cobra.Command {
 		Use:   "on",
 		Short: "启用NTFY通知",
 		Long:  `启用NTFY通知功能，如果未配置NTFY_TOPIC则提示用户输入，并添加通知hooks`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return enableNTFY()
 		},
 	}
@@ -46,7 +46,7 @@ func createNotifyOffCmd() *cobra.Command {
 		Use:   "off",
 		Short: "禁用NTFY通知",
 		Long:  `禁用NTFY通知功能，保留NTFY_TOPIC但移除通知hooks`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return disableNTFY()
 		},
 	}

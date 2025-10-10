@@ -71,7 +71,7 @@ func createProxyCmd() *cobra.Command {
 		Use:   "proxy <command>",
 		Short: "代理管理",
 		Long:  "管理 HTTP/HTTPS 代理设置 (127.0.0.1:7890)",
-		Run: func(cmd *cobra.Command, args []string) {
+		Run: func(cmd *cobra.Command, _ []string) {
 			_ = cmd.Help()
 		},
 	}
@@ -79,7 +79,7 @@ func createProxyCmd() *cobra.Command {
 	proxyOnCmd := &cobra.Command{
 		Use:   "on",
 		Short: "启用代理",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return enableProxy()
 		},
 	}
@@ -87,7 +87,7 @@ func createProxyCmd() *cobra.Command {
 	proxyOffCmd := &cobra.Command{
 		Use:   "off",
 		Short: "禁用代理",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			return proxyMgr.Disable(ctx)
 		},
@@ -96,7 +96,7 @@ func createProxyCmd() *cobra.Command {
 	proxyToggleCmd := &cobra.Command{
 		Use:   "toggle",
 		Short: "切换代理状态",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			return proxyMgr.Toggle(ctx)
 		},
@@ -106,7 +106,7 @@ func createProxyCmd() *cobra.Command {
 		Use:   "reset",
 		Short: "重置代理配置",
 		Long:  "删除保存的代理配置文件并禁用代理",
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			ctx := context.Background()
 			if err := proxyMgr.Reset(ctx); err != nil {
 				return err

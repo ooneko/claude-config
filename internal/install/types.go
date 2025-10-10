@@ -2,8 +2,8 @@ package install
 
 import "fmt"
 
-// InstallOptions 安装选项配置
-type InstallOptions struct {
+// Options 安装选项配置
+type Options struct {
 	All          bool // 安装所有配置文件
 	Agents       bool // 仅安装agents
 	Commands     bool // 仅安装commands
@@ -16,7 +16,7 @@ type InstallOptions struct {
 }
 
 // Validate 验证安装选项
-func (opts InstallOptions) Validate() error {
+func (opts Options) Validate() error {
 	if !opts.All && !opts.Agents && !opts.Commands && !opts.Hooks &&
 		!opts.OutputStyles && !opts.Settings && !opts.Claude && !opts.Statusline {
 		return fmt.Errorf("必须至少选择一个安装选项")
@@ -25,7 +25,7 @@ func (opts InstallOptions) Validate() error {
 }
 
 // GetSelectedComponents 获取选中的组件列表
-func (opts InstallOptions) GetSelectedComponents() []string {
+func (opts Options) GetSelectedComponents() []string {
 	var components []string
 
 	if opts.All {

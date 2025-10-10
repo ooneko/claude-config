@@ -13,28 +13,28 @@ lint_go() {
         log_debug "Go linting disabled"
         return 0
     fi
-    
-    log_info "Running Go linting..."
-    
-    # Check if Makefile exists with lint target
-    if [[ -f "Makefile" ]]; then
-        local has_lint=$(grep -E "^lint:" Makefile 2>/dev/null || echo "")
 
-        if [[ -n "$has_lint" ]]; then
-            log_info "Using Makefile lint target"
+    log_info "Running Go linting..."
+
+    # Check if we're in a git repository and can get the revision
+    if command_exists git && git rev-parse --git-dir >/dev/null 2>&1; then
+        # Use golangci-lint with new-from-rev to only check changed files
+        if command_exists golangci-lint; then
+            log_info "Running golangci-lint on changes since HEAD~1"
 
             local lint_output
-            if ! lint_output=$(make lint 2>&1); then
-                add_error "Go linting failed (make lint)"
+            if ! lint_output=$(golangci-lint run --new-from-rev=HEAD~1 --timeout=2m 2>&1); then
+                add_error "golangci-lint found issues in changed files"
                 echo "$lint_output" >&2
             fi
         else
-            # Fallback to direct commands
-            run_go_direct_lint
+            log_error "golangci-lint not found - please install it"
+            add_error "golangci-lint not installed"
         fi
     else
-        # No Makefile, use direct commands
-        run_go_direct_lint
+        # Not a git repository, fall back to full project scan
+        log_info "Not in a git repository, running full project scan"
+        run_go_full_project_lint
     fi
 }
 

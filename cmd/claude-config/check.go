@@ -22,7 +22,7 @@ func createCheckCmd() *cobra.Command {
 		Example: `  claude-config check on   # 启用代码检查hooks
   claude-config check off  # 禁用代码检查hooks`,
 		Args: cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, args []string) error {
 			action := args[0]
 			return handleCheckCommand(action)
 		},

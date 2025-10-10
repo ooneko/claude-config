@@ -13,7 +13,7 @@ func createStatusCmd() *cobra.Command {
 		Use:   "status",
 		Short: "显示当前配置状态",
 		Long:  `显示代理、检查功能和通知的当前状态`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			return showStatus()
 		},
 	}

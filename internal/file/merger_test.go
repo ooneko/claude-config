@@ -10,7 +10,7 @@ import (
 )
 
 func TestSettingsJsonMerger_MergeSettings_ProxyProtection(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	// User's current settings with proxy
 	dest := &claude.Settings{
@@ -47,7 +47,7 @@ func TestSettingsJsonMerger_MergeSettings_ProxyProtection(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_MergeSettings_HooksIntelligentMerge(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	// User's current settings with custom hook
 	dest := &claude.Settings{
@@ -120,7 +120,7 @@ func TestSettingsJsonMerger_MergeSettings_HooksIntelligentMerge(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_MergeSettings_CompleteScenario(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	// This test covers the exact scenario from DESIGN.md
 
@@ -246,7 +246,7 @@ func TestSettingsJsonMerger_MergeSettings_CompleteScenario(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_MergeSettings_BadCases(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	// Test case 1: Prevent duplicate hooks with same command
 	dest := &claude.Settings{
@@ -292,7 +292,7 @@ func TestSettingsJsonMerger_MergeSettings_BadCases(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_NormalizeMatcherPattern(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	tests := []struct {
 		name     string
@@ -335,7 +335,7 @@ func TestSettingsJsonMerger_NormalizeMatcherPattern(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_IsProxyVar(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	tests := []struct {
 		name     string

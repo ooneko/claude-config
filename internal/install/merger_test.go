@@ -10,13 +10,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewSettingsJsonMerger(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+func TestNewSettingsJSONMerger(t *testing.T) {
+	merger := NewSettingsJSONMerger()
 	assert.NotNil(t, merger)
 }
 
 func TestSettingsJsonMerger_ShouldPreserveProxyConfig(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	tests := []struct {
 		name       string
@@ -76,7 +76,7 @@ func TestSettingsJsonMerger_ShouldPreserveProxyConfig(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_FilterProxyFromSource(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	sourceData := map[string]interface{}{
 		"includeCoAuthoredBy": true,
@@ -115,7 +115,7 @@ func TestSettingsJsonMerger_FilterProxyFromSource(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_DeepMergeDict(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	target := map[string]interface{}{
 		"includeCoAuthoredBy": false,
@@ -189,7 +189,7 @@ func TestSettingsJsonMerger_DeepMergeDict(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_MergeSettings(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 	tempDir := t.TempDir()
 
 	// 创建源文件
@@ -268,7 +268,7 @@ func TestSettingsJsonMerger_MergeSettings(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_MergeSettings_NoTargetFile(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 	tempDir := t.TempDir()
 
 	// 创建源文件（包含代理配置）
@@ -307,7 +307,7 @@ func TestSettingsJsonMerger_MergeSettings_NoTargetFile(t *testing.T) {
 }
 
 func TestSettingsJsonMerger_MergeHooks(t *testing.T) {
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 
 	targetHooks := map[string]interface{}{
 		"PostToolUse": []interface{}{

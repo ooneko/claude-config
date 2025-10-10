@@ -14,7 +14,7 @@ func runInstall(cmd *cobra.Command) error {
 	ctx := context.Background()
 
 	// 解析命令行参数
-	options := install.InstallOptions{}
+	options := install.Options{}
 
 	allFlag, _ := cmd.Flags().GetBool("all")
 	agentsFlag, _ := cmd.Flags().GetBool("agents")
@@ -69,7 +69,7 @@ func createInstallCmd() *cobra.Command {
 		Use:   "install",
 		Short: "安装配置文件",
 		Long:  `安装Claude Code配置文件到 ~/.claude 目录`,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			return runInstall(cmd)
 		},
 	}

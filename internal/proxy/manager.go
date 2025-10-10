@@ -23,7 +23,7 @@ func NewManager(claudeDir string) *Manager {
 }
 
 // Enable enables proxy with the given configuration
-func (m *Manager) Enable(ctx context.Context, config *claude.ProxyConfig) error {
+func (m *Manager) Enable(_ context.Context, config *claude.ProxyConfig) error {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return fmt.Errorf("failed to load settings: %w", err)
@@ -52,7 +52,7 @@ func (m *Manager) Enable(ctx context.Context, config *claude.ProxyConfig) error 
 }
 
 // Disable disables proxy
-func (m *Manager) Disable(ctx context.Context) error {
+func (m *Manager) Disable(_ context.Context) error {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return fmt.Errorf("failed to load settings: %w", err)
@@ -101,7 +101,7 @@ func (m *Manager) Toggle(ctx context.Context) error {
 }
 
 // IsEnabled returns whether proxy is currently enabled
-func (m *Manager) IsEnabled(ctx context.Context) (bool, error) {
+func (m *Manager) IsEnabled(_ context.Context) (bool, error) {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return false, fmt.Errorf("failed to load settings: %w", err)
@@ -118,7 +118,7 @@ func (m *Manager) IsEnabled(ctx context.Context) (bool, error) {
 }
 
 // GetConfig returns current proxy configuration
-func (m *Manager) GetConfig(ctx context.Context) (*claude.ProxyConfig, error) {
+func (m *Manager) GetConfig(_ context.Context) (*claude.ProxyConfig, error) {
 	settings, err := m.loadSettings()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load settings: %w", err)
@@ -224,7 +224,7 @@ func (m *Manager) loadProxyConfig() (*claude.ProxyConfig, error) {
 }
 
 // LoadSavedConfig loads saved proxy configuration from file
-func (m *Manager) LoadSavedConfig(ctx context.Context) (*claude.ProxyConfig, error) {
+func (m *Manager) LoadSavedConfig(_ context.Context) (*claude.ProxyConfig, error) {
 	return m.loadProxyConfig()
 }
 

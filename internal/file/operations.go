@@ -13,7 +13,7 @@ import (
 type Operations struct {
 	sourceDir string
 	claudeDir string
-	merger    *SettingsJsonMerger
+	merger    *SettingsJSONMerger
 }
 
 // NewOperations creates a new file operations manager
@@ -21,7 +21,7 @@ func NewOperations(sourceDir, claudeDir string) *Operations {
 	return &Operations{
 		sourceDir: sourceDir,
 		claudeDir: claudeDir,
-		merger:    NewSettingsJsonMerger(),
+		merger:    NewSettingsJSONMerger(),
 	}
 }
 
@@ -53,7 +53,7 @@ func (o *Operations) Copy(ctx context.Context, options *claude.CopyOptions) erro
 	}
 
 	// Always process settings.json specially
-	if err := o.handleSettingsJson(ctx); err != nil {
+	if err := o.handleSettingsJSON(ctx); err != nil {
 		return fmt.Errorf("failed to handle settings.json: %w", err)
 	}
 
@@ -81,8 +81,8 @@ func (o *Operations) Copy(ctx context.Context, options *claude.CopyOptions) erro
 	return nil
 }
 
-// handleSettingsJson handles intelligent merging of settings.json
-func (o *Operations) handleSettingsJson(ctx context.Context) error {
+// handleSettingsJSON handles intelligent merging of settings.json
+func (o *Operations) handleSettingsJSON(_ context.Context) error {
 	sourcePath := filepath.Join(o.sourceDir, "settings.json")
 	destPath := filepath.Join(o.claudeDir, "settings.json")
 
@@ -248,7 +248,7 @@ func (o *Operations) saveSettings(path string, settings *claude.Settings) error 
 }
 
 // Compare compares source and destination files
-func (o *Operations) Compare(ctx context.Context, sourcePath, destPath string) (*claude.CompareResult, error) {
+func (o *Operations) Compare(_ context.Context, sourcePath, destPath string) (*claude.CompareResult, error) {
 	// Check if both files exist
 	sourceInfo, sourceErr := os.Stat(sourcePath)
 	destInfo, destErr := os.Stat(destPath)
@@ -304,6 +304,6 @@ func (o *Operations) Compare(ctx context.Context, sourcePath, destPath string) (
 }
 
 // MergeSettings provides direct access to settings merging
-func (o *Operations) MergeSettings(ctx context.Context, source, dest *claude.Settings) (*claude.Settings, error) {
+func (o *Operations) MergeSettings(_ context.Context, source, dest *claude.Settings) (*claude.Settings, error) {
 	return o.merger.MergeSettings(dest, source)
 }

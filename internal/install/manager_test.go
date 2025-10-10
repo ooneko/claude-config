@@ -29,13 +29,13 @@ func TestManager_Install(t *testing.T) {
 
 	tests := []struct {
 		name    string
-		options InstallOptions
+		options Options
 		wantErr bool
 		checkFn func(t *testing.T, claudeDir string)
 	}{
 		{
 			name: "安装所有配置文件",
-			options: InstallOptions{
+			options: Options{
 				All: true,
 			},
 			wantErr: false,
@@ -51,7 +51,7 @@ func TestManager_Install(t *testing.T) {
 		},
 		{
 			name: "仅安装agents",
-			options: InstallOptions{
+			options: Options{
 				Agents: true,
 			},
 			wantErr: false,
@@ -63,7 +63,7 @@ func TestManager_Install(t *testing.T) {
 		},
 		{
 			name: "Force选项测试 - 强制覆盖",
-			options: InstallOptions{
+			options: Options{
 				Agents: true,
 				Force:  true,
 			},
@@ -74,7 +74,7 @@ func TestManager_Install(t *testing.T) {
 		},
 		{
 			name:    "无效选项",
-			options: InstallOptions{
+			options: Options{
 				// 所有选项都为false
 			},
 			wantErr: true,

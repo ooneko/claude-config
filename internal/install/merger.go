@@ -7,16 +7,16 @@ import (
 	"path/filepath"
 )
 
-// SettingsJsonMerger settings.json智能合并器
-type SettingsJsonMerger struct{}
+// SettingsJSONMerger settings.json智能合并器
+type SettingsJSONMerger struct{}
 
-// NewSettingsJsonMerger 创建新的settings.json合并器
-func NewSettingsJsonMerger() *SettingsJsonMerger {
-	return &SettingsJsonMerger{}
+// NewSettingsJSONMerger 创建新的settings.json合并器
+func NewSettingsJSONMerger() *SettingsJSONMerger {
+	return &SettingsJSONMerger{}
 }
 
 // ShouldPreserveProxyConfig 检查是否应该保留目标文件中的代理配置
-func (m *SettingsJsonMerger) ShouldPreserveProxyConfig(targetData map[string]interface{}) bool {
+func (m *SettingsJSONMerger) ShouldPreserveProxyConfig(targetData map[string]interface{}) bool {
 	env, ok := targetData["env"].(map[string]interface{})
 	if !ok {
 		return false
@@ -28,7 +28,7 @@ func (m *SettingsJsonMerger) ShouldPreserveProxyConfig(targetData map[string]int
 }
 
 // FilterProxyFromSource 从源数据中移除代理配置
-func (m *SettingsJsonMerger) FilterProxyFromSource(sourceData map[string]interface{}) map[string]interface{} {
+func (m *SettingsJSONMerger) FilterProxyFromSource(sourceData map[string]interface{}) map[string]interface{} {
 	result := make(map[string]interface{})
 
 	// 深度复制
@@ -50,7 +50,7 @@ func (m *SettingsJsonMerger) FilterProxyFromSource(sourceData map[string]interfa
 }
 
 // deepCopyValue 深度复制值
-func (m *SettingsJsonMerger) deepCopyValue(value interface{}) interface{} {
+func (m *SettingsJSONMerger) deepCopyValue(value interface{}) interface{} {
 	switch v := value.(type) {
 	case map[string]interface{}:
 		result := make(map[string]interface{})
@@ -70,7 +70,7 @@ func (m *SettingsJsonMerger) deepCopyValue(value interface{}) interface{} {
 }
 
 // DeepMergeDict 深度合并字典，source覆盖target
-func (m *SettingsJsonMerger) DeepMergeDict(target, source map[string]interface{}) map[string]interface{} {
+func (m *SettingsJSONMerger) DeepMergeDict(target, source map[string]interface{}) map[string]interface{} {
 	result := m.deepCopyValue(target).(map[string]interface{})
 
 	for key, value := range source {
@@ -102,7 +102,7 @@ func (m *SettingsJsonMerger) DeepMergeDict(target, source map[string]interface{}
 }
 
 // uniqueSlice 数组去重
-func (m *SettingsJsonMerger) uniqueSlice(slice []interface{}) []interface{} {
+func (m *SettingsJSONMerger) uniqueSlice(slice []interface{}) []interface{} {
 	seen := make(map[string]bool)
 	var result []interface{}
 
@@ -124,7 +124,7 @@ func (m *SettingsJsonMerger) uniqueSlice(slice []interface{}) []interface{} {
 }
 
 // MergeHooks 智能合并hooks配置
-func (m *SettingsJsonMerger) MergeHooks(targetHooks, sourceHooks map[string]interface{}) map[string]interface{} {
+func (m *SettingsJSONMerger) MergeHooks(targetHooks, sourceHooks map[string]interface{}) map[string]interface{} {
 	result := m.deepCopyValue(targetHooks).(map[string]interface{})
 
 	for eventType, sourceConfigs := range sourceHooks {
@@ -144,7 +144,7 @@ func (m *SettingsJsonMerger) MergeHooks(targetHooks, sourceHooks map[string]inte
 }
 
 // mergeHookConfigs 合并同一事件类型的hook配置
-func (m *SettingsJsonMerger) mergeHookConfigs(existing, source []interface{}) []interface{} {
+func (m *SettingsJSONMerger) mergeHookConfigs(existing, source []interface{}) []interface{} {
 	// 按matcher建立映射
 	existingMatchers := make(map[string]int)
 	for i, config := range existing {
@@ -187,7 +187,7 @@ func (m *SettingsJsonMerger) mergeHookConfigs(existing, source []interface{}) []
 }
 
 // mergeHookCommands 按command去重合并hook命令
-func (m *SettingsJsonMerger) mergeHookCommands(existing, new []interface{}) []interface{} {
+func (m *SettingsJSONMerger) mergeHookCommands(existing, newHooks []interface{}) []interface{} {
 	existingCommands := make(map[string]bool)
 
 	// 记录现有命令
@@ -202,7 +202,7 @@ func (m *SettingsJsonMerger) mergeHookCommands(existing, new []interface{}) []in
 	result := m.deepCopyValue(existing).([]interface{})
 
 	// 添加新命令（去重）
-	for _, hook := range new {
+	for _, hook := range newHooks {
 		if hookMap, ok := hook.(map[string]interface{}); ok {
 			if command, ok := hookMap["command"].(string); ok {
 				if !existingCommands[command] {
@@ -216,7 +216,7 @@ func (m *SettingsJsonMerger) mergeHookCommands(existing, new []interface{}) []in
 }
 
 // MergeSettings 合并settings.json文件
-func (m *SettingsJsonMerger) MergeSettings(targetFile, sourceFile string) error {
+func (m *SettingsJSONMerger) MergeSettings(targetFile, sourceFile string) error {
 	// 读取源文件
 	sourceData, err := m.readJSONFile(sourceFile)
 	if err != nil {
@@ -275,7 +275,7 @@ func (m *SettingsJsonMerger) MergeSettings(targetFile, sourceFile string) error 
 }
 
 // readJSONFile 读取JSON文件
-func (m *SettingsJsonMerger) readJSONFile(filename string) (map[string]interface{}, error) {
+func (m *SettingsJSONMerger) readJSONFile(filename string) (map[string]interface{}, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
@@ -290,7 +290,7 @@ func (m *SettingsJsonMerger) readJSONFile(filename string) (map[string]interface
 }
 
 // writeJSONFile 写入JSON文件
-func (m *SettingsJsonMerger) writeJSONFile(filename string, data map[string]interface{}) error {
+func (m *SettingsJSONMerger) writeJSONFile(filename string, data map[string]interface{}) error {
 	// 确保目录存在
 	if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil {
 		return err
@@ -305,7 +305,7 @@ func (m *SettingsJsonMerger) writeJSONFile(filename string, data map[string]inte
 }
 
 // isEqual 简单比较两个map是否相等
-func (m *SettingsJsonMerger) isEqual(a, b map[string]interface{}) bool {
+func (m *SettingsJSONMerger) isEqual(a, b map[string]interface{}) bool {
 	if len(a) != len(b) {
 		return false
 	}

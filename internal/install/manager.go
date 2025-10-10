@@ -27,7 +27,7 @@ func NewManager(claudeDir string) *Manager {
 }
 
 // Install 安装配置文件
-func (m *Manager) Install(ctx context.Context, options InstallOptions) error {
+func (m *Manager) Install(ctx context.Context, options Options) error {
 	if err := options.Validate(); err != nil {
 		return fmt.Errorf("无效的安装选项: %w", err)
 	}
@@ -60,7 +60,7 @@ func (m *Manager) installComponent(ctx context.Context, component string, force 
 	case "agents", "commands", "hooks", "output-styles":
 		return m.installDirectory(component, force)
 	case "settings.json":
-		return m.installSettingsJson()
+		return m.installSettingsJSON()
 	case "CLAUDE.md.template":
 		return m.installClaudeMd(force)
 	case "statusline.js":
@@ -85,8 +85,8 @@ func (m *Manager) installDirectory(dirName string, force bool) error {
 	return m.resources.ExtractDirectory(dirName, targetDir)
 }
 
-// installSettingsJson 安装settings.json - 始终使用智能合并
-func (m *Manager) installSettingsJson() error {
+// installSettingsJSON 安装settings.json - 始终使用智能合并
+func (m *Manager) installSettingsJSON() error {
 	targetPath := filepath.Join(m.claudeDir, "settings.json")
 
 	// 创建临时文件来存储源文件内容
@@ -99,12 +99,12 @@ func (m *Manager) installSettingsJson() error {
 	defer os.Remove(tempFile) // 清理临时文件
 
 	// 使用智能合并器合并文件
-	merger := NewSettingsJsonMerger()
+	merger := NewSettingsJSONMerger()
 	return merger.MergeSettings(targetPath, tempFile)
 }
 
 // installClaudeMd 安装CLAUDE.md文件 - 总是覆盖现有文件
-func (m *Manager) installClaudeMd(force bool) error {
+func (m *Manager) installClaudeMd(_ bool) error {
 	targetPath := filepath.Join(m.claudeDir, "CLAUDE.md")
 	// CLAUDE.md 默认总是覆盖，不受force参数影响
 	return m.resources.ExtractFile("CLAUDE.md.template", targetPath)
@@ -212,18 +212,18 @@ func (rm *ResourceManager) ExtractDirectory(srcDir, destDir string) error {
 
 		if d.IsDir() {
 			return os.MkdirAll(destPath, 0755)
-		} else {
-			data, err := rm.fs.ReadFile(path)
-			if err != nil {
-				return err
-			}
-
-			// 确保目标目录存在
-			if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
-				return err
-			}
-
-			return os.WriteFile(destPath, data, 0644)
 		}
+
+		data, err := rm.fs.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		// 确保目标目录存在
+		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+			return err
+		}
+
+		return os.WriteFile(destPath, data, 0644)
 	})
 }

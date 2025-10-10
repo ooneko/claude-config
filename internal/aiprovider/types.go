@@ -18,8 +18,8 @@ const (
 	ProviderZhiPu    = claude.ProviderZhiPu
 )
 
-// AIProviderManager defines the interface for managing AI providers
-type AIProviderManager interface {
+// ProviderManager defines the interface for managing AI providers
+type ProviderManager interface {
 	// Enable enables an AI provider with the given API key
 	Enable(ctx context.Context, provider ProviderType, apiKey string) error
 
