@@ -76,8 +76,8 @@ func (p *ZhipuProvider) GetDefaultConfig(apiKey string) *ProviderConfig {
 		Type:           ProviderZhiPu,
 		AuthToken:      apiKey,
 		BaseURL:        "https://open.bigmodel.cn/api/anthropic",
-		Model:          "glm-4.5",
-		SmallFastModel: "glm-4.5-air",
+		Model:          "glm-4.6",
+		SmallFastModel: "glm-4.6",
 	}
 }
 
