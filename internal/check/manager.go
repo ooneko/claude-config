@@ -97,10 +97,12 @@ func (m *Manager) createDefaultHooksConfig() *claude.HooksConfig {
 					{
 						Type:    "command",
 						Command: "~/.claude/hooks/smart-lint.sh",
+						Timeout: 120,
 					},
 					{
 						Type:    "command",
 						Command: "~/.claude/hooks/smarter-test.sh",
+						Timeout: 120,
 					},
 				},
 			},

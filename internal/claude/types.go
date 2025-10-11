@@ -30,6 +30,7 @@ type HookRule struct {
 type HookItem struct {
 	Type    string `json:"type"`
 	Command string `json:"command"`
+	Timeout int    `json:"timeout,omitempty"` // Timeout in seconds, 0 means no timeout
 }
 
 // StatusLineConfig represents status line configuration
