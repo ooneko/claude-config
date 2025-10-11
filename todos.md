@@ -1,7 +1,7 @@
 # Project Todos
 
 ## Active
-
+- [ ] 如果判断是 golang 项目，不要进行 python lint
 
 ## Completed
 - [x] 更新 @CLAUDE.md and @README.md | Done: 01/11/2025
