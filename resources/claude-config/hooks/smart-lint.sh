@@ -168,35 +168,172 @@ if [[ -f "${SCRIPT_DIR}/lint-tilt.sh" ]]; then
     source "${SCRIPT_DIR}/lint-tilt.sh"
 fi
 
+# ============================================================================
+# PYTHON FILE DETECTION (similar to get_target_go_files in lint-go.sh)
+# ============================================================================
+
+# ============================================================================
+# TARGET FILE DETECTION FUNCTIONS
+# ============================================================================
+
+# Extract Python files from CLAUDE_FILE_PATHS environment variable
+get_target_python_files() {
+    local python_files=""
+
+    # Check if CLAUDE_FILE_PATHS is set (from Claude Code environment)
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        # Parse JSON array and extract Python files
+        while IFS= read -r file_path; do
+            # Only process Python files that exist
+            if [[ "$file_path" =~ \.py$ ]] && [[ -f "$file_path" ]]; then
+                # Skip if file should be skipped
+                if ! should_skip_file "$file_path"; then
+                    python_files="${python_files}${file_path} "
+                fi
+            fi
+        done < <(echo "$CLAUDE_FILE_PATHS" | jq -r '.[]' 2>/dev/null)
+    fi
+
+    # Trim trailing space and return
+    echo "${python_files% }"
+}
+
+# Extract JavaScript/TypeScript files from CLAUDE_FILE_PATHS environment variable
+get_target_js_files() {
+    local js_files=""
+
+    # Check if CLAUDE_FILE_PATHS is set (from Claude Code environment)
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        # Parse JSON array and extract JS/TS files
+        while IFS= read -r file_path; do
+            # Only process JS/TS files that exist
+            if [[ "$file_path" =~ \.(js|ts|jsx|tsx)$ ]] && [[ -f "$file_path" ]]; then
+                # Skip if file should be skipped
+                if ! should_skip_file "$file_path"; then
+                    js_files="${js_files}${file_path} "
+                fi
+            fi
+        done < <(echo "$CLAUDE_FILE_PATHS" | jq -r '.[]' 2>/dev/null)
+    fi
+
+    # Trim trailing space and return
+    echo "${js_files% }"
+}
+
+# Extract Rust files from CLAUDE_FILE_PATHS environment variable
+get_target_rust_files() {
+    local rust_files=""
+
+    # Check if CLAUDE_FILE_PATHS is set (from Claude Code environment)
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        # Parse JSON array and extract Rust files
+        while IFS= read -r file_path; do
+            # Only process Rust files that exist
+            if [[ "$file_path" =~ \.rs$ ]] && [[ -f "$file_path" ]]; then
+                # Skip if file should be skipped
+                if ! should_skip_file "$file_path"; then
+                    rust_files="${rust_files}${file_path} "
+                fi
+            fi
+        done < <(echo "$CLAUDE_FILE_PATHS" | jq -r '.[]' 2>/dev/null)
+    fi
+
+    # Trim trailing space and return
+    echo "${rust_files% }"
+}
+
+# Extract Nix files from CLAUDE_FILE_PATHS environment variable
+get_target_nix_files() {
+    local nix_files=""
+
+    # Check if CLAUDE_FILE_PATHS is set (from Claude Code environment)
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        # Parse JSON array and extract Nix files
+        while IFS= read -r file_path; do
+            # Only process Nix files that exist
+            if [[ "$file_path" =~ \.nix$ ]] && [[ -f "$file_path" ]]; then
+                # Skip if file should be skipped
+                if ! should_skip_file "$file_path"; then
+                    nix_files="${nix_files}${file_path} "
+                fi
+            fi
+        done < <(echo "$CLAUDE_FILE_PATHS" | jq -r '.[]' 2>/dev/null)
+    fi
+
+    # Trim trailing space and return
+    echo "${nix_files% }"
+}
+
+# Extract Tilt files from CLAUDE_FILE_PATHS environment variable
+get_target_tilt_files() {
+    local tilt_files=""
+
+    # Check if CLAUDE_FILE_PATHS is set (from Claude Code environment)
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        # Parse JSON array and extract Tilt files
+        while IFS= read -r file_path; do
+            # Only process Tilt files that exist (Tiltfile or .tiltfile)
+            if [[ "$file_path" =~ (Tiltfile|\.tiltfile)$ ]] && [[ -f "$file_path" ]]; then
+                # Skip if file should be skipped
+                if ! should_skip_file "$file_path"; then
+                    tilt_files="${tilt_files}${file_path} "
+                fi
+            fi
+        done < <(echo "$CLAUDE_FILE_PATHS" | jq -r '.[]' 2>/dev/null)
+    fi
+
+    # Trim trailing space and return
+    echo "${tilt_files% }"
+}
+
 lint_python() {
     if [[ "${CLAUDE_HOOKS_PYTHON_ENABLED:-true}" != "true" ]]; then
         log_debug "Python linting disabled"
         return 0
     fi
-    
+
+    # Check if CLAUDE_FILE_PATHS is set and contains Python files
+    local target_files=""
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        target_files=$(get_target_python_files)
+    fi
+
+    # If CLAUDE_FILE_PATHS is set but contains no Python files, skip Python linting
+    if [[ -n "$CLAUDE_FILE_PATHS" && -z "$target_files" ]]; then
+        log_debug "No Python files in CLAUDE_FILE_PATHS, skipping Python linting"
+        return 0
+    fi
+
     log_info "Running Python linters..."
-    
-    # Find Python files
-    local py_files=$(find . -name "*.py" -type f | grep -v -E "(venv/|\.venv/|__pycache__|\.git/)" | head -100)
-    
-    if [[ -z "$py_files" ]]; then
-        log_debug "No Python files found"
-        return 0
-    fi
-    
-    # Filter out files that should be skipped
+
     local filtered_files=""
-    for file in $py_files; do
-        if ! should_skip_file "$file"; then
-            filtered_files="$filtered_files$file "
+
+    if [[ -n "$target_files" ]]; then
+        # Use the target files from CLAUDE_FILE_PATHS
+        filtered_files="$target_files"
+        log_info "Processing specified Python files from CLAUDE_FILE_PATHS"
+    else
+        # Find Python files (original behavior)
+        local py_files=$(find . -name "*.py" -type f | grep -v -E "(venv/|\.venv/|__pycache__|\.git/)" | head -100)
+
+        if [[ -z "$py_files" ]]; then
+            log_debug "No Python files found"
+            return 0
         fi
-    done
-    
-    if [[ -z "$filtered_files" ]]; then
-        log_debug "All Python files were skipped by .claude-hooks-ignore"
-        return 0
+
+        # Filter out files that should be skipped
+        for file in $py_files; do
+            if ! should_skip_file "$file"; then
+                filtered_files="$filtered_files$file "
+            fi
+        done
+
+        if [[ -z "$filtered_files" ]]; then
+            log_debug "All Python files were skipped by .claude-hooks-ignore"
+            return 0
+        fi
     fi
-    
+
     # Black formatting
     if command_exists black; then
         local black_output
@@ -209,7 +346,7 @@ lint_python() {
             fi
         fi
     fi
-    
+
     # Linting
     if command_exists ruff; then
         local ruff_output
@@ -233,28 +370,48 @@ lint_javascript() {
         log_debug "JavaScript linting disabled"
         return 0
     fi
-    
-    log_info "Running JavaScript/TypeScript linters..."
-    
-    # Find JS/TS files
-    local js_files=$(find . \( -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" \) -type f | grep -v -E "(node_modules/|dist/|build/|\.git/)" | head -100)
-    
-    if [[ -z "$js_files" ]]; then
-        log_debug "No JavaScript/TypeScript files found"
+
+    # Check if CLAUDE_FILE_PATHS is set and contains JS/TS files
+    local target_files=""
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        target_files=$(get_target_js_files)
+    fi
+
+    # If CLAUDE_FILE_PATHS is set but contains no JS/TS files, skip JS linting
+    if [[ -n "$CLAUDE_FILE_PATHS" && -z "$target_files" ]]; then
+        log_debug "No JavaScript/TypeScript files in CLAUDE_FILE_PATHS, skipping JavaScript linting"
         return 0
     fi
-    
-    # Filter out files that should be skipped
+
+    log_info "Running JavaScript/TypeScript linters..."
+
     local filtered_files=""
-    for file in $js_files; do
-        if ! should_skip_file "$file"; then
-            filtered_files="$filtered_files$file "
+
+    if [[ -n "$target_files" ]]; then
+        # Use the target files from CLAUDE_FILE_PATHS
+        filtered_files="$target_files"
+        log_info "Processing specified JavaScript/TypeScript files from CLAUDE_FILE_PATHS"
+    else
+        # Find JS/TS files (original behavior)
+        local js_files=$(find . \( -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" \) -type f | grep -v -E "(node_modules/|dist/|build/|\.git/)" | head -100)
+
+        if [[ -z "$js_files" ]]; then
+            log_debug "No JavaScript/TypeScript files found"
+            return 0
         fi
-    done
-    
-    if [[ -z "$filtered_files" ]]; then
-        log_debug "All JavaScript/TypeScript files were skipped by .claude-hooks-ignore"
-        return 0
+
+        # Filter out files that should be skipped
+        local filtered_files=""
+        for file in $js_files; do
+            if ! should_skip_file "$file"; then
+                filtered_files="$filtered_files$file "
+            fi
+        done
+
+        if [[ -z "$filtered_files" ]]; then
+            log_debug "All JavaScript/TypeScript files were skipped by .claude-hooks-ignore"
+            return 0
+        fi
     fi
     
     # Check for ESLint
@@ -301,28 +458,48 @@ lint_rust() {
         log_debug "Rust linting disabled"
         return 0
     fi
-    
-    log_info "Running Rust linters..."
-    
-    # Find Rust files
-    local rust_files=$(find . -name "*.rs" -type f | grep -v -E "(target/|\.git/)" | head -100)
-    
-    if [[ -z "$rust_files" ]]; then
-        log_debug "No Rust files found"
+
+    # Check if CLAUDE_FILE_PATHS is set and contains Rust files
+    local target_files=""
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        target_files=$(get_target_rust_files)
+    fi
+
+    # If CLAUDE_FILE_PATHS is set but contains no Rust files, skip Rust linting
+    if [[ -n "$CLAUDE_FILE_PATHS" && -z "$target_files" ]]; then
+        log_debug "No Rust files in CLAUDE_FILE_PATHS, skipping Rust linting"
         return 0
     fi
-    
-    # Filter out files that should be skipped
+
+    log_info "Running Rust linters..."
+
     local filtered_files=""
-    for file in $rust_files; do
-        if ! should_skip_file "$file"; then
-            filtered_files="$filtered_files$file "
+
+    if [[ -n "$target_files" ]]; then
+        # Use the target files from CLAUDE_FILE_PATHS
+        filtered_files="$target_files"
+        log_info "Processing specified Rust files from CLAUDE_FILE_PATHS"
+    else
+        # Find Rust files (original behavior)
+        local rust_files=$(find . -name "*.rs" -type f | grep -v -E "(target/|\.git/)" | head -100)
+
+        if [[ -z "$rust_files" ]]; then
+            log_debug "No Rust files found"
+            return 0
         fi
-    done
-    
-    if [[ -z "$filtered_files" ]]; then
-        log_debug "All Rust files were skipped by .claude-hooks-ignore"
-        return 0
+
+        # Filter out files that should be skipped
+        local filtered_files=""
+        for file in $rust_files; do
+            if ! should_skip_file "$file"; then
+                filtered_files="$filtered_files$file "
+            fi
+        done
+
+        if [[ -z "$filtered_files" ]]; then
+            log_debug "All Rust files were skipped by .claude-hooks-ignore"
+            return 0
+        fi
     fi
     
     if command_exists cargo; then
@@ -353,30 +530,53 @@ lint_nix() {
         log_debug "Nix linting disabled"
         return 0
     fi
-    
+
+    # Check if CLAUDE_FILE_PATHS is set and contains Nix files
+    local target_files=""
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        target_files=$(get_target_nix_files)
+    fi
+
+    # If CLAUDE_FILE_PATHS is set but contains no Nix files, skip Nix linting
+    if [[ -n "$CLAUDE_FILE_PATHS" && -z "$target_files" ]]; then
+        log_debug "No Nix files in CLAUDE_FILE_PATHS, skipping Nix linting"
+        return 0
+    fi
+
     log_info "Running Nix linters..."
-    
-    # Find all .nix files
-    local nix_files=$(find . -name "*.nix" -type f | grep -v -E "(result/|/nix/store/)" | head -20)
-    
-    if [[ -z "$nix_files" ]]; then
-        log_debug "No Nix files found"
-        return 0
-    fi
-    
-    # Filter out files that should be skipped
+
     local filtered_files=""
-    for file in $nix_files; do
-        if ! should_skip_file "$file"; then
-            filtered_files="$filtered_files$file "
+
+    if [[ -n "$target_files" ]]; then
+        # Use the target files from CLAUDE_FILE_PATHS
+        filtered_files="$target_files"
+        log_info "Processing specified Nix files from CLAUDE_FILE_PATHS"
+    else
+        # Find Nix files (original behavior)
+        local nix_files=$(find . -name "*.nix" -type f | grep -v -E "(result/|/nix/store/)" | head -20)
+
+        if [[ -z "$nix_files" ]]; then
+            log_debug "No Nix files found"
+            return 0
         fi
-    done
-    
-    nix_files="$filtered_files"
-    if [[ -z "$nix_files" ]]; then
-        log_debug "All Nix files were skipped by .claude-hooks-ignore"
-        return 0
+
+        # Filter out files that should be skipped
+        local filtered_files=""
+        for file in $nix_files; do
+            if ! should_skip_file "$file"; then
+                filtered_files="$filtered_files$file "
+            fi
+        done
+
+        nix_files="$filtered_files"
+        if [[ -z "$nix_files" ]]; then
+            log_debug "All Nix files were skipped by .claude-hooks-ignore"
+            return 0
+        fi
     fi
+
+    # Use filtered_files for the rest of the function
+    nix_files="$filtered_files"
     
     # Check formatting with nixpkgs-fmt or alejandra
     if command_exists nixpkgs-fmt; then

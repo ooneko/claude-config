@@ -13,30 +13,56 @@ lint_tilt() {
         log_debug "Tilt linting disabled"
         return 0
     fi
-    
+
+    # Check if CLAUDE_FILE_PATHS is set and contains Tilt files
+    local target_files=""
+    if [[ -n "$CLAUDE_FILE_PATHS" ]]; then
+        # Use the function from smart-lint.sh
+        target_files=$(get_target_tilt_files)
+    fi
+
+    # If CLAUDE_FILE_PATHS is set but contains no Tilt files, skip Tilt linting
+    if [[ -n "$CLAUDE_FILE_PATHS" && -z "$target_files" ]]; then
+        log_debug "No Tiltfiles in CLAUDE_FILE_PATHS, skipping Tilt linting"
+        return 0
+    fi
+
     log_info "Running Tiltfile/Starlark linters..."
-    
-    # Check if we're in a project with Tiltfiles
-    local tiltfiles=$(find . -name "Tiltfile" -not -path "./vendor/*" -not -path "./.git/*" -not -path "./node_modules/*" | head -20)
-    
-    if [[ -z "$tiltfiles" ]]; then
-        log_debug "No Tiltfiles found"
-        return 0
-    fi
-    
-    # Filter out files that should be skipped
+
     local filtered_files=""
-    for file in $tiltfiles; do
-        if ! should_skip_file "$file"; then
-            filtered_files="$filtered_files$file "
+
+    if [[ -n "$target_files" ]]; then
+        # Use the target files from CLAUDE_FILE_PATHS
+        filtered_files="$target_files"
+        log_info "Processing specified Tiltfiles from CLAUDE_FILE_PATHS"
+    else
+        # Check if we're in a project with Tiltfiles (original behavior)
+        local tiltfiles=$(find . -name "Tiltfile" -o -name "*.tiltfile" -not -path "./vendor/*" -not -path "./.git/*" -not -path "./node_modules/*" | head -20)
+
+        if [[ -z "$tiltfiles" ]]; then
+            log_debug "No Tiltfiles found"
+            return 0
         fi
-    done
-    
-    tiltfiles="$filtered_files"
-    if [[ -z "$tiltfiles" ]]; then
-        log_debug "All Tiltfiles were skipped by .claude-hooks-ignore"
-        return 0
+
+        # Filter out files that should be skipped
+        local filtered_files=""
+        for file in $tiltfiles; do
+            if ! should_skip_file "$file"; then
+                filtered_files="$filtered_files$file "
+            fi
+        done
+
+        tiltfiles="$filtered_files"
+        if [[ -z "$tiltfiles" ]]; then
+            log_debug "All Tiltfiles were skipped by .claude-hooks-ignore"
+            return 0
+        fi
+
+        filtered_files="$tiltfiles"
     fi
+
+    # Use filtered_files for the rest of the function
+    tiltfiles="$filtered_files"
     
     # Check for Makefile with lint-tilt target
     if [[ -f "Makefile" ]]; then
