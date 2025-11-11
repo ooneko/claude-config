@@ -45,9 +45,9 @@ func (p *KimiProvider) GetDefaultConfig(apiKey string) *ProviderConfig {
 	return &ProviderConfig{
 		Type:           ProviderKimi,
 		AuthToken:      apiKey,
-		BaseURL:        "https://api.moonshot.cn/anthropic",
-		Model:          "kimi-k2-0905-preview",
-		SmallFastModel: "kimi-k2-0905-preview",
+		BaseURL:        "https://api.kimi.com/coding/",
+		Model:          "kimi-for-coding",
+		SmallFastModel: "kimi-for-coding",
 	}
 }
 
