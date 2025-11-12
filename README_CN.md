@@ -9,7 +9,7 @@
 - **配置管理** - 管理Claude Code设置和配置
 - **代理设置** - 配置HTTP/HTTPS代理设置并进行验证
 - **验证系统** - 高级开发工作流验证和管理
-- **AI提供商集成** - 多提供商AI API配置和管理（DeepSeek、Kimi、GLM4.5）
+- **AI提供商集成** - 多提供商AI API配置和管理（DeepSeek、Kimi、GLM4.5、Doubao）
 - **NTFY通知** - 为开发工作流配置通知系统
 - **资源管理** - 安装和管理代理、命令、钩子和模板
 - **备份与恢复** - 完整的配置备份和恢复系统
@@ -106,7 +106,7 @@ claude-config proxy
 # 设置HTTP_PROXY和HTTPS_PROXY环境变量
 # 验证代理连接性
 
-# 配置AI提供商（DeepSeek、Kimi、GLM4.5）
+# 配置AI提供商（DeepSeek、Kimi、GLM4.5、Doubao）
 claude-config ai on deepseek
 # 交互式设置和连接测试
 
@@ -144,6 +144,7 @@ claude-config proxy toggle
 claude-config ai on deepseek
 claude-config ai on kimi
 claude-config ai on zhipu
+claude-config ai on doubao
 
 # 禁用所有AI提供商
 claude-config ai off
@@ -157,7 +158,7 @@ claude-config ai list
 # 显示当前AI提供商状态
 claude-config ai
 ```
-支持多个AI提供商：DeepSeek、Kimi（Moonshot）和GLM4.5（ZhipuAI）。
+支持多个AI提供商：DeepSeek、Kimi（Moonshot）、GLM4.5（ZhipuAI）和Doubao（字节跳动）。
 
 #### `check` - 验证系统管理
 ```bash

@@ -15,7 +15,7 @@ func createAIProviderCmd() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "ai",
 		Short: "AI提供商配置管理",
-		Long:  `管理AI提供商配置，支持DeepSeek、Kimi、GLM4.5等多个提供商。`,
+		Long:  `管理AI提供商配置，支持DeepSeek、Kimi、GLM、Doubao等多个提供商。`,
 		Run: func(_ *cobra.Command, _ []string) {
 			showAIProviderStatus()
 		},
@@ -35,14 +35,14 @@ func createAIProviderResetCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "reset <provider>",
 		Short: "重置AI提供商",
-		Long:  `重置指定的AI提供商（删除API密钥和配置）。支持的提供商：deepseek, kimi, zhipu`,
+		Long:  `重置指定的AI提供商（删除API密钥和配置）。支持的提供商：deepseek, kimi, glm, doubao`,
 		Args:  cobra.ExactArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
 			provider := claude.NormalizeProviderName(args[0])
 
 			if provider == claude.ProviderNone {
 				fmt.Printf("❌ 不支持的提供商: %s\n", args[0])
-				fmt.Println("支持的提供商: deepseek, kimi, zhipu")
+				fmt.Println("支持的提供商: deepseek, kimi, glm, doubao")
 				return
 			}
 
@@ -80,7 +80,7 @@ func createAIProviderOnCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "on [provider]",
 		Short: "启用AI提供商",
-		Long:  `启用指定的AI提供商，如果未指定则恢复最后一次关闭前配置的AI提供商。支持的提供商：deepseek, kimi, zhipu`,
+		Long:  `启用指定的AI提供商，如果未指定则恢复最后一次关闭前配置的AI提供商。支持的提供商：deepseek, kimi, glm, doubao`,
 		Args:  cobra.MaximumNArgs(1),
 		Run: func(_ *cobra.Command, args []string) {
 			ctx := context.Background()
@@ -101,7 +101,7 @@ func createAIProviderOnCmd() *cobra.Command {
 
 			if provider == claude.ProviderNone {
 				fmt.Printf("❌ 不支持的提供商: %s\n", args[0])
-				fmt.Println("支持的提供商: deepseek, kimi, zhipu")
+				fmt.Println("支持的提供商: deepseek, kimi, glm, doubao")
 				return
 			}
 

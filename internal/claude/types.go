@@ -43,7 +43,8 @@ const (
 	ProviderNone     ProviderType = ""
 	ProviderDeepSeek ProviderType = "deepseek"
 	ProviderKimi     ProviderType = "kimi"
-	ProviderZhiPu    ProviderType = "ZhiPu"
+	ProviderGLM      ProviderType = "GLM"
+	ProviderDoubao   ProviderType = "doubao"
 )
 
 // String returns the string representation of ProviderType
@@ -54,7 +55,7 @@ func (p ProviderType) String() string {
 // IsValid checks if the provider type is valid
 func (p ProviderType) IsValid() bool {
 	switch p {
-	case ProviderDeepSeek, ProviderKimi, ProviderZhiPu:
+	case ProviderDeepSeek, ProviderKimi, ProviderGLM, ProviderDoubao:
 		return true
 	default:
 		return false
@@ -69,8 +70,12 @@ func NormalizeProviderName(input string) ProviderType {
 		return ProviderDeepSeek
 	case "kimi":
 		return ProviderKimi
-	case "zhipu", "zhipu-ai":
-		return ProviderZhiPu
+	case "glm":
+		return ProviderGLM
+	case "zhipu", "zhipu-ai": // Backwards compatibility
+		return ProviderGLM
+	case "doubao":
+		return ProviderDoubao
 	default:
 		// If exact match, return as-is for backwards compatibility
 		p := ProviderType(input)

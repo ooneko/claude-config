@@ -15,7 +15,8 @@ const (
 	ProviderNone     = claude.ProviderNone
 	ProviderDeepSeek = claude.ProviderDeepSeek
 	ProviderKimi     = claude.ProviderKimi
-	ProviderZhiPu    = claude.ProviderZhiPu
+	ProviderGLM      = claude.ProviderGLM
+	ProviderDoubao   = claude.ProviderDoubao
 )
 
 // ProviderManager defines the interface for managing AI providers

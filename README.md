@@ -9,7 +9,7 @@ A modern, unified configuration management tool for Claude Code written in Go. P
 - **Configuration Management** - Manage Claude Code settings and configurations
 - **Proxy Setup** - Configure HTTP/HTTPS proxy settings with validation
 - **Validation System** - Advanced development workflow validation and management
-- **AI Provider Integration** - Multi-provider AI API configuration and management (DeepSeek, Kimi, GLM4.5)
+- **AI Provider Integration** - Multi-provider AI API configuration and management (DeepSeek, Kimi, GLM4.5, Doubao)
 - **NTFY Notifications** - Configure notification systems for development workflows
 - **Resource Management** - Install and manage agents, commands, hooks, and templates
 - **Backup & Restore** - Complete configuration backup and restoration system
@@ -106,7 +106,7 @@ claude-config proxy
 # Sets up HTTP_PROXY and HTTPS_PROXY environment variables
 # Validates proxy connectivity
 
-# Configure AI provider (DeepSeek, Kimi, GLM4.5)
+# Configure AI provider (DeepSeek, Kimi, GLM4.5, Doubao)
 claude-config ai on deepseek
 # Interactive setup and connection testing
 
@@ -144,6 +144,7 @@ Manages HTTP/HTTPS proxy settings with validation and connectivity testing.
 claude-config ai on deepseek
 claude-config ai on kimi
 claude-config ai on zhipu
+claude-config ai on doubao
 
 # Disable all AI providers
 claude-config ai off
@@ -157,7 +158,7 @@ claude-config ai list
 # Show current AI provider status
 claude-config ai
 ```
-Supports multiple AI providers: DeepSeek, Kimi (Moonshot), and GLM4.5 (ZhipuAI).
+Supports multiple AI providers: DeepSeek, Kimi (Moonshot), GLM4.5 (ZhipuAI), and Doubao (ByteDance).
 
 #### `check` - Validation System Management
 ```bash

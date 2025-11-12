@@ -26,7 +26,8 @@ func NewManager(claudeDir string) claude.AIProviderManager {
 	// Register supported providers
 	m.providers[ProviderDeepSeek] = &DeepSeekProvider{}
 	m.providers[ProviderKimi] = &KimiProvider{}
-	m.providers[ProviderZhiPu] = &ZhipuProvider{}
+	m.providers[ProviderGLM] = &GLMProvider{}
+	m.providers[ProviderDoubao] = &DoubaoProvider{}
 
 	return m
 }

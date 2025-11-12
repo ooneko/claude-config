@@ -111,28 +111,28 @@ func TestNormalizeProviderName(t *testing.T) {
 		{
 			name:     "zhipu lowercase",
 			input:    "zhipu",
-			expected: ProviderZhiPu,
+			expected: ProviderGLM,
 		},
 		{
 			name:     "zhipu uppercase",
 			input:    "ZHIPU",
-			expected: ProviderZhiPu,
+			expected: ProviderGLM,
 		},
 		{
 			name:     "zhipu with hyphen",
 			input:    "zhipu-ai",
-			expected: ProviderZhiPu,
+			expected: ProviderGLM,
 		},
 		{
 			name:     "zhipu with hyphen uppercase",
 			input:    "ZHIPU-AI",
-			expected: ProviderZhiPu,
+			expected: ProviderGLM,
 		},
 		// Backwards compatibility
 		{
-			name:     "exact match ZhiPu",
-			input:    "ZhiPu",
-			expected: ProviderZhiPu,
+			name:     "exact match GLM",
+			input:    "GLM",
+			expected: ProviderGLM,
 		},
 		// Invalid cases
 		{
@@ -177,8 +177,13 @@ func TestProviderType_IsValid(t *testing.T) {
 			expected: true,
 		},
 		{
-			name:     "valid zhipu",
-			provider: ProviderZhiPu,
+			name:     "valid glm",
+			provider: ProviderGLM,
+			expected: true,
+		},
+		{
+			name:     "valid doubao",
+			provider: ProviderDoubao,
 			expected: true,
 		},
 		{
@@ -196,6 +201,56 @@ func TestProviderType_IsValid(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			result := tt.provider.IsValid()
+			assert.Equal(t, tt.expected, result)
+		})
+	}
+}
+
+// TestNormalizeProviderName_GLM tests the new GLM unification feature
+func TestNormalizeProviderName_GLM(t *testing.T) {
+	tests := []struct {
+		name     string
+		input    string
+		expected ProviderType
+	}{
+		// GLM should map to GLM provider
+		{
+			name:     "glm lowercase",
+			input:    "glm",
+			expected: ProviderGLM,
+		},
+		{
+			name:     "glm uppercase",
+			input:    "GLM",
+			expected: ProviderGLM,
+		},
+		{
+			name:     "glm mixed case",
+			input:    "Glm",
+			expected: ProviderGLM,
+		},
+		// Existing zhipu mappings should still work for backwards compatibility
+		{
+			name:     "zhipu lowercase",
+			input:    "zhipu",
+			expected: ProviderGLM,
+		},
+		{
+			name:     "zhipu with hyphen",
+			input:    "zhipu-ai",
+			expected: ProviderGLM,
+		},
+		// Backwards compatibility
+		{
+			name:     "exact match GLM",
+			input:    "GLM",
+			expected: ProviderGLM,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := NormalizeProviderName(tt.input)
 			assert.Equal(t, tt.expected, result)
 		})
 	}

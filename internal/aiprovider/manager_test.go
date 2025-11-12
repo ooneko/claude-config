@@ -18,12 +18,12 @@ func TestNewManager(t *testing.T) {
 		{
 			name:      "create manager with valid directory",
 			claudeDir: "/tmp/test-claude",
-			want:      3, // DeepSeek, Kimi, ZhiPu
+			want:      4, // DeepSeek, Kimi, ZhiPu, Doubao
 		},
 		{
 			name:      "create manager with empty directory",
 			claudeDir: "",
-			want:      3,
+			want:      4,
 		},
 	}
 
@@ -51,7 +51,7 @@ func TestNewManager(t *testing.T) {
 			}
 
 			// Check all expected providers are registered
-			expectedProviders := []ProviderType{ProviderDeepSeek, ProviderKimi, ProviderZhiPu}
+			expectedProviders := []ProviderType{ProviderDeepSeek, ProviderKimi, ProviderGLM, ProviderDoubao}
 			for _, provider := range expectedProviders {
 				if _, exists := mgr.providers[provider]; !exists {
 					t.Errorf("NewManager() missing provider %v", provider)
@@ -81,9 +81,9 @@ func TestManager_Enable(t *testing.T) {
 			wantErr:  false,
 		},
 		{
-			name:     "enable zhipu with valid key",
-			provider: ProviderZhiPu,
-			apiKey:   "sk-zhipu-test-key",
+			name:     "enable glm with valid key",
+			provider: ProviderGLM,
+			apiKey:   "sk-glm-test-key",
 			wantErr:  false,
 		},
 		{
@@ -337,7 +337,7 @@ func TestManager_On(t *testing.T) {
 		{
 			name:         "turn on with missing API key",
 			setupOff:     true,
-			lastProvider: ProviderZhiPu,
+			lastProvider: ProviderGLM,
 			hasAPIKey:    false,
 			wantErr:      true,
 		},
@@ -564,7 +564,7 @@ func TestManager_ListSupportedProviders(t *testing.T) {
 
 	providers := mgr.ListSupportedProviders()
 
-	expectedProviders := []ProviderType{ProviderDeepSeek, ProviderKimi, ProviderZhiPu}
+	expectedProviders := []ProviderType{ProviderDeepSeek, ProviderKimi, ProviderGLM, ProviderDoubao}
 	if len(providers) != len(expectedProviders) {
 		t.Errorf("ListSupportedProviders() returned %d providers, want %d", len(providers), len(expectedProviders))
 	}

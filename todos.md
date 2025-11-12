@@ -1,7 +1,10 @@
 # Project Todos
 
 ## Active
-- [ ] 如果判断是 golang 项目，不要进行 python lint
+- [ ] 通过 cc-sdk slash command 添加 make cc-test make cc-lint
+- [ ] 要可以检查可用性
+- [ ] 可以选择并 一键添加MCP
+- [ ] 通知可以换成铃声
 
 ## Completed
 - [x] 更新 @CLAUDE.md and @README.md | Done: 01/11/2025
