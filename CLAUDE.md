@@ -70,10 +70,10 @@ The application uses a manager-based architecture initialized in `main.go:init()
 
 ```go
 // Key managers (all operate on ~/.claude directory)
-configMgr   claude.ConfigManager  // Configuration management
-proxyMgr    claude.ProxyManager   // HTTP/HTTPS proxy management  
-checkMgr    *check.Manager        // Hooks system validation
-deepSeekMgr claude.DeepSeekManager // DeepSeek API integration
+configMgr     claude.ConfigManager      // Configuration management
+proxyMgr      claude.ProxyManager       // HTTP/HTTPS proxy management
+checkMgr      *check.Manager            // Hooks system validation
+aiProviderMgr claude.AIProviderManager  // AI model provider configuration
 ```
 
 All managers implement interfaces defined in `internal/claude/interfaces.go` and work with context-based operations.
@@ -86,18 +86,22 @@ cmd/claude-config/     # CLI entrypoint and command implementations
 ├── status.go         # Status command - shows configuration state
 ├── proxy.go          # Proxy management command
 ├── check.go          # Hooks system management
-├── deepseek.go       # DeepSeek API configuration
+├── aiprovider.go     # AI model provider configuration
 ├── install.go        # Resource installation command
-└── backup.go         # Backup and restore functionality
+├── backup.go         # Backup and restore functionality
+├── start.go          # Launch Claude Code with configured AI providers
+├── notify.go         # Notification system (NTFY integration)
+└── utils.go          # Utility functions
 
 internal/             # Private packages following Go conventions
 ├── claude/          # Core interfaces and shared types
 ├── config/          # Settings.json management and configuration
 ├── proxy/           # HTTP/HTTPS proxy configuration management
 ├── check/           # Hooks system validation and control
-├── deepseek/        # DeepSeek API client and configuration
+├── aiprovider/      # AI model provider configuration (unified interface)
+├── provider/        # Provider-related utilities and env mapping
 ├── file/            # File operations, merging, and atomic operations
-└── install/         # Resource installation with embedded files
+├── install/         # Resource installation with embedded files
 
 resources/           # Embedded resources using go:embed
 └── claude-config/   # Resources deployed to ~/.claude
@@ -138,10 +142,12 @@ Built with Cobra framework, commands follow this pattern:
 ### Available Commands
 - `status` - Comprehensive configuration status across all managers
 - `proxy` - Interactive proxy configuration with connectivity validation
-- `check` - Hooks system management with language-specific validation  
-- `deepseek` - DeepSeek API configuration and connection testing
-- `install` - Resource installation with selective component installation
+- `check` - Hooks system management with language-specific validation
+- `aiprovider` - AI model provider configuration (supports DeepSeek, GLM, Doubao, Kimi)
+- `start` - Launch Claude Code with configured AI providers
+- `install` - Resource installation with selective component installation (supports --force flag)
 - `backup` - Configuration backup and restore with versioning
+- `notify` - Notification system configuration (NTFY integration)
 
 ## Testing Architecture
 
@@ -155,11 +161,31 @@ Built with Cobra framework, commands follow this pattern:
 ```bash
 # Test packages individually (faster during development)
 go test ./internal/config      # Configuration management tests
-go test ./internal/proxy       # Proxy functionality tests  
+go test ./internal/proxy       # Proxy functionality tests
 go test ./internal/file        # File operations and merging tests
 go test ./internal/install     # Resource installation tests
 go test ./internal/deepseek    # DeepSeek API integration tests
+go test ./internal/aiprovider  # AI provider configuration tests
+go test ./internal/provider    # Provider-related utilities tests
 ```
+
+## AI Provider Architecture
+
+The application implements a unified AI provider architecture with support for multiple AI model providers:
+
+### Supported Providers
+- **DeepSeek** - DeepSeek AI models
+- **GLM** - ZhiPu AI models (GLM series)
+- **Doubao** - ByteDance Doubao models
+- **Kimi** - Moonshot AI Kimi models
+
+### Key Features
+- Centralized configuration for all AI providers
+- Consistent API interface across different providers
+- Automatic provider selection based on configuration
+- Support for provider-specific settings (API endpoints, models, etc.)
+- Easy extension for adding new AI providers
+- Environment variable mapping utilities in `internal/provider/` for flexible configuration
 
 ## Key Development Patterns
 
