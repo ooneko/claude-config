@@ -61,7 +61,7 @@ claude-config status
 
 ## 📦 安装指南
 
-### 🚀 方式一：直接安装（推荐新手）
+### 🚀 方式一：直接安装
 
 最简单快速的安装方式，无需克隆仓库：
 
@@ -81,7 +81,7 @@ claude-config status
 > export PATH="$HOME/go/bin:$PATH"
 > ```
 
-### 🔧 方式二：本地构建（推荐开发者）
+### 🔧 方式二：本地构建
 
 适合想要修改代码或本地开发的用户：
 
@@ -95,22 +95,6 @@ make install
 ```
 
 `make install` 会自动处理 PATH 配置。
-
-### 🏗️ 方式三：源码构建
-
-完全控制构建过程：
-
-```bash
-# 1. 获取源码
-git clone https://github.com/ooneko/claude-config.git
-cd claude-config
-
-# 2. 构建二进制
-go build ./cmd/claude-config
-
-# 3. 运行测试
-./claude-config --help
-```
 
 ### 📋 系统要求
 
@@ -137,8 +121,8 @@ claude-config proxy on
 # 4️⃣ 配置 AI 提供商（例如 DeepSeek）
 claude-config ai on deepseek
 
-# 5️⃣ 启动 Claude Code（可选）
-claude-config start
+# 5️⃣ 启动 Claude Code （glm 模型）
+claude-config start glm
 ```
 
 ### 🌐 代理配置示例

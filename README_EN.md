@@ -96,22 +96,6 @@ make install
 
 `make install` will automatically handle PATH configuration.
 
-### 🏗️ Method 3: Build from Source
-
-Full control over the build process:
-
-```bash
-# 1. Get source code
-git clone https://github.com/ooneko/claude-config.git
-cd claude-config
-
-# 2. Build binary
-go build ./cmd/claude-config
-
-# 3. Test run
-./claude-config --help
-```
-
 ### 📋 System Requirements
 
 - ✅ **Go 1.21** or later
