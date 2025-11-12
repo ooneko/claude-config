@@ -1,326 +1,448 @@
 # claude-config
 
-[中文文档](README_CN.md) | [English Documentation](README.md)
+[![Go Version](https://img.shields.io/badge/Go-1.21+-blue?style=flat-square)](https://go.dev/)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey?style=flat-square)](https://github.com/ooneko/claude-config)
 
-A modern, unified configuration management tool for Claude Code written in Go. Provides comprehensive management for Claude Code settings, proxy setup, validation system control, AI provider integration, NTFY notifications, and resource installation.
+**[简体中文](README.md) | [English](README_EN.md)**
 
-## Features
+<p align="center">
+  <img src="logo.png" alt="claude-config logo" width="300"/>
+</p>
 
-- **Configuration Management** - Manage Claude Code settings and configurations
-- **Proxy Setup** - Configure HTTP/HTTPS proxy settings with validation
-- **Validation System** - Advanced development workflow validation and management
-- **AI Provider Integration** - Multi-provider AI API configuration and management (DeepSeek, Kimi, GLM4.5, Doubao)
-- **NTFY Notifications** - Configure notification systems for development workflows
-- **Resource Management** - Install and manage agents, commands, hooks, and templates
-- **Backup & Restore** - Complete configuration backup and restoration system
+<p align="center">
+  <strong>现代化 Claude 配置管理工具</strong>
+</p>
 
-## Installation
+一个用 Go 编写的现代化、统一的 Claude Code 配置管理工具，让配置管理变得简单高效。
 
-### Direct Install from GitHub (Easiest)
+## ✨ 快速开始
+
+只需 3 步，即可开始使用 claude-config：
+
 ```bash
-# Install directly from GitHub (requires Go 1.21+)
+# 1️⃣ 安装（最简单的方式）
+go install github.com/ooneko/claude-config/cmd/claude-config@latest
+
+# 2️⃣ 安装资源（一键配置所有组件）
+claude-config install
+
+# 3️⃣ 查看状态（确认配置完成）
+claude-config status
+```
+
+🎉 **完成！** 你的 Claude Code 环境已经配置完毕。
+
+## 📖 目录
+
+- [功能特性](#-功能特性)
+- [安装指南](#-安装指南)
+- [使用示例](#-使用示例)
+- [命令参考](#-命令参考)
+- [贡献指南](#-贡献指南)
+- [许可证](#-许可证)
+
+## 🚀 功能特性
+
+### 核心功能
+- 🎯 **配置管理** - 一键管理 Claude Code 设置和配置
+- 🌐 **代理设置** - 智能配置 HTTP/HTTPS 代理并进行连接验证
+- ✅ **验证系统** - 高级开发工作流验证和代码质量检查
+- 🤖 **AI提供商集成** - 支持 DeepSeek、Kimi、GLM4.5、Doubao 等多家 AI
+- 🔔 **NTFY通知** - 为开发工作流配置实时通知系统
+- 📦 **资源管理** - 安装和管理代理、命令、钩子等开发资源
+- 💾 **备份与恢复** - 完整的配置备份和一键恢复系统
+
+### 为什么选择 claude-config？
+- ⚡ **极简易用** - 一条命令完成所有配置
+- 🔧 **智能管理** - 自动检测和解决配置冲突
+- 🛡️ **安全可靠** - 原子操作，确保配置完整性
+- 🌍 **跨平台** - 支持 Linux、macOS、Windows
+
+## 📦 安装指南
+
+### 🚀 方式一：直接安装（推荐新手）
+
+最简单快速的安装方式，无需克隆仓库：
+
+```bash
+# 一键安装（需要 Go 1.21+）
 go install github.com/ooneko/claude-config/cmd/claude-config@latest
 ```
 
-After installation, you can run the tool from anywhere:
+安装完成后，立即可用：
 ```bash
 claude-config --help
 claude-config status
 ```
 
-**Note**: Ensure `~/go/bin` is in your PATH. If not, add this line to your shell profile:
-```bash
-export PATH="$HOME/go/bin:$PATH"
-```
+> 💡 **PATH 提示**：确保 `~/go/bin` 在你的 PATH 中。如果没有，请添加：
+> ```bash
+> export PATH="$HOME/go/bin:$PATH"
+> ```
 
-### Local Install with Make (Recommended for Development)
+### 🔧 方式二：本地构建（推荐开发者）
+
+适合想要修改代码或本地开发的用户：
+
 ```bash
-# Clone the repository
+# 1. 克隆仓库
 git clone https://github.com/ooneko/claude-config.git
 cd claude-config
 
-# Install to ~/go/bin (adds to PATH automatically)
+# 2. 安装到系统
 make install
 ```
 
-The `make install` command will install the binary to `~/go/bin` and provide PATH setup instructions if needed.
+`make install` 会自动处理 PATH 配置。
 
-### Build from Source
+### 🏗️ 方式三：源码构建
+
+完全控制构建过程：
+
 ```bash
-# Clone the repository
+# 1. 获取源码
 git clone https://github.com/ooneko/claude-config.git
 cd claude-config
 
-# Build the binary locally
+# 2. 构建二进制
 go build ./cmd/claude-config
 
-# Run the tool
+# 3. 运行测试
 ./claude-config --help
 ```
 
-### System Requirements
-- Go 1.21 or later
-- Access to `~/.claude` directory (Claude Code configuration directory)
+### 📋 系统要求
 
-## Usage
-
-### Main Commands
-
-```bash
-# Install resources (agents, commands, hooks, templates)
-claude-config install
-
-# Show current configuration status
-claude-config status
-
-# Configure proxy settings (interactive)
-claude-config proxy
-
-# Manage validation system
-claude-config check
-
-# Configure NTFY notifications
-claude-config notify
-
-# Configure AI provider integration
-claude-config ai
-
-# Backup and restore configurations
-claude-config backup
-```
-
-**Note**: If you built from source instead of using `make install`, prefix commands with `./` (e.g., `./claude-config status`).
-
-### Command Examples
-
-```bash
-# Install all available resources to ~/.claude
-claude-config install
-# Installs: agents, commands, hooks, output-styles, settings
-
-# Check current status of all configurations
-claude-config status
-
-# Interactive proxy configuration with validation
-claude-config proxy
-# Sets up HTTP_PROXY and HTTPS_PROXY environment variables
-# Validates proxy connectivity
-
-# Configure AI provider (DeepSeek, Kimi, GLM4.5, Doubao)
-claude-config ai on deepseek
-# Interactive setup and connection testing
-
-# Enable validation system
-claude-config check on
-# Configures validation with language-specific linting and testing
-```
-
-## Command Reference
-
-### Main Commands
-
-#### `status` - Show Configuration Status
-```bash
-claude-config status
-```
-Displays comprehensive status of all configurations including proxy, AI providers, validation system, and notifications.
-
-#### `proxy` - Proxy Management
-```bash
-# Interactive proxy configuration
-claude-config proxy on
-
-# Disable proxy
-claude-config proxy off
-
-# Toggle proxy status
-claude-config proxy toggle
-```
-Manages HTTP/HTTPS proxy settings with validation and connectivity testing.
-
-#### `ai` - AI Provider Management
-```bash
-# Enable specific AI provider (with API key prompt if needed)
-claude-config ai on deepseek
-claude-config ai on kimi
-claude-config ai on zhipu
-claude-config ai on doubao
-
-# Disable all AI providers
-claude-config ai off
-
-# Reset specific provider (removes API key)
-claude-config ai reset deepseek
-
-# List all supported providers
-claude-config ai list
-
-# Show current AI provider status
-claude-config ai
-```
-Supports multiple AI providers: DeepSeek, Kimi (Moonshot), GLM4.5 (ZhipuAI), and Doubao (ByteDance).
-
-#### `check` - Validation System Management
-```bash
-# Enable validation system
-claude-config check on
-
-# Disable validation system
-claude-config check off
-```
-Manages development validation for linting, testing, and code quality checks.
-
-#### `notify` - NTFY Notifications
-```bash
-# Enable NTFY notifications
-claude-config notify on
-
-# Disable NTFY notifications
-claude-config notify off
-```
-Configures NTFY notification system for development workflows.
-
-#### `install` - Resource Installation
-```bash
-# Install all resources
-claude-config install
-
-# Install with force flag (overwrite existing)
-claude-config install --force
-```
-Installs agents, commands, validation hooks, output-styles, and settings to `~/.claude`.
-
-#### `backup` - Configuration Backup
-```bash
-claude-config backup
-```
-Creates backups and restores Claude Code configurations.
-
-## Project Structure
-
-```
-claude-config/
-├── cmd/claude-config/          # CLI application and command implementations
-│   ├── main.go                # Application entrypoint
-│   ├── commands.go            # Command structure and initialization
-│   ├── status.go              # Status command implementation
-│   ├── proxy.go               # Proxy management command
-│   ├── check.go               # Validation system management
-│   ├── aiprovider.go          # AI provider integration
-│   ├── notify.go              # NTFY notifications setup
-│   ├── install.go             # Resource installation command
-│   └── backup.go              # Backup and restore functionality
-├── internal/                   # Private packages (Go internal convention)
-│   ├── config/                # Configuration file management
-│   ├── proxy/                 # HTTP/HTTPS proxy management
-│   ├── check/                 # Validation system
-│   ├── aiprovider/            # AI provider client and configuration
-│   ├── file/                  # File operations and merging utilities
-│   ├── install/               # Resource installation and management
-│   └── claude/                # Core interfaces and shared types
-└── resources/                  # Embedded resources and templates
-    └── claude-config/         # Resource files for installation
-        ├── agents/            # Claude Code agent definitions
-        ├── commands/          # Custom Claude commands
-        ├── hooks/             # Shell hook scripts
-        ├── output-styles/     # Output formatting configurations
-        ├── settings.json      # Default Claude settings
-        └── CLAUDE.md.template # Template for project configurations
-```
-
-## Development
-
-### Build and Test
-
-```bash
-# Build the application
-go build ./cmd/claude-config
-
-# Run all tests
-go test ./...
-
-# Run tests with verbose output
-go test -v ./...
-
-# Run tests for specific package
-go test ./internal/config
-go test ./internal/proxy
-go test ./internal/file
-
-# Test with race detection
-go test -race ./...
-
-# Build for different platforms
-GOOS=linux GOARCH=amd64 go build ./cmd/claude-config
-GOOS=darwin GOARCH=amd64 go build ./cmd/claude-config
-GOOS=windows GOARCH=amd64 go build ./cmd/claude-config
-```
-
-### Code Quality
-
-```bash
-# Format code
-go fmt ./...
-
-# Run static analysis
-go vet ./...
-
-# Install and run golangci-lint
-golangci-lint run
-```
-
-## Architecture
-
-### Manager Pattern
-The application uses a manager-based architecture with these core components:
-
-- **ConfigManager** (`internal/config`) - Handles Claude configuration settings
-- **ProxyManager** (`internal/proxy`) - Manages HTTP/HTTPS proxy configurations
-- **CheckManager** (`internal/check`) - Controls validation system
-- **AIProviderManager** (`internal/aiprovider`) - Manages multi-provider AI API integration
-
-All managers are initialized in `main.go:init()` and operate on the `~/.claude` directory.
-
-### Resource System
-The resource system (`internal/install`) provides:
-- Embedded resource files using Go embed
-- Template processing and customization
-- Atomic file operations with backup
-- Configuration merging with conflict resolution
-
-### Configuration Directory
-All operations work with `~/.claude` as the base configuration directory:
-
-```
-~/.claude/
-├── settings.json              # Main Claude settings
-├── claude_config.toml         # Tool-specific configuration
-├── agents/                    # Custom agent definitions
-├── commands/                  # Custom commands
-├── hooks/                     # Development validation hooks
-└── output-styles/             # Output formatting styles
-```
-
-## Contributing
-
-### Development Guidelines
-- Follow standard Go project structure
-- Use meaningful package and function names
-- Write tests for all new functionality
-- Ensure all tests pass before submitting PRs
-- Use Go modules for dependency management
-
-### Adding New Commands
-1. Create command implementation in `cmd/claude-config/`
-2. Add command to `initCommands()` in `commands.go`
-3. Create corresponding manager in `internal/` if needed
-4. Add tests for the new functionality
-5. Update documentation
-
-## License
-
-This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENSE) file for details.
+- ✅ **Go 1.21** 或更高版本
+- ✅ **权限**：访问 `~/.claude` 目录（Claude Code 配置目录）
+- ✅ **系统**：Linux / macOS / Windows
 
 ---
 
-**Note**: This tool manages your Claude Code configuration in `~/.claude`. Always backup your configurations before making changes.
+## 💡 使用示例
+
+### 🎯 基础工作流
+
+```bash
+# 1️⃣ 首次使用：安装所有资源
+claude-config install
+
+# 2️⃣ 检查当前配置状态
+claude-config status
+
+# 3️⃣ 配置代理（如果需要）
+claude-config proxy on
+
+# 4️⃣ 配置 AI 提供商（例如 DeepSeek）
+claude-config ai on deepseek
+
+# 5️⃣ 启动 Claude Code（可选）
+claude-config start
+```
+
+### 🌐 代理配置示例
+
+```bash
+# 交互式配置代理
+claude-config proxy
+
+# 快速开启代理
+claude-config proxy on
+
+# 临时切换代理状态
+claude-config proxy toggle
+
+# 关闭代理
+claude-config proxy off
+```
+
+### 🤖 AI 提供商配置示例
+
+```bash
+# 配置 DeepSeek
+claude-config ai on deepseek
+
+# 配置 Kimi（月之暗面）
+claude-config ai on kimi
+
+# 配置智谱 GLM
+claude-config ai on glm
+
+# 配置豆包（字节跳动）
+claude-config ai on doubao
+
+# 查看当前 AI 配置
+claude-config ai
+
+# 重置特定提供商
+claude-config ai reset deepseek
+```
+
+### 🚀 启动 Claude Code 示例
+
+```bash
+# 启动原生 Claude Code（清理所有 AI 配置）
+claude-config start
+
+# 使用已配置的 DeepSeek 启动
+claude-config start deepseek
+
+# 使用已配置的 Kimi 启动，指定模型
+claude-config start kimi --model kimi-plus
+
+# 使用 GLM 启动，临时指定 API 密钥
+claude-config start glm --api-key sk-xxxxxxxx
+
+# 使用豆包启动，指定模型和 API 密钥
+claude-config start doubao --model doubao-pro --api-key your-api-key
+```
+
+## 📚 命令参考
+
+### 🎯 核心命令一览
+
+| 命令 | 功能 | 快速示例 |
+|------|------|----------|
+| `install` | 安装所有资源 | `claude-config install` |
+| `status` | 查看配置状态 | `claude-config status` |
+| `proxy` | 代理配置管理 | `claude-config proxy on` |
+| `ai` | AI提供商配置 | `claude-config ai on deepseek` |
+| `check` | 验证系统控制 | `claude-config check on` |
+| `notify` | 通知系统配置 | `claude-config notify on` |
+| `start` | 启动Claude Code | `claude-config start` |
+| `backup` | 备份恢复配置 | `claude-config backup` |
+
+### 📋 详细命令说明
+
+#### `claude-config install` - 资源安装
+一键安装所有开发资源到 `~/.claude`：
+```bash
+# 安装所有资源（代理、命令、钩子、模板等）
+claude-config install
+
+# 强制覆盖安装（慎用）
+claude-config install --force
+```
+
+#### `claude-config status` - 配置状态
+查看当前所有配置的状态：
+```bash
+claude-config status
+```
+输出示例：
+```
+✅ 配置文件: 已就绪
+🤖 AI提供商: DeepSeek (已连接)
+🌐 代理配置: 未启用
+✅ 验证系统: 已启用
+🔔 通知系统: 已启用
+```
+
+#### `claude-config proxy` - 代理管理
+智能代理配置和验证：
+```bash
+# 交互式配置
+claude-config proxy
+
+# 快速启用
+claude-config proxy on
+
+# 切换状态
+claude-config proxy toggle
+
+# 完全禁用
+claude-config proxy off
+```
+
+#### `claude-config ai` - AI提供商管理
+支持多家 AI 服务商：
+```bash
+# 启用特定提供商（会提示输入API密钥）
+claude-config ai on deepseek    # DeepSeek AI
+claude-config ai on kimi        # Kimi (月之暗面)
+claude-config ai on glm         # 智谱 GLM
+claude-config ai on doubao      # 豆包 (字节跳动)
+
+# 查看所有支持的提供商
+claude-config ai list
+
+# 查看当前配置
+claude-config ai
+
+# 禁用所有AI提供商
+claude-config ai off
+
+# 重置特定提供商（删除密钥）
+claude-config ai reset deepseek
+```
+
+#### `claude-config check` - 验证系统
+控制代码质量检查：
+```bash
+# 启用开发验证
+claude-config check on
+
+# 禁用验证系统
+claude-config check off
+```
+
+#### `claude-config notify` - 通知系统
+配置 NTFY 实时通知：
+```bash
+# 启用通知
+claude-config notify on
+
+# 禁用通知
+claude-config notify off
+```
+
+#### `claude-config start` - 启动 Claude Code
+智能启动 Claude Code，支持多种模式：
+```bash
+# 启动原生 Claude Code（清理所有 AI 配置）
+claude-config start
+
+# 使用已配置的 AI 提供商启动
+claude-config start deepseek    # 使用 DeepSeek
+claude-config start kimi        # 使用 Kimi
+claude-config start glm         # 使用 GLM
+claude-config start doubao      # 使用豆包
+
+# 高级选项（临时覆盖配置）
+claude-config start kimi --model kimi-plus              # 指定模型
+claude-config start glm --api-key sk-xxxxxxxx           # 临时 API 密钥
+claude-config start doubao --model pro --key your-key   # 同时指定模型和密钥
+```
+
+**特性：**
+- 🔄 **智能切换** - 无参数时启动原生 Claude，有参数时使用指定 AI
+- 🔐 **密钥管理** - 优先使用存储的密钥，支持临时覆盖
+- 🎯 **模型选择** - 支持临时指定不同模型
+- 🧹 **配置清理** - 启动原生版本时自动清理现有配置
+
+#### `claude-config backup` - 配置备份
+安全备份和恢复：
+```bash
+# 创建配置备份
+claude-config backup
+
+# 查看恢复选项
+claude-config backup --help
+```
+
+> 💡 **提示**：如果是从源码构建，请在命令前加上 `./`（例如 `./claude-config status`）
+
+
+
+## 🤝 贡献指南
+
+我们欢迎所有形式的贡献！无论是 bug 报告、功能建议还是代码贡献。
+
+### 🚀 快速开始
+
+```bash
+# 1. Fork 并克隆仓库
+git clone https://github.com/your-username/claude-config.git
+cd claude-config
+
+# 2. 创建功能分支
+git checkout -b feature/amazing-feature
+
+# 3. 开发和测试
+make dev  # 运行完整的开发工作流
+
+# 4. 提交更改
+git commit -m "feat: add amazing feature"
+
+# 5. 推送并创建 PR
+git push origin feature/amazing-feature
+```
+
+### 📋 开发规范
+
+#### 代码质量
+- ✅ **遵循 Go 项目结构** - 使用标准的 Go 项目布局
+- ✅ **有意义的命名** - 函数和变量名要清晰表达意图
+- ✅ **编写测试** - 新功能必须有对应的测试用例
+- ✅ **通过检查** - 提交前运行 `make check` 确保代码质量
+
+#### 提交规范
+- 🎯 **清晰的信息** - 提交信息要说明更改的目的
+- 🔍 **原子提交** - 一次提交只做一件事
+- 📝 **更新文档** - 重大更改要更新相关文档
+
+#### 添加新功能
+1. **实现命令** - 在 `cmd/claude-config/` 中创建命令文件
+2. **注册命令** - 在 `commands.go` 的 `initCommands()` 中注册
+3. **创建管理器** - 需要时在 `internal/` 中创建对应管理器
+4. **编写测试** - 为新功能添加全面的测试
+5. **更新文档** - 更新 README 和相关文档
+
+### 🛠️ 开发工具
+
+```bash
+# 开发工作流（格式化、检查、构建）
+make dev
+
+# 运行测试
+make test
+
+# 代码覆盖率
+make test-coverage
+
+# 代码质量检查
+make check
+
+# 构建多平台二进制
+make build-all
+```
+
+### 🐛 报告问题
+
+发现 bug？请通过以下方式报告：
+
+- 📋 **问题模板** - 使用 GitHub Issues 的 bug 模板
+- 🔍 **详细信息** - 提供复现步骤和环境信息
+- 📸 **截图** - 如可能，提供相关截图
+- 💻 **日志** - 附上相关的错误日志
+
+---
+
+## 📄 许可证
+
+本项目采用 [Apache License 2.0](LICENSE) 许可证。
+
+### 📋 许可证摘要
+
+- ✅ **商业使用** - 可以用于商业项目
+- ✅ **修改** - 可以修改源代码
+- ✅ **分发** - 可以分发原版或修改版
+- ✅ **私用** - 可以私人使用而不开源
+- ⚠️ **责任** - 需要保留原作者的版权声明
+- ⚠️ **专利** - 提供专利授权
+
+---
+
+## ⚠️ 重要提示
+
+此工具管理你在 `~/.claude` 中的 Claude Code 配置。在进行重大更改之前，**强烈建议备份你的配置**：
+
+```bash
+# 创建配置备份
+claude-config backup
+```
+
+## 🙏 致谢
+
+感谢所有为 claude-config 项目做出贡献的开发者和用户！
+
+---
+
+<div align="center">
+
+**[⬆️ 回到顶部](#claude-config)**
+
+Made with ❤️ by the claude-config community
+
+</div>
