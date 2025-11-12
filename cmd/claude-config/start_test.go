@@ -349,12 +349,6 @@ func TestParseStartArgs(t *testing.T) {
 			wantModel:    "",
 			wantErr:      false,
 		},
-		{
-			name:    "too many args",
-			args:    []string{"deepseek", "extra"},
-			wantErr: true,
-			errMsg:  "accepts 1 arg(s), received 2",
-		},
 	}
 
 	for _, tt := range tests {
@@ -385,6 +379,174 @@ func TestParseStartArgs(t *testing.T) {
 				assert.Equal(t, tt.wantProvider, provider)
 				assert.Equal(t, tt.wantAPIKey, apiKey)
 				assert.Equal(t, tt.wantModel, model)
+			}
+		})
+	}
+}
+
+// TestPassthroughArgs 测试透传参数功能
+func TestPassthroughArgs(t *testing.T) {
+	tests := []struct {
+		name     string
+		args     []string
+		wantArgs []string
+		wantErr  bool
+		errMsg   string
+		setup    func() func()
+	}{
+		{
+			name:     "pass through single argument",
+			args:     []string{"deepseek", "--", "--dangerously-skip-permissions"},
+			wantArgs: []string{"--dangerously-skip-permissions"},
+			wantErr:  false,
+			setup: func() func() {
+				tempDir := t.TempDir()
+				originalHome := os.Getenv("HOME")
+				os.Setenv("HOME", tempDir)
+
+				claudeDir := tempDir + "/.claude"
+				err := os.MkdirAll(claudeDir, 0755)
+				require.NoError(t, err)
+
+				apiKeyPath := claudeDir + "/.deepseek_api_key"
+				err = os.WriteFile(apiKeyPath, []byte("sk-test123"), 0600)
+				require.NoError(t, err)
+
+				return func() {
+					os.Setenv("HOME", originalHome)
+				}
+			},
+		},
+		{
+			name:     "pass through multiple arguments",
+			args:     []string{"kimi", "--", "--verbose", "--debug"},
+			wantArgs: []string{"--verbose", "--debug"},
+			wantErr:  false,
+			setup: func() func() {
+				tempDir := t.TempDir()
+				originalHome := os.Getenv("HOME")
+				os.Setenv("HOME", tempDir)
+
+				claudeDir := tempDir + "/.claude"
+				err := os.MkdirAll(claudeDir, 0755)
+				require.NoError(t, err)
+
+				apiKeyPath := claudeDir + "/.kimi_api_key"
+				err = os.WriteFile(apiKeyPath, []byte("sk-kimi456"), 0600)
+				require.NoError(t, err)
+
+				return func() {
+					os.Setenv("HOME", originalHome)
+				}
+			},
+		},
+		{
+			name:     "pass through with mixed flags and arguments",
+			args:     []string{"GLM", "--model", "glm-4-plus", "--", "--config", "/path/to/config"},
+			wantArgs: []string{"--config", "/path/to/config"},
+			wantErr:  false,
+			setup: func() func() {
+				tempDir := t.TempDir()
+				originalHome := os.Getenv("HOME")
+				os.Setenv("HOME", tempDir)
+
+				claudeDir := tempDir + "/.claude"
+				err := os.MkdirAll(claudeDir, 0755)
+				require.NoError(t, err)
+
+				apiKeyPath := claudeDir + "/.GLM_api_key"
+				err = os.WriteFile(apiKeyPath, []byte("sk-glm789"), 0600)
+				require.NoError(t, err)
+
+				return func() {
+					os.Setenv("HOME", originalHome)
+				}
+			},
+		},
+		{
+			name:     "native claude with passthrough args",
+			args:     []string{"--", "--dangerously-skip-permissions"},
+			wantArgs: []string{"--dangerously-skip-permissions"},
+			wantErr:  false,
+			setup: func() func() {
+				tempDir := t.TempDir()
+				originalHome := os.Getenv("HOME")
+				os.Setenv("HOME", tempDir)
+
+				claudeDir := tempDir + "/.claude"
+				err := os.MkdirAll(claudeDir, 0755)
+				require.NoError(t, err)
+
+				return func() {
+					os.Setenv("HOME", originalHome)
+				}
+			},
+		},
+		{
+			name:     "no passthrough args",
+			args:     []string{"deepseek"},
+			wantArgs: []string{},
+			wantErr:  false,
+			setup: func() func() {
+				tempDir := t.TempDir()
+				originalHome := os.Getenv("HOME")
+				os.Setenv("HOME", tempDir)
+
+				claudeDir := tempDir + "/.claude"
+				err := os.MkdirAll(claudeDir, 0755)
+				require.NoError(t, err)
+
+				apiKeyPath := claudeDir + "/.deepseek_api_key"
+				err = os.WriteFile(apiKeyPath, []byte("sk-test123"), 0600)
+				require.NoError(t, err)
+
+				return func() {
+					os.Setenv("HOME", originalHome)
+				}
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var cleanup func()
+			if tt.setup != nil {
+				cleanup = tt.setup()
+				defer cleanup()
+			}
+
+			// 设置 mock 命令来验证透传的参数
+			os.Setenv("CLAUDE_MOCK", "echo")
+			defer os.Unsetenv("CLAUDE_MOCK")
+
+			cmd := createStartCmd()
+			cmd.SetArgs(tt.args)
+
+			var buf bytes.Buffer
+			cmd.SetOut(&buf)
+			cmd.SetErr(&buf)
+
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			cmd.SetContext(ctx)
+
+			err := cmd.Execute()
+
+			if tt.wantErr {
+				assert.Error(t, err)
+				if tt.errMsg != "" {
+					assert.Contains(t, err.Error(), tt.errMsg)
+				}
+			} else {
+				assert.NoError(t, err)
+				// 验证透传的参数被正确处理
+				// 这里我们检查环境变量 CLAUDE_PASSTHROUGH_ARGS 是否包含期望的参数
+				passthroughArgs := os.Getenv("CLAUDE_PASSTHROUGH_ARGS")
+				if len(tt.wantArgs) > 0 {
+					for _, arg := range tt.wantArgs {
+						assert.Contains(t, passthroughArgs, arg)
+					}
+				}
 			}
 		})
 	}
