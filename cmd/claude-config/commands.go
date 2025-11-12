@@ -33,5 +33,6 @@ func initCommands(rootCmd *cobra.Command) {
 		createNotifyCmd(),
 		createInstallCmd(),
 		createBackupCmd(),
+		createStartCmd(),
 	)
 }
