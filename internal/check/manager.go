@@ -23,7 +23,14 @@ func NewManager(claudeDir string) *Manager {
 }
 
 // EnableCheck enables code checking hooks (PostToolUse hooks)
-func (m *Manager) EnableCheck(_ context.Context) error {
+func (m *Manager) EnableCheck(ctx context.Context) error {
+	// Check for context cancellation
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
 	settings, err := m.loadSettings()
 	if err != nil {
 		return fmt.Errorf("failed to load settings: %w", err)
@@ -34,16 +41,17 @@ func (m *Manager) EnableCheck(_ context.Context) error {
 		settings.Hooks = &claude.HooksConfig{}
 	}
 
-	// Load from backup or create default configuration
-	var hooksConfig *claude.HooksConfig
+	// Load from backup or create default configuration for PostToolUse hooks
+	var postToolUseHooks []*claude.HookRule
 	if backupConfig, err := m.loadHooksBackup(); err == nil {
-		hooksConfig = backupConfig
+		postToolUseHooks = backupConfig.PostToolUse
 	} else {
-		hooksConfig = m.createDefaultHooksConfig()
+		defaultConfig := m.createDefaultHooksConfig()
+		postToolUseHooks = defaultConfig.PostToolUse
 	}
 
-	// Enable PostToolUse hooks
-	settings.Hooks.PostToolUse = hooksConfig.PostToolUse
+	// Add PostToolUse hooks while preserving existing hooks
+	settings.Hooks.PostToolUse = postToolUseHooks
 
 	// Save settings
 	if err := m.saveSettings(settings); err != nil {
@@ -54,7 +62,14 @@ func (m *Manager) EnableCheck(_ context.Context) error {
 }
 
 // DisableCheck disables code checking hooks (PostToolUse hooks)
-func (m *Manager) DisableCheck(_ context.Context) error {
+func (m *Manager) DisableCheck(ctx context.Context) error {
+	// Check for context cancellation
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	default:
+	}
+
 	settings, err := m.loadSettings()
 	if err != nil {
 		return fmt.Errorf("failed to load settings: %w", err)
@@ -70,8 +85,26 @@ func (m *Manager) DisableCheck(_ context.Context) error {
 		return fmt.Errorf("failed to save hooks backup: %w", err)
 	}
 
-	// Remove PostToolUse hooks
-	settings.Hooks.PostToolUse = nil
+	// Remove only check-related PostToolUse hooks (smart-lint.sh and smart-test.sh)
+	if settings.Hooks.PostToolUse != nil {
+		var filteredHooks []*claude.HookRule
+		for _, rule := range settings.Hooks.PostToolUse {
+			var filteredItems []*claude.HookItem
+			for _, item := range rule.Hooks {
+				// Keep hooks that are not check-related
+				if item.Command != "~/.claude/hooks/smart-lint.sh" &&
+					item.Command != "~/.claude/hooks/smart-test.sh" {
+					filteredItems = append(filteredItems, item)
+				}
+			}
+			// Only keep the rule if it has hooks remaining
+			if len(filteredItems) > 0 {
+				rule.Hooks = filteredItems
+				filteredHooks = append(filteredHooks, rule)
+			}
+		}
+		settings.Hooks.PostToolUse = filteredHooks
+	}
 
 	// If all hooks are removed, set hooks to nil
 	if len(settings.Hooks.PostToolUse) == 0 &&
@@ -101,7 +134,7 @@ func (m *Manager) createDefaultHooksConfig() *claude.HooksConfig {
 					},
 					{
 						Type:    "command",
-						Command: "~/.claude/hooks/smarter-test.sh",
+						Command: "~/.claude/hooks/smart-test.sh",
 						Timeout: 120,
 					},
 				},

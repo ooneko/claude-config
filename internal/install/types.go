@@ -7,7 +7,7 @@ type Options struct {
 	All          bool // 安装所有配置文件
 	Agents       bool // 仅安装agents
 	Commands     bool // 仅安装commands
-	Hooks        bool // 仅安装hooks
+	Hooks        bool // 仅安装hooks脚本目录
 	OutputStyles bool // 仅安装output-styles
 	Settings     bool // 仅安装settings.json
 	Claude       bool // 仅安装CLAUDE.md

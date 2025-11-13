@@ -160,6 +160,49 @@ func TestNormalizeProviderName(t *testing.T) {
 	}
 }
 
+// TestNewCheckStructures tests the new Check-based structures (future replacement for Hooks)
+func TestNewCheckStructures(t *testing.T) {
+	// This test will fail initially until we add the new structures
+	// and serves as a guide for the refactoring
+
+	// Future test for CheckConfig (replacing HooksConfig)
+	// checkConfig := &CheckConfig{
+	// 	PostToolUse: []*CheckRule{
+	// 		{
+	// 			Matcher: "Write|Edit",
+	// 			Checks: []*CheckItem{
+	// 				{
+	// 					Type:    "command",
+	// 					Command: "~/.claude/hooks/smart-lint.sh",
+	// 				},
+	// 			},
+	// 		},
+	// 	},
+	// }
+
+	// For now, just verify the existing hooks structures still work
+	hooksConfig := &HooksConfig{
+		PostToolUse: []*HookRule{
+			{
+				Matcher: "Write|Edit",
+				Hooks: []*HookItem{
+					{
+						Type:    "command",
+						Command: "~/.claude/hooks/smart-lint.sh",
+					},
+				},
+			},
+		},
+	}
+
+	assert.NotNil(t, hooksConfig)
+	assert.Len(t, hooksConfig.PostToolUse, 1)
+	assert.Equal(t, "Write|Edit", hooksConfig.PostToolUse[0].Matcher)
+	assert.Len(t, hooksConfig.PostToolUse[0].Hooks, 1)
+	assert.Equal(t, "command", hooksConfig.PostToolUse[0].Hooks[0].Type)
+	assert.Equal(t, "~/.claude/hooks/smart-lint.sh", hooksConfig.PostToolUse[0].Hooks[0].Command)
+}
+
 func TestProviderType_IsValid(t *testing.T) {
 	tests := []struct {
 		name     string

@@ -78,7 +78,7 @@ func createInstallCmd() *cobra.Command {
 	installCmd.Flags().Bool("all", false, "安装所有配置文件")
 	installCmd.Flags().Bool("agents", false, "仅安装agents")
 	installCmd.Flags().Bool("commands", false, "仅安装commands")
-	installCmd.Flags().Bool("hooks", false, "仅安装hooks")
+	installCmd.Flags().Bool("hooks", false, "仅安装hooks脚本目录")
 	installCmd.Flags().Bool("output-styles", false, "仅安装output-styles")
 	installCmd.Flags().Bool("settings", false, "仅安装settings.json")
 	installCmd.Flags().Bool("claude", false, "仅安装CLAUDE.md")

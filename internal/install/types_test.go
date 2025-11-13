@@ -73,11 +73,11 @@ func TestOptions_GetSelectedComponents(t *testing.T) {
 		{
 			name: "所有单独选项",
 			options: Options{
-				Agents: true, Commands: true, Hooks: true,
+				Agents: true, Commands: true,
 				OutputStyles: true, Settings: true, Claude: true, Statusline: true,
 			},
 			expected: []string{
-				"agents", "commands", "hooks", "output-styles",
+				"agents", "commands", "output-styles",
 				"settings.json", "CLAUDE.md.template", "statusline.js",
 			},
 		},
@@ -85,6 +85,15 @@ func TestOptions_GetSelectedComponents(t *testing.T) {
 			name:     "仅settings",
 			options:  Options{Settings: true},
 			expected: []string{"settings.json"},
+		},
+		{
+			name: "Commands与Settings组合",
+			options: Options{
+				Commands: true, Settings: true,
+			},
+			expected: []string{
+				"commands", "settings.json",
+			},
 		},
 	}
 
