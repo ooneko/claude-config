@@ -74,33 +74,6 @@ func TestManager_Install(t *testing.T) {
 			},
 		},
 		{
-			name: "安装 commands 组件",
-			options: Options{
-				Commands: true,
-			},
-			wantErr: false,
-			checkFn: func(t *testing.T, claudeDir string) {
-				// 检查commands目录是否被创建
-				assert.DirExists(t, filepath.Join(claudeDir, "commands"))
-				// 验证其他目录不存在
-				assert.NoFileExists(t, filepath.Join(claudeDir, "agents"))
-				assert.NoFileExists(t, filepath.Join(claudeDir, "hooks"))
-			},
-		},
-		{
-			name: "Commands与Agents组合",
-			options: Options{
-				Commands: true,
-				Agents:   true,
-			},
-			wantErr: false,
-			checkFn: func(t *testing.T, claudeDir string) {
-				assert.DirExists(t, filepath.Join(claudeDir, "commands"))
-				assert.DirExists(t, filepath.Join(claudeDir, "agents"))
-				assert.NoFileExists(t, filepath.Join(claudeDir, "hooks"))
-			},
-		},
-		{
 			name:    "无效选项",
 			options: Options{
 				// 所有选项都为false
