@@ -29,7 +29,7 @@ func (opts Options) GetSelectedComponents() []string {
 	var components []string
 
 	if opts.All {
-		return []string{"agents", "commands", "output-styles", "settings.json", "CLAUDE.md.template", "statusline.js"}
+		return []string{"agents", "commands", "hooks", "output-styles", "settings.json", "CLAUDE.md.template", "statusline.js"}
 	}
 
 	if opts.Agents {

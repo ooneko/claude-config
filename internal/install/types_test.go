@@ -56,7 +56,7 @@ func TestOptions_GetSelectedComponents(t *testing.T) {
 			name:    "All选项",
 			options: Options{All: true},
 			expected: []string{
-				"agents", "commands", "output-styles",
+				"agents", "commands", "hooks", "output-styles",
 				"settings.json", "CLAUDE.md.template", "statusline.js",
 			},
 		},
