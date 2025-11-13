@@ -43,6 +43,8 @@ set -euo pipefail
 
 # Get the event type from the first argument
 EVENT_TYPE="${1:-notification}"
+# Get the notification sub type from the second argument (for notification events)
+NOTIFICATION_SUBTYPE="${2:-}"
 
 # Check if notifications are enabled (allow easy disable)
 if [[ "${CLAUDE_HOOKS_NTFY_ENABLED:-true}" != "true" ]]; then
@@ -190,43 +192,66 @@ send_notification() {
 # Prepare notification based on event type
 case "$EVENT_TYPE" in
     "notification")
-        # Claude sent a notification - parse the payload if available
-        if [[ -n "${CLAUDE_HOOK_PAYLOAD:-}" ]]; then
-            # Extract message from JSON payload
-            # 注意：如果 jq 解析失败或没有 message 字段，使用默认消息
-            MESSAGE=$(echo "$CLAUDE_HOOK_PAYLOAD" | jq -r '.message // empty' 2>/dev/null || echo "")
-            
-            # 如果消息为空，使用默认消息
-            if [[ -z "$MESSAGE" ]]; then
-                MESSAGE="Claude notification"
-            fi
-            
-            # Check for error or warning indicators
-            PRIORITY="default"
-            if echo "$MESSAGE" | grep -qiE '(error|fail|problem|issue)'; then
+        # Handle different notification subtypes
+        case "$NOTIFICATION_SUBTYPE" in
+            "permission_prompt")
+                TITLE="$CONTEXT"
+                MESSAGE="Claude Code 需要您的确认"
+                TAGS="claude-code,permission,prompt"
                 PRIORITY="high"
-            elif echo "$MESSAGE" | grep -qiE '(warn|warning|attention)'; then
+                # On macOS, use say command for voice notification
+                if [[ "$(uname)" == "Darwin" ]]; then
+                    say "Claude Code 需要您的确认" >/dev/null 2>&1 &
+                fi
+                ;;
+            "idle_prompt")
+                TITLE="$CONTEXT"
+                MESSAGE="Claude Code 正在等待您的输入"
+                TAGS="claude-code,idle,prompt"
                 PRIORITY="default"
-            fi
-        else
-            MESSAGE="Claude notification"
-            PRIORITY="default"
-        fi
-        
-        TITLE="$CONTEXT"
-        TAGS="claude-code,notification"
+                say "Claude Code 正在等待您的输入" >/dev/null 2>&1 &
+                ;;
+            *)
+                # Default notification handling - parse the payload if available
+                if [[ -n "${CLAUDE_HOOK_PAYLOAD:-}" ]]; then
+                    # Extract message from JSON payload
+                    # 注意：如果 jq 解析失败或没有 message 字段，使用默认消息
+                    MESSAGE=$(echo "$CLAUDE_HOOK_PAYLOAD" | jq -r '.message // empty' 2>/dev/null || echo "")
+
+                    # 如果消息为空，使用默认消息
+                    if [[ -z "$MESSAGE" ]]; then
+                        MESSAGE="Claude notification"
+                    fi
+
+                    # Check for error or warning indicators
+                    PRIORITY="default"
+                    if echo "$MESSAGE" | grep -qiE '(error|fail|problem|issue)'; then
+                        PRIORITY="high"
+                    elif echo "$MESSAGE" | grep -qiE '(warn|warning|attention)'; then
+                        PRIORITY="default"
+                    fi
+                else
+                    MESSAGE="Claude notification"
+                    PRIORITY="default"
+                fi
+
+                TITLE="$CONTEXT"
+                TAGS="claude-code,notification"
+                ;;
+        esac
         ;;
-    
+
     "stop")
         TITLE="$CONTEXT"
         MESSAGE="Claude finished responding"
         TAGS="claude-code,stop,checkmark"
         PRIORITY="low"
+        say "Claude Code 任务已完成" >/dev/null 2>&1 &
         ;;
-    
+
     *)
         echo "Error: Unknown event type: $EVENT_TYPE" >&2
-        echo "Usage: $0 {notification|stop}" >&2
+        echo "Usage: $0 {notification|stop} [subtype]" >&2
         exit 1
         ;;
 esac

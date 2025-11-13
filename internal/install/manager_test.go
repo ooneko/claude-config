@@ -40,13 +40,14 @@ func TestManager_Install(t *testing.T) {
 			},
 			wantErr: false,
 			checkFn: func(t *testing.T, claudeDir string) {
-				// 检查是否创建了所有必要的目录和文件
+				// 检查是否创建了所有必要的目录和文件（默认不安装hooks）
 				assert.DirExists(t, filepath.Join(claudeDir, "agents"))
 				assert.DirExists(t, filepath.Join(claudeDir, "commands"))
-				assert.DirExists(t, filepath.Join(claudeDir, "hooks"))
 				assert.DirExists(t, filepath.Join(claudeDir, "output-styles"))
 				assert.FileExists(t, filepath.Join(claudeDir, "settings.json"))
 				assert.FileExists(t, filepath.Join(claudeDir, "CLAUDE.md"))
+				// 确认hooks目录没有被创建
+				assert.NoDirExists(t, filepath.Join(claudeDir, "hooks"))
 			},
 		},
 		{

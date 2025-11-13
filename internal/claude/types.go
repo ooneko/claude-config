@@ -16,8 +16,9 @@ type Settings struct {
 
 // HooksConfig represents the hooks configuration
 type HooksConfig struct {
-	PostToolUse []*HookRule `json:"PostToolUse,omitempty"`
-	Stop        []*HookRule `json:"Stop,omitempty"`
+	PostToolUse  []*HookRule `json:"PostToolUse,omitempty"`
+	Stop         []*HookRule `json:"Stop,omitempty"`
+	Notification []*HookRule `json:"Notification,omitempty"`
 }
 
 // HookRule represents a single hook rule with matcher and hooks

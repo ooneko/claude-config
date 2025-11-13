@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"runtime"
 	"strings"
 
 	"github.com/ooneko/claude-config/internal/claude"
@@ -13,8 +14,8 @@ import (
 func createNotifyCmd() *cobra.Command {
 	notifyCmd := &cobra.Command{
 		Use:   "notify",
-		Short: "NTFY通知配置管理",
-		Long:  `管理NTFY通知配置，支持启用/禁用通知功能`,
+		Short: "通知配置管理",
+		Long:  `管理通知配置，支持NTFY和macOS原生通知功能。在macOS系统上会自动配置原生通知。`,
 		Run: func(cmd *cobra.Command, _ []string) {
 			fmt.Println("使用 'claude-config notify on' 启用通知或 'claude-config notify off' 禁用通知")
 			_ = cmd.Help()
@@ -88,7 +89,7 @@ func enableNTFY() error {
 	}
 
 	// 检查Stop hooks中是否已存在ntfy-notifier.sh
-	ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh"
+	ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh stop"
 	ntfyExists := false
 
 	for _, rule := range settings.Hooks.Stop {
@@ -132,12 +133,20 @@ func enableNTFY() error {
 		targetRule.Hooks = append(targetRule.Hooks, ntfyHook)
 	}
 
+	// 在 macOS 上自动配置原生通知
+	if runtime.GOOS == "darwin" {
+		configureMacOSNotifications(settings)
+	}
+
 	// 保存配置
 	if err := configMgr.Save(ctx, settings); err != nil {
 		return fmt.Errorf("保存配置失败: %w", err)
 	}
 
-	fmt.Printf("✅ NTFY通知已启用！Topic: %s\n", ntfyTopic)
+	fmt.Printf("✅ 通知已启用！Topic: %s\n", ntfyTopic)
+	if runtime.GOOS == "darwin" {
+		fmt.Println("🍎 macOS原生通知已自动配置")
+	}
 	return nil
 }
 
@@ -158,7 +167,7 @@ func disableNTFY() error {
 	}
 
 	// 查找并移除ntfy-notifier.sh hook
-	ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh"
+	ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh stop"
 	removed := false
 
 	for i, rule := range settings.Hooks.Stop {
@@ -195,4 +204,37 @@ func disableNTFY() error {
 
 	fmt.Println("✅ NTFY通知已禁用（保留NTFY_TOPIC配置）")
 	return nil
+}
+
+// configureMacOSNotifications 配置macOS原生通知
+func configureMacOSNotifications(settings *claude.Settings) {
+	// 确保 hooks 配置存在
+	if settings.Hooks == nil {
+		settings.Hooks = &claude.HooksConfig{}
+	}
+
+	// 创建通知规则，使用统一的ntfy-notifier.sh脚本
+	notificationRules := []*claude.HookRule{
+		{
+			Matcher: "permission_prompt",
+			Hooks: []*claude.HookItem{
+				{
+					Type:    "command",
+					Command: "~/.claude/hooks/ntfy-notifier.sh notification permission_prompt",
+				},
+			},
+		},
+		{
+			Matcher: "idle_prompt",
+			Hooks: []*claude.HookItem{
+				{
+					Type:    "command",
+					Command: "~/.claude/hooks/ntfy-notifier.sh notification idle_prompt",
+				},
+			},
+		},
+	}
+
+	// 将通知规则添加到 hooks.Notification 中
+	settings.Hooks.Notification = notificationRules
 }
