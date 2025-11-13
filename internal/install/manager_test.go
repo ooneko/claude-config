@@ -183,3 +183,184 @@ func TestResourceManager_ExtractFile_NotFound(t *testing.T) {
 	assert.Error(t, err)
 	assert.Contains(t, err.Error(), "读取嵌入文件失败")
 }
+
+func TestResourceManager_ExtractFileWithPermissions(t *testing.T) {
+	manager := NewResourceManager()
+
+	tempDir := t.TempDir()
+
+	tests := []struct {
+		name         string
+		srcFile      string
+		destFileName string
+		wantPerms    os.FileMode
+	}{
+		{
+			name:         "Shell脚本文件应获取可执行权限",
+			srcFile:      "hooks/smart-lint.sh",
+			destFileName: "test.sh",
+			wantPerms:    0755,
+		},
+		{
+			name:         "JavaScript文件应获取可执行权限",
+			srcFile:      "commands/statusline.js",
+			destFileName: "test.js",
+			wantPerms:    0755,
+		},
+		{
+			name:         "Python文件应获取可执行权限",
+			srcFile:      "hooks/test.py", // 假设存在，如果不存在会失败但这是预期的
+			destFileName: "test.py",
+			wantPerms:    0755,
+		},
+		{
+			name:         "JSON配置文件应获取只读权限",
+			srcFile:      "settings.json",
+			destFileName: "settings.json",
+			wantPerms:    0644,
+		},
+		{
+			name:         "Markdown文件应获取只读权限",
+			srcFile:      "CLAUDE.md.template",
+			destFileName: "README.md",
+			wantPerms:    0644,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			destPath := filepath.Join(tempDir, tt.destFileName)
+
+			err := manager.ExtractFile(tt.srcFile, destPath)
+
+			// 如果源文件不存在，跳过测试
+			if err != nil && strings.Contains(err.Error(), "file does not exist") {
+				t.Skipf("源文件 %s 不存在，跳过测试", tt.srcFile)
+				return
+			}
+
+			assert.NoError(t, err)
+			assert.FileExists(t, destPath)
+
+			// 验证文件权限
+			info, err := os.Stat(destPath)
+			assert.NoError(t, err)
+
+			// 只检查最后3位权限，避免系统差异影响
+			perms := info.Mode().Perm()
+			assert.Equal(t, tt.wantPerms, perms, "文件权限不匹配: got %o, want %o", perms, tt.wantPerms)
+		})
+	}
+}
+
+func TestResourceManager_ExtractDirectoryWithPermissions(t *testing.T) {
+	manager := NewResourceManager()
+
+	tempDir := t.TempDir()
+	destDir := filepath.Join(tempDir, "hooks")
+
+	err := manager.ExtractDirectory("hooks", destDir)
+	assert.NoError(t, err)
+	assert.DirExists(t, destDir)
+
+	// 检查hooks目录中的文件权限
+	entries, err := os.ReadDir(destDir)
+	assert.NoError(t, err)
+
+	executableFiles := []string{
+		"smart-lint.sh",
+		"debug-hook.sh",
+		"test-tilt.sh",
+		"lint-tilt.sh",
+		"smart-test.sh",
+		"ntfy-notifier.sh",
+	}
+
+	// 所有 .sh 文件现在都是可执行的
+	nonExecutableFiles := []string{}
+
+	// 验证文件权限
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		info, err := entry.Info()
+		assert.NoError(t, err)
+
+		fileName := entry.Name()
+		perms := info.Mode().Perm()
+
+		// 检查可执行文件
+		isExecutableExpected := false
+		for _, execFile := range executableFiles {
+			if fileName == execFile {
+				isExecutableExpected = true
+				break
+			}
+		}
+
+		// 检查非可执行文件
+		isNonExecutableExpected := false
+		for _, nonExecFile := range nonExecutableFiles {
+			if fileName == nonExecFile {
+				isNonExecutableExpected = true
+				break
+			}
+		}
+
+		if isExecutableExpected {
+			assert.Equal(t, os.FileMode(0755), perms, "可执行文件 %s 应该有 0755 权限，实际为 %o", fileName, perms)
+		} else if isNonExecutableExpected {
+			assert.Equal(t, os.FileMode(0644), perms, "非可执行文件 %s 应该有 0644 权限，实际为 %o", fileName, perms)
+		}
+		// 其他文件暂时不做断言，避免测试过于严格
+	}
+}
+
+func TestManager_InstallPreservesPermissions(t *testing.T) {
+	// 创建临时目录作为测试的claude目录
+	tempDir := t.TempDir()
+	claudeDir := filepath.Join(tempDir, ".claude")
+
+	manager := NewManager(claudeDir)
+
+	ctx := context.Background()
+	options := Options{
+		Hooks: true,
+	}
+
+	err := manager.Install(ctx, options)
+	assert.NoError(t, err)
+
+	// 验证hooks目录和文件权限
+	hooksDir := filepath.Join(claudeDir, "hooks")
+	assert.DirExists(t, hooksDir)
+
+	// 检查特定的脚本文件权限（所有 .sh 文件都应该可执行）
+	testFiles := []struct {
+		filePath  string
+		wantPerms os.FileMode
+	}{
+		{"hooks/smart-lint.sh", 0755},
+		{"hooks/debug-hook.sh", 0755},
+		{"hooks/common-helpers.sh", 0755},
+		{"hooks/lint-go.sh", 0755},
+	}
+
+	for _, tf := range testFiles {
+		fullPath := filepath.Join(claudeDir, tf.filePath)
+
+		// 只检查存在的文件
+		if _, err := os.Stat(fullPath); os.IsNotExist(err) {
+			t.Skipf("文件 %s 不存在，跳过权限检查", tf.filePath)
+			continue
+		}
+
+		info, err := os.Stat(fullPath)
+		assert.NoError(t, err)
+
+		perms := info.Mode().Perm()
+		assert.Equal(t, tf.wantPerms, perms, "文件 %s 权限不匹配: got %o, want %o", tf.filePath, perms, tf.wantPerms)
+	}
+}

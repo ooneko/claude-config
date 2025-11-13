@@ -186,7 +186,7 @@ func (rm *ResourceManager) ExtractFile(srcPath, destPath string) error {
 		return fmt.Errorf("创建目标目录失败: %w", err)
 	}
 
-	return os.WriteFile(destPath, data, 0644)
+	return os.WriteFile(destPath, data, GetFilePermissions(destPath))
 }
 
 // ExtractDirectory 提取目录
@@ -224,6 +224,6 @@ func (rm *ResourceManager) ExtractDirectory(srcDir, destDir string) error {
 			return err
 		}
 
-		return os.WriteFile(destPath, data, 0644)
+		return os.WriteFile(destPath, data, GetFilePermissions(destPath))
 	})
 }
