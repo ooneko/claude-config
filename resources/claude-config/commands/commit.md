@@ -1,227 +1,88 @@
-# Claude Command: Commit
+# Claude 命令：Commit
 
-This command helps you create well-formatted commits with conventional commit messages and emoji.
+智能创建符合规范的提交，自动验证代码质量并生成提交消息。
 
-## Usage
+## 快速使用
 
-To create a commit, just type:
-```
-/commit
-```
-
-Or with options:
-```
-/commit --no-verify
-/commit --no-push
-/commit --no-verify --no-push
-```
-
-### Commit with additional reference
 ```bash
-/commit "[SQCEE-DOX-8949] dox add makefile"
-```
-When additional reference is provided:
-- System still auto-generates commit title and detailed description
-- The provided reference is appended to the end of the commit content
-- All validation steps (tests, linting, file analysis) are still performed
-
-### Example commit message format:
-```
-feat: add Makefile support for build automation
-
-- Added Makefile with build, test, and lint targets
-- Updated documentation for build process
-- Added make install target for easy deployment
-
-Test coverage: All modified files covered
-All tests passing: ✓
-
-[SQCEE-DOX-8949] dox add makefile
+/commit                           # 标准提交
+/commit --no-verify               # 跳过代码检查
+/commit --no-push                 # 跳过远程推送
 ```
 
-## What This Command Does
+## 工作流程
 
-1. Unless specified with `--no-verify`, automatically runs pre-commit checks:
-   - `make lint` to ensure code quality
-   - `make build` to verify the build succeeds
-   - `make test` to run all tests
-2. Checks current git branch name for version information:
-   - Extracts version numbers from branch names like `release/v0.1.0`, `hotfix/v1.2.3`, `feature/v2.0.0`
-   - Incorporates version into commit message format: `<type>(version): <description>`
-3. Examines repository status with `git status` to identify:
-   - Modified files
-   - Deleted files
-   - Untracked files
-   - Currently staged files
-4. **Intelligent file staging logic**:
-   - **If files are already staged**: Only commits the manually staged files
-   - **If no files are staged**: Automatically analyzes and selectively adds relevant files:
-     - Determines which untracked files are logically related to modified files
-     - Identifies dependencies between tracked changes and new files
-     - Excludes unrelated untracked files (e.g., temporary files, logs)
-     - Uses selective `git add path/to/specific_file` commands instead of `git add .`
-5. Verifies unit test coverage for modified files:
-   - Checks that all modified Go files have corresponding test files
-   - Ensures test coverage exists for new functionality
-   - Documents test status in commit message
-6. Performs a `git diff --cached` to understand what changes are being committed
-7. Analyzes the diff to determine if multiple distinct logical changes are present
-8. If multiple distinct changes are detected, suggests breaking the commit into multiple smaller commits
-9. For each commit (or the single commit if not split), creates a commit message using emoji conventional commit format that:
-   - Clearly describes the purpose of the changes
-   - Lists both modified and newly added relevant files
-   - Explains the relationship between changes and added files
-   - Mentions test coverage status for modified files
-10. Unless specified with `--no-push`, automatically pushes the commit to the remote repository:
-    - Checks if the current branch has an upstream remote branch
-    - If no upstream exists, sets up tracking with `git push -u origin <branch>`
-    - If upstream exists, pushes with `git push`
-    - Verifies the push was successful and displays the result
+1. **预提交检查** - 运行 lint、build、test（如果这些检查失败，询问用户是否要继续提交或先修复问题）
+2. **智能暂存** - 分析相关文件并选择性暂存（如果特定文件已暂存，只提交暂存文件；如果没有文件暂存，自动暂存所有修改和新文件）
+3. **测试覆盖检查** - 验证修改文件的测试情况
+4. **生成提交消息** - 创建规范的提交信息
+5. **自动推送** - 提交后推送到远程仓库（总是使用`git push -u origin xxx` 进行 push，其中 XXX 为远程分支名，推送前要求用户确认，默认为 main）
 
-## Best Practices for Commits
+## 最佳实践
 
-- **Verify before committing**: Ensure code is linted, builds correctly, and documentation is updated
-- **Atomic commits**: Each commit should contain related changes that serve a single purpose
-- **Split large changes**: If changes touch multiple concerns, split them into separate commits
-- **Conventional commit format**: Use the format `<type>: <description>` or `<type>(version): <description>` where type is one of:
-  - `feat`: A new feature
-  - `fix`: A bug fix
-  - `docs`: Documentation changes
-  - `style`: Code style changes (formatting, etc)
-  - `refactor`: Code changes that neither fix bugs nor add features
-  - `perf`: Performance improvements
-  - `test`: Adding or fixing tests
-  - `chore`: Changes to the build process, tools, etc.
-- **Version-aware commits**: When working on version-specific branches (e.g., `release/v0.1.0`, `hotfix/v1.2.3`), the version number is automatically extracted and included in the commit format as `<type>(version): <description>` (e.g., `feat(0.1.0): add new feature`)
-- **Present tense, imperative mood**: Write commit messages as commands (e.g., "add feature" not "added feature")
-- **Concise first line**: Keep the first line under 72 characters
-- **Emoji**: Each commit type is paired with an appropriate emoji:
-  - ✨ `feat`: New feature
-  - 🐛 `fix`: Bug fix
-  - 📝 `docs`: Documentation
-  - 💄 `style`: Formatting/style
-  - ♻️ `refactor`: Code refactoring
-  - ⚡️ `perf`: Performance improvements
-  - ✅ `test`: Tests
-  - 🔧 `chore`: Tooling, configuration
-  - 🚀 `ci`: CI/CD improvements
-  - 🗑️ `revert`: Reverting changes
-  - 🧪 `test`: Add a failing test
-  - 🚨 `fix`: Fix compiler/linter warnings
-  - 🔒️ `fix`: Fix security issues
-  - 👥 `chore`: Add or update contributors
-  - 🚚 `refactor`: Move or rename resources
-  - 🏗️ `refactor`: Make architectural changes
-  - 🔀 `chore`: Merge branches
-  - 📦️ `chore`: Add or update compiled files or packages
-  - ➕ `chore`: Add a dependency
-  - ➖ `chore`: Remove a dependency
-  - 🌱 `chore`: Add or update seed files
-  - 🧑‍💻 `chore`: Improve developer experience
-  - 🧵 `feat`: Add or update code related to multithreading or concurrency
-  - 🔍️ `feat`: Improve SEO
-  - 🏷️ `feat`: Add or update types
-  - 💬 `feat`: Add or update text and literals
-  - 🌐 `feat`: Internationalization and localization
-  - 👔 `feat`: Add or update business logic
-  - 📱 `feat`: Work on responsive design
-  - 🚸 `feat`: Improve user experience / usability
-  - 🩹 `fix`: Simple fix for a non-critical issue
-  - 🥅 `fix`: Catch errors
-  - 👽️ `fix`: Update code due to external API changes
-  - 🔥 `fix`: Remove code or files
-  - 🎨 `style`: Improve structure/format of the code
-  - 🚑️ `fix`: Critical hotfix
-  - 🎉 `chore`: Begin a project
-  - 🔖 `chore`: Release/Version tags
-  - 🚧 `wip`: Work in progress
-  - 💚 `fix`: Fix CI build
-  - 📌 `chore`: Pin dependencies to specific versions
-  - 👷 `ci`: Add or update CI build system
-  - 📈 `feat`: Add or update analytics or tracking code
-  - ✏️ `fix`: Fix typos
-  - ⏪️ `revert`: Revert changes
-  - 📄 `chore`: Add or update license
-  - 💥 `feat`: Introduce breaking changes
-  - 🍱 `assets`: Add or update assets
-  - ♿️ `feat`: Improve accessibility
-  - 💡 `docs`: Add or update comments in source code
-  - 🗃️ `db`: Perform database related changes
-  - 🔊 `feat`: Add or update logs
-  - 🔇 `fix`: Remove logs
-  - 🤡 `test`: Mock things
-  - 🥚 `feat`: Add or update an easter egg
-  - 🙈 `chore`: Add or update .gitignore file
-  - 📸 `test`: Add or update snapshots
-  - ⚗️ `experiment`: Perform experiments
-  - 🚩 `feat`: Add, update, or remove feature flags
-  - 💫 `ui`: Add or update animations and transitions
-  - ⚰️ `refactor`: Remove dead code
-  - 🦺 `feat`: Add or update code related to validation
-  - ✈️ `feat`: Improve offline support
+- **提交前验证**：确保代码已检查、正确构建且文档已更新
+- **原子提交**：每个提交应包含服务于单一目的的相关更改
+- **拆分大更改**：如果更改涉及多个关注点，将其拆分为单独的提交
+- **传统提交格式**：使用格式 `<type>: <description>` 或 `<type>(版本): <description>`，其中类型为：
+    - `feat`：新功能
+    - `fix`：错误修复
+    - `docs`：文档更改
+    - `style`：代码样式更改（格式化等）
+    - `refactor`：既不修复错误也不添加功能的代码更改
+    - `perf`：性能改进
+    - `test`：添加或修复测试
+    - `chore`：对构建过程、工具等的更改
+- **版本感知提交**：在版本特定分支（如 `release/v0.1.0`、`hotfix/v1.2.3`）上工作时，版本号会自动提取并以格式 `<type>(版本): <description>` 纳入提交（例如：`feat(0.1.0): 添加新功能`）
+- **现在时，祈使语气**：将提交消息编写为命令（例如："add feature" 而不是 "added feature"）
+- **简洁的第一行**：第一行保持在 72 个字符以下
+- **表情符号**：主要提交类型的表情符号：
+    - ✨ `feat`: 新功能
+    - 🐛 `fix`: 错误修复
+    - 📝 `docs`: 文档
+    - 💄 `style`: 格式化
+    - ♻️ `refactor`: 重构
+    - ⚡️ `perf`: 性能
+    - ✅ `test`: 测试
+    - 🔧 `chore`: 工具/配置
+    - 🚀 `ci`: CI/CD
+    - 🗑️ `revert`: 撤销
+    - 🚑️ `fix`: 紧急修复
+    - 🔒️ `fix`: 安全修复
+    - 💚 `fix`: 修复 CI
+    - 🔥 `fix`: 删除代码
 
-## Guidelines for Splitting Commits
+## 提交指南
 
-When analyzing the diff, consider splitting commits based on these criteria:
+分析差异时，考虑基于以下标准拆分提交：
 
-1. **Different concerns**: Changes to unrelated parts of the codebase
-2. **Different types of changes**: Mixing features, fixes, refactoring, etc.
-3. **File patterns**: Changes to different types of files (e.g., source code vs documentation)
-4. **Logical grouping**: Changes that would be easier to understand or review separately
-5. **Size**: Very large changes that would be clearer if broken down
+1. **不同关注点**：对代码库不相关部分的更改
+2. **不同类型的更改**：混合功能、修复、重构等
+3. **文件模式**：对不同类型文件的更改（例如：源代码 vs 文档）
+4. **逻辑分组**：分开理解或审查更容易的更改
+5. **大小**：非常大、拆分后更清晰的更改
 
-## Examples
+## 提交示例
 
-Good commit messages:
-- ✨ feat: add user authentication system
-- 🐛 fix: resolve memory leak in rendering process
-- 📝 docs: update API documentation with new endpoints
-- ♻️ refactor: simplify error handling logic in parser
-- 🚨 fix: resolve linter warnings in component files
-- 🧑‍💻 chore: improve developer tooling setup process
-- 👔 feat: implement business logic for transaction validation
-- 🩹 fix: address minor styling inconsistency in header
-- 🚑️ fix: patch critical security vulnerability in auth flow
-- 🎨 style: reorganize component structure for better readability
-- 🔥 fix: remove deprecated legacy code
-- 🦺 feat: add input validation for user registration form
-- 💚 fix: resolve failing CI pipeline tests
-- 📈 feat: implement analytics tracking for user engagement
-- 🔒️ fix: strengthen authentication password requirements
-- ♿️ feat: improve form accessibility for screen readers
+**标准提交消息：**
+- ✨ feat: 添加用户身份验证系统
+- 🐛 fix: 修复内存泄漏问题
+- 📝 docs: 更新 API 文档
+- ♻️ refactor: 重构错误处理逻辑
+- 🔧 chore: 更新依赖包版本
 
-Version-aware commit messages (when on version branches):
-- ✨ feat(0.1.0): add user authentication system
-- 🐛 fix(1.2.3): resolve memory leak in rendering process
-- 📝 docs(2.0.0): update API documentation with new endpoints
-- 🚑️ fix(1.1.1): patch critical security vulnerability in auth flow
+**版本感知提交（在版本分支上）：**
+- ✨ feat(0.1.0): 添加用户身份验证系统
+- 🐛 fix(1.2.3): 修复内存泄漏问题
+- 📝 docs(2.0.0): 更新 API 文档
 
-Example of splitting commits:
-- First commit: ✨ feat: add new solc version type definitions
-- Second commit: 📝 docs: update documentation for new solc versions
-- Third commit: 🔧 chore: update go.mod dependencies
-- Fourth commit: 🏷️ feat: add type definitions for new API endpoints
-- Fifth commit: 🧵 feat: improve concurrency handling in worker threads
-- Sixth commit: 🚨 fix: resolve linting issues in new code
-- Seventh commit: ✅ test: add unit tests for new solc version features
-- Eighth commit: 🔒️ fix: update dependencies with security vulnerabilities
+**拆分提交示例：**
+- 第一次提交：✨ feat: 添加新功能定义
+- 第二次提交：✅ test: 为新功能添加测试
+- 第三次提交：📝 docs: 更新相关文档
 
-## Command Options
 
-- `--no-verify`: Skip running the pre-commit checks (lint, build, test)
-- `--no-push`: Skip automatically pushing the commit to the remote repository
+## 命令选项
 
-## Important Notes
+- `--no-verify`: 跳过运行预提交检查（lint、build、test）
+- `--no-push`: 跳过自动将提交推送到远程仓库
 
-- By default, pre-commit checks (`make lint`, `make build`, `make test`) will run to ensure code quality
-- If these checks fail, you'll be asked if you want to proceed with the commit anyway or fix the issues first
-- If specific files are already staged, the command will only commit those files
-- If no files are staged, it will automatically stage all modified and new files
-- The commit message will be constructed based on the changes detected
-- Before committing, the command will review the diff to identify if multiple commits would be more appropriate
-- If suggesting multiple commits, it will help you stage and commit the changes separately
-- Always reviews the commit diff to ensure the message matches the changes
-- **By default, commits are automatically pushed to the remote repository**
-- Use `--no-push` to skip the automatic push if you want to push manually later
-- For new branches without upstream, the command will set up tracking with `git push -u origin <branch>`
-- Push failures will be reported but won't rollback the local commit

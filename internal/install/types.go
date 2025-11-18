@@ -13,6 +13,7 @@ type Options struct {
 	Claude       bool // 仅安装CLAUDE.md
 	Statusline   bool // 仅安装statusline.js
 	Force        bool // 强制覆盖已存在的文件
+	Delete       bool // 删除目标目录中不在源资源中的文件（需要与Force配合使用）
 }
 
 // Validate 验证安装选项

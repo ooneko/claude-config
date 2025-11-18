@@ -1,43 +1,43 @@
 ---
 allowed-tools: all
-description: Deep validation of completed implementation
+description: 深度验证已完成的实现
 ---
 
-# Implementation Validation
+# 实现验证
 
-Ultrathink and thoroughly validate the implementation we just completed
+深度思考并彻底验证我们刚刚完成的实现
 
-## Validation Criteria
+## 验证标准
 
-**Start with:** "Let me ultrathink about this implementation and examine the code closely"
+**开始时：** "让我深度思考这个实现并仔细检查代码"
 
-### 1. Task Completeness
-- All requirements fully implemented
-- Edge cases properly handled
-- No missing functionality
+### 1. 任务完整性
+- 所有要求都已完全实现
+- 边界情况得到妥善处理
+- 没有遗漏的功能
 
-### 2. Code Quality
-- Idiomatic for the language
-- Proper error handling and resource management
-- Functions appropriately sized and focused
+### 2. 代码质量
+- 符合语言习惯用法
+- 适当的错误处理和资源管理
+- 函数大小合适、职责单一
 
-### 3. Architecture Integrity
-- No duplicate code paths or reinvented wheels
-- Consistent with existing patterns
-- No over-engineering or unnecessary abstractions
+### 3. 架构完整性
+- 没有重复的代码路径或重新发明的轮子
+- 与现有模式保持一致
+- 没有过度设计或不必要的抽象
 
-### 4. Hidden Issues
-- Race conditions or concurrency bugs
-- Security vulnerabilities
-- Performance bottlenecks
-- Missing critical test coverage
+### 4. 潜在问题
+- 竞态条件或并发错误
+- 安全漏洞
+- 性能瓶颈
+- 缺少关键测试覆盖
 
-## Response Format
+## 回复格式
 
-Be direct and honest:
+直接和诚实：
 
-**✅ Done Well:** Specific achievements
-**⚠️ Issues Found:** Problems with severity
-**📊 Verdict:** Is the implementation truly complete?
+**✅ 做得好的地方：** 具体成就
+**⚠️ 发现的问题：** 按严重程度列出问题
+**📊 最终判断：** 实现是否真正完整？
 
-If issues exist, offer to fix them immediately.
+如果存在问题，立即提供修复方案。

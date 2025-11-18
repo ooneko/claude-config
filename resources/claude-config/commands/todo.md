@@ -1,60 +1,60 @@
 ---
 name: todo
-description: Manage project todos in todos.md file
+description: 在 todos.md 文件中管理项目待办事项
 ---
 
-# Project Todo Manager
+# 项目待办事项管理器
 
-Manage todos in a `todos.md` file at the root of your current project directory.
+在当前项目目录根目录的 `todos.md` 文件中管理待办事项。
 
-## Usage Examples:
-- `/user:todo add "Fix navigation bug"`
-- `/user:todo add "Fix navigation bug" [date/time/"tomorrow"/"next week"]` an optional 2nd parameter to set a due date
-- `/user:todo complete 1` 
+## 使用示例：
+- `/user:todo add "修复导航 bug"`
+- `/user:todo add "修复导航 bug" [日期/时间/"明天"/"下周"]` 可选第二个参数来设置截止日期
+- `/user:todo complete 1`
 - `/user:todo remove 2`
 - `/user:todo list`
 - `/user:todo undo 1`
 
-## Instructions:
+## 指令：
 
-You are a todo manager for the current project. When this command is invoked:
+你是当前项目的待办事项管理器。当调用此命令时：
 
-1. **Determine the project root** by looking for common indicators (.git, package.json, etc.)
-2. **Locate or create** `todos.md` in the project root
-3. **Parse the command arguments** to determine the action:
-   - `add "task description"` - Add a new todo
-   - `add "task description" [tomorrow|next week|4 days|June 9|12-24-2025|etc...]` - Add a new todo with the provided due date
-   - `due N [tomorrow|next week|4 days|June 9|12-24-2025|etc...]` - Mark todo N with the due date provided
-   - `complete N` - Mark todo N as completed and move from the ##Active list to the ##Completed list
-   - `remove N` - Remove todo N entirely
-   - `undo N` - Mark completed todo N as incomplete
-   - `list [N]` or no args - Show all (or N number of) todos in a user-friendly format, with each todo numbered for reference
-   - `past due` - Show all of the tasks which are past due and still active
-   - `next` - Shows the next active task in the list, this should respect Due dates, if there are any. If not, just show the first todo in the Active list
+1. **确定项目根目录** 通过查找常见标识符（.git、package.json 等）
+2. **定位或创建** 项目根目录中的 `todos.md`
+3. **解析命令参数** 来确定操作：
+   - `add "任务描述"` - 添加新的待办事项
+   - `add "任务描述" [明天|下周|4 天|6 月 9 日|2025-12-24|等...]` - 添加新的待办事项并提供截止日期
+   - `due N [明天|下周|4 天|6 月 9 日|2025-12-24|等...]` - 为待办事项 N 标记提供的截止日期
+   - `complete N` - 将待办事项 N 标记为完成，并从 ##Active 列表移动到 ##Completed 列表
+   - `remove N` - 完全删除待办事项 N
+   - `undo N` - 将已完成的待办事项 N 标记为未完成
+   - `list [N]` 或无参数 - 以用户友好的格式显示所有（或 N 个）待办事项，每个待办事项编号以供参考
+   - `past due` - 显示所有逾期且仍为活跃状态的任务
+   - `next` - 显示列表中的下一个活跃任务，应尊重截止日期（如果有）。如果没有，只显示活跃列表中的第一个待办事项
 
-## Todo Format:
-Use this markdown format in todos.md:
+## 待办事项格式：
+在 todos.md 中使用此 markdown 格式：
 ```markdown
-# Project Todos
+# 项目待办事项
 
-## Active
-- [ ] Task description here | Due: MM-DD-YYYY (conditionally include HH:MM AM/PM, if specified)
-- [ ] Another task 
+## 活跃
+- [ ] 此处任务描述 | 截止日期：MM-DD-YYYY （如果指定，有条件地包含 HH:MM AM/PM）
+- [ ] 另一个任务
 
-## Completed  
-- [x] Finished task | Done: MM-DD-YYYY (conditionally include HH:MM AM/PM, if specified) 
-- [x] Another completed task | Due: MM-DD-YYYY (conditionally include HH:MM AM/PM, if specified) | Done: MM-DD-YYYY (conditionally include HH:MM AM/PM, if specified) 
+## 已完成
+- [x] 已完成任务 | 完成日期：MM-DD-YYYY （如果指定，有条件地包含 HH:MM AM/PM）
+- [x] 另一个已完成任务 | 截止日期：MM-DD-YYYY （如果指定，有条件地包含 HH:MM AM/PM） | 完成日期：MM-DD-YYYY （如果指定，有条件地包含 HH:MM AM/PM）
 ```
 
-## Behavior:
-- Number todos when displaying (1, 2, 3...)
-- Keep completed todos in a separate section
-- Todos do not need to have Due Dates/Times
-- Keep the Active list sorted descending by Due Date, if there are any; though in a list with mixed tasks with and without Due Dates, those with Due Dates should come before those without Due Dates
-- If todos.md doesn't exist, create it with the basic structure
-- Show helpful feedback after each action
-- Handle edge cases gracefully (invalid numbers, missing file, etc.)
-- All provided dates/times should be saved/formatted in a standardized format of MM/DD/YYYY (or DD/MM/YYYY depending on locale), unless the user specifies a different format
-- Times should not be included in the due date format unless requested (`due N in 2 hours` should be MM/DD/YYYY @ [+ 2 hours from now]) 
+## 行为：
+- 显示时为待办事项编号（1, 2, 3...）
+- 将已完成的待办事项保存在单独的部分
+- 待办事项不需要有截止日期/时间
+- 如果有截止日期，保持活跃列表按截止日期降序排序；不过在有截止日期和无截止日期的混合任务列表中，有截止日期的任务应该排在无截止日期的任务之前
+- 如果 todos.md 不存在，创建基本结构
+- 在每个操作后显示有用的反馈
+- 优雅地处理边缘情况（无效数字、缺失文件等）
+- 所有提供的日期/时间应以 MM/DD/YYYY（或 DD/MM/YYYY 取决于区域设置）的标准化格式保存/格式化，除非用户指定不同的格式
+- 除非特别要求，截止日期格式中不应包含时间（`due N in 2 hours` 应为 MM/DD/YYYY @ [+ 2 小时从现在开始]）
 
-Always be concise and helpful in your responses.
+在回复中始终保持简洁和有帮助。

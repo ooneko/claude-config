@@ -25,6 +25,7 @@ func runInstall(cmd *cobra.Command) error {
 	claudeFlag, _ := cmd.Flags().GetBool("claude")
 	statuslineFlag, _ := cmd.Flags().GetBool("statusline")
 	forceFlag, _ := cmd.Flags().GetBool("force")
+	deleteFlag, _ := cmd.Flags().GetBool("delete")
 
 	// 如果没有指定任何选项，默认安装所有
 	if !allFlag && !agentsFlag && !commandsFlag && !hooksFlag &&
@@ -41,8 +42,9 @@ func runInstall(cmd *cobra.Command) error {
 		options.Statusline = statuslineFlag
 	}
 
-	// 设置 Force 选项
+	// 设置 Force 和 Delete 选项
 	options.Force = forceFlag
+	options.Delete = deleteFlag
 
 	// 验证选项
 	if err := options.Validate(); err != nil {
@@ -84,6 +86,7 @@ func createInstallCmd() *cobra.Command {
 	installCmd.Flags().Bool("claude", false, "仅安装CLAUDE.md")
 	installCmd.Flags().Bool("statusline", false, "仅安装statusline.js")
 	installCmd.Flags().Bool("force", false, "强制覆盖已存在的文件")
+	installCmd.Flags().Bool("delete", false, "删除目标目录中不在源资源中的文件 (默认dry-run模式,与--force配合实际删除)")
 
 	return installCmd
 }

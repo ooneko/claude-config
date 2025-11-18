@@ -1,95 +1,70 @@
-# Development Partnership
+# 开发合作伙伴关系
 
-We build production code together. I handle implementation details while you guide architecture and catch complexity early.
+我们共同构建生产代码。我负责实现细节，而你指导架构设计并及早发现复杂性。
 
-## Core Workflow: Research → Plan → Implement → Validate
+## 核心工作流程：研究 → 计划 → 实现 → 验证
 
-**Always respond in 中文** - All responses should be in Chinese to maintain consistency with user preferences
+**每个功能都以这句话开始：** "让我研究代码库并在实现前创建一个计划。"
 
-**Start every feature with:** "Let me research the codebase and create a plan before implementing."
+1. **研究** - 理解现有模式和架构
+2. **计划** - 提出方法并与你确认
+3. **实现** - 构建代码并包含测试和错误处理
+4. **验证** - 实现后 ALWAYS 运行格式化工具、静态检查和测试
 
-1. **Research** - Understand existing patterns and architecture
-2. **Plan** - Propose approach and verify with you
-3. **Implement** - Build with tests and error handling
-4. **Validate** - ALWAYS run formatters, linters, and tests after implementation
+## 代码组织
 
-## Code Organization
+**保持函数小而专注：**
+- 如果需要注释来解释段落，就拆分成函数
+- 将相关功能组合到清晰的包中
+- 偏好多个小文件而不是少数大文件
 
-**Keep functions small and focused:**
-- If you need comments to explain sections, split into functions
-- Group related functionality into clear packages
-- Prefer many small files over few large ones
+## 架构原则
 
-## Architecture Principles
+**这始终是一个功能分支：**
+- 完全删除旧代码 - 不要通过注释
+- 不要版本化名称（processV2, handleNew, ClientOld）
+- 除非明确要求，否则不写迁移代码
+- 不要"已删除代码"的注释 - 直接删除即可
 
-**This is always a feature branch:**
-- Delete old code completely - no deprecation needed
-- No versioned names (processV2, handleNew, ClientOld)
-- No migration code unless explicitly requested
-- No "removed code" comments - just delete it
+**明确胜过隐含：**
+- 清晰的函数名胜过巧妙的抽象
+- 明显的数据流胜过隐藏的魔法
+- 直接依赖胜过服务定位器
 
-**Prefer explicit over implicit:**
-- Clear function names over clever abstractions
-- Obvious data flow over hidden magic
-- Direct dependencies over service locators
+## 最大化效率
 
-## Maximize Efficiency
+**并行操作：** 在单个消息中运行多个搜索、读取和搜索
+**多个代理：** 分割复杂任务 - 一个负责测试，一个负责实现
+**批量处理：** 将相关的文件编辑组合在一起
 
-**Parallel operations:** Run multiple searches, reads, and greps in single messages
-**Multiple agents:** Split complex tasks - one for tests, one for implementation
-**Batch similar work:** Group related file edits together
+## Go 开发标准
 
-## Go Development Standards
+### 必需模式
+- **具体类型** 而不是 interface{} 或 any - 接口会隐藏 bug
+- **channel** 用于同步，而不是 time.Sleep() - 睡眠不可靠
+- **提前返回** 减少嵌套 - 扁平代码是可读代码
+- **删除旧代码** 当替换时 - 不要版本化函数
+- **fmt.Errorf("context: %w", err)** - 保留错误链
+- **表测试** 用于复杂逻辑 - 易于添加用例
+- **Godoc** 所有导出符号 - 文档防止误用
 
-### Required Patterns
-- **Concrete types** not interface{} or any - interfaces hide bugs
-- **Channels** for synchronization, not time.Sleep() - sleeping is unreliable  
-- **Early returns** to reduce nesting - flat code is readable code
-- **Delete old code** when replacing - no versioned functions
-- **fmt.Errorf("context: %w", err)** - preserve error chains
-- **Table tests** for complex logic - easy to add cases
-- **Godoc** all exported symbols - documentation prevents misuse
+## 问题解决
 
-## Problem Solving
+**卡住时：** 停下来。简单的解决方案通常是正确的。
+**不确定时：** "Let me ultrathink about this architecture."
+**做选择时：** "I see approach A (simple) vs B (flexible). Which do you prefer?"
+你的重定向可以防止过度工程化。当对实现不确定时，停下来寻求指导。
 
-**When stuck:** Stop. The simple solution is usually correct.
+## 测试策略
 
-**When uncertain:** "Let me ultrathink about this architecture."
+**让测试方法与代码复杂度匹配：**
+- 复杂业务逻辑：先写测试 (TDD)
+- 简单 CRUD 操作：先写代码，再写测试
+- 热路径：实现后添加基准测试
 
-**When choosing:** "I see approach A (simple) vs B (flexible). Which do you prefer?"
+## 进度跟踪
 
-Your redirects prevent over-engineering. When uncertain about implementation, stop and ask for guidance.
+- **TodoWrite** 用于任务管理
+- **清晰命名** 在所有代码中
 
-## Testing Strategy
-
-**Match testing approach to code complexity:**
-- Complex business logic: Write tests first (TDD)
-- Simple CRUD operations: Write code first, then tests
-- Hot paths: Add benchmarks after implementation
-
-**Always keep security in mind:** Validate all inputs, use crypto/rand for randomness, use prepared SQL statements.
-
-**Performance rule:** Measure before optimizing. No guessing.
-
-## Progress Tracking
-
-- **TodoWrite** for task management
-- **Clear naming** in all code
-
-Focus on maintainable solutions over clever abstractions.
-
-## Playwright MCP Server Configuration
-
-**IMPORTANT**: This is a headless NixOS server with no display. When using the Playwright MCP tools:
-
-1. **Always use Firefox** - Set `browserType: "firefox"` in all `playwright_navigate` calls
-2. **Always use headless mode** - Set `headless: true` in all `playwright_navigate` calls
-3. **Example**: 
-   ```
-   playwright_navigate with parameters:
-   - url: "https://example.com"
-   - browserType: "firefox"
-   - headless: true
-   ```
-
-Chromium does not work on this headless server due to missing dependencies. Firefox is the only supported browser.
+专注于可维护的解决方案，而不是巧妙的抽象。

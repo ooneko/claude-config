@@ -1,44 +1,44 @@
 ---
 allowed-tools: all
-description: Verify code quality and fix all issues
+description: 验证代码质量并修复所有问题
 ---
 
-# Code Quality Check
+# 代码质量检查
 
-Fix all issues found during quality verification. Do not just report problems.
+修复质量验证过程中发现的所有问题。不要只是报告问题。
 
-## Workflow
+## 工作流程
 
-1. **Identify** - Run all validation commands
-2. **Fix** - Address every issue found
-3. **Verify** - Re-run until all checks pass
+1. **识别** - 运行所有验证命令
+2. **修复** - 处理发现的每个问题
+3. **验证** - 重新运行直到所有检查通过
 
-## Validation Commands
+## 验证命令
 
-Find and run all applicable commands:
-- **Lint**: `make lint`, `golangci-lint run`, `npm run lint`, `ruff check`
-- **Test**: `make test`, `go test ./...`, `npm test`, `pytest`
-- **Build**: `make build`, `go build ./...`, `npm run build`
-- **Format**: `gofmt`, `prettier`, `black`
-- **Security**: `gosec`, `npm audit`, `bandit`
+查找并运行所有适用的命令：
+- **代码检查**: `make lint`, `golangci-lint run`, `npm run lint`, `ruff check`
+- **测试**: `make test`, `go test ./...`, `npm test`, `pytest`
+- **构建**: `make build`, `go build ./...`, `npm run build`
+- **格式化**: `gofmt`, `prettier`, `black`
+- **安全**: `gosec`, `npm audit`, `bandit`
 
-## Parallel Fixing Strategy
+## 并行修复策略
 
-When multiple issues exist, spawn agents to fix in parallel:
+当存在多个问题时，启动代理并行修复：
 ```
-Agent 1: Fix linting issues in module A
-Agent 2: Fix test failures
-Agent 3: Fix type errors
+代理 1: 修复模块 A 中的代码检查问题
+代理 2: 修复测试失败
+代理 3: 修复类型错误
 ```
 
-## Go-Specific Standards
+## Go 特定标准
 
-- Use concrete types, not `interface{}`
-- Wrap errors with context
-- Add godoc comments
-- Use channels for synchronization
-- No `time.Sleep()` for coordination
+- 使用具体类型，而不是 `interface{}`
+- 为错误包装上下文
+- 添加 godoc 注释
+- 使用 channel 进行同步
+- 不要使用 `time.Sleep()` 进行协调
 
-## Success Criteria
+## 成功标准
 
-All validation commands pass with zero warnings or errors.
+所有验证命令都通过，没有警告或错误。

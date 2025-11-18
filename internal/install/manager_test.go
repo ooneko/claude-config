@@ -364,3 +364,329 @@ func TestManager_InstallPreservesPermissions(t *testing.T) {
 		assert.Equal(t, tf.wantPerms, perms, "文件 %s 权限不匹配: got %o, want %o", tf.filePath, perms, tf.wantPerms)
 	}
 }
+
+func TestIsSpecialFile(t *testing.T) {
+	tests := []struct {
+		name     string
+		filePath string
+		want     bool
+	}{
+		{
+			name:     "settings.json是特殊文件",
+			filePath: "settings.json",
+			want:     true,
+		},
+		{
+			name:     "CLAUDE.md是特殊文件",
+			filePath: "CLAUDE.md",
+			want:     true,
+		},
+		{
+			name:     "带路径的settings.json",
+			filePath: "some/path/settings.json",
+			want:     true,
+		},
+		{
+			name:     "带路径的CLAUDE.md",
+			filePath: "some/path/CLAUDE.md",
+			want:     true,
+		},
+		{
+			name:     "普通命令文件不是特殊文件",
+			filePath: "commands/test.md",
+			want:     false,
+		},
+		{
+			name:     "agent文件不是特殊文件",
+			filePath: "agents/golang-pro.md",
+			want:     false,
+		},
+		{
+			name:     "hook脚本不是特殊文件",
+			filePath: "hooks/test.sh",
+			want:     false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := isSpecialFile(tt.filePath)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestManager_listEmbeddedFilesForComponent(t *testing.T) {
+	manager := NewManager("/tmp/test-claude")
+
+	tests := []struct {
+		name      string
+		component string
+		wantErr   bool
+		validate  func(t *testing.T, files []string)
+	}{
+		{
+			name:      "agents组件",
+			component: "agents",
+			wantErr:   false,
+			validate: func(t *testing.T, files []string) {
+				assert.NotEmpty(t, files)
+				// 验证所有文件都以agents/开头
+				for _, file := range files {
+					assert.True(t, strings.HasPrefix(file, "agents/"), "文件 %s 应该以 agents/ 开头", file)
+				}
+			},
+		},
+		{
+			name:      "commands组件",
+			component: "commands",
+			wantErr:   false,
+			validate: func(t *testing.T, files []string) {
+				assert.NotEmpty(t, files)
+				for _, file := range files {
+					assert.True(t, strings.HasPrefix(file, "commands/"), "文件 %s 应该以 commands/ 开头", file)
+				}
+			},
+		},
+		{
+			name:      "hooks组件",
+			component: "hooks",
+			wantErr:   false,
+			validate: func(t *testing.T, files []string) {
+				assert.NotEmpty(t, files)
+				for _, file := range files {
+					assert.True(t, strings.HasPrefix(file, "hooks/"), "文件 %s 应该以 hooks/ 开头", file)
+				}
+			},
+		},
+		{
+			name:      "statusline.js组件",
+			component: "statusline.js",
+			wantErr:   false,
+			validate: func(t *testing.T, files []string) {
+				assert.Contains(t, files, "statusline.js")
+			},
+		},
+		{
+			name:      "settings.json组件返回空列表",
+			component: "settings.json",
+			wantErr:   false,
+			validate: func(t *testing.T, files []string) {
+				assert.Empty(t, files, "特殊文件不应参与删除逻辑")
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			files, err := manager.listEmbeddedFilesForComponent(tt.component)
+
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				if tt.validate != nil {
+					tt.validate(t, files)
+				}
+			}
+		})
+	}
+}
+
+func TestManager_listInstalledFilesInDirectory(t *testing.T) {
+	tempDir := t.TempDir()
+	claudeDir := filepath.Join(tempDir, ".claude")
+	manager := NewManager(claudeDir)
+
+	// 创建测试文件
+	commandsDir := filepath.Join(claudeDir, "commands")
+	err := os.MkdirAll(commandsDir, 0755)
+	assert.NoError(t, err)
+
+	testFiles := []string{"test1.md", "test2.md", "subdir/test3.md"}
+	for _, file := range testFiles {
+		filePath := filepath.Join(commandsDir, file)
+		err := os.MkdirAll(filepath.Dir(filePath), 0755)
+		assert.NoError(t, err)
+		err = os.WriteFile(filePath, []byte("test"), 0644)
+		assert.NoError(t, err)
+	}
+
+	// 测试
+	files, err := manager.listInstalledFilesInDirectory("commands")
+	assert.NoError(t, err)
+	assert.Len(t, files, 3)
+
+	// 验证文件路径
+	for _, file := range files {
+		assert.True(t, strings.HasPrefix(file, "commands/"), "文件 %s 应该以 commands/ 开头", file)
+	}
+
+	// 测试不存在的目录
+	files, err = manager.listInstalledFilesInDirectory("nonexistent")
+	assert.NoError(t, err)
+	assert.Empty(t, files)
+}
+
+func TestManager_listOrphanedFiles(t *testing.T) {
+	tempDir := t.TempDir()
+	claudeDir := filepath.Join(tempDir, ".claude")
+	manager := NewManager(claudeDir)
+
+	// 先安装commands组件以获得嵌入资源
+	ctx := context.Background()
+	err := manager.Install(ctx, Options{Commands: true})
+	assert.NoError(t, err)
+
+	// 添加一些孤立文件
+	commandsDir := filepath.Join(claudeDir, "commands")
+	orphanedFiles := []string{"orphaned1.md", "orphaned2.md"}
+	for _, file := range orphanedFiles {
+		filePath := filepath.Join(commandsDir, file)
+		err := os.WriteFile(filePath, []byte("orphaned"), 0644)
+		assert.NoError(t, err)
+	}
+
+	// 获取孤立文件列表
+	orphaned, err := manager.listOrphanedFiles("commands")
+	assert.NoError(t, err)
+	assert.NotEmpty(t, orphaned)
+
+	// 验证孤立文件在列表中
+	orphanedMap := make(map[string]bool)
+	for _, file := range orphaned {
+		orphanedMap[filepath.Base(file)] = true
+	}
+
+	for _, expected := range orphanedFiles {
+		assert.True(t, orphanedMap[expected], "孤立文件 %s 应该在列表中", expected)
+	}
+}
+
+func TestManager_cleanupOrphanedFiles_DryRun(t *testing.T) {
+	tempDir := t.TempDir()
+	claudeDir := filepath.Join(tempDir, ".claude")
+	manager := NewManager(claudeDir)
+
+	// 先安装commands组件
+	ctx := context.Background()
+	err := manager.Install(ctx, Options{Commands: true})
+	assert.NoError(t, err)
+
+	// 添加孤立文件
+	commandsDir := filepath.Join(claudeDir, "commands")
+	orphanedFile := filepath.Join(commandsDir, "orphaned.md")
+	err = os.WriteFile(orphanedFile, []byte("orphaned"), 0644)
+	assert.NoError(t, err)
+
+	// 执行dry-run删除 (Delete=true, Force=false)
+	options := Options{
+		Commands: true,
+		Delete:   true,
+		Force:    false, // dry-run模式
+	}
+
+	err = manager.cleanupOrphanedFiles("commands", options)
+	assert.NoError(t, err)
+
+	// 验证文件仍然存在 (dry-run不删除)
+	assert.FileExists(t, orphanedFile, "Dry-run模式不应删除文件")
+}
+
+func TestManager_cleanupOrphanedFiles_ActualDelete(t *testing.T) {
+	tempDir := t.TempDir()
+	claudeDir := filepath.Join(tempDir, ".claude")
+	manager := NewManager(claudeDir)
+
+	// 先安装commands组件
+	ctx := context.Background()
+	err := manager.Install(ctx, Options{Commands: true})
+	assert.NoError(t, err)
+
+	// 添加孤立文件
+	commandsDir := filepath.Join(claudeDir, "commands")
+	orphanedFile := filepath.Join(commandsDir, "orphaned.md")
+	err = os.WriteFile(orphanedFile, []byte("orphaned"), 0644)
+	assert.NoError(t, err)
+
+	// 执行实际删除 (Delete=true, Force=true)
+	options := Options{
+		Commands: true,
+		Delete:   true,
+		Force:    true, // 实际删除模式
+	}
+
+	err = manager.cleanupOrphanedFiles("commands", options)
+	assert.NoError(t, err)
+
+	// 验证文件已被删除
+	assert.NoFileExists(t, orphanedFile, "实际删除模式应该删除文件")
+}
+
+func TestManager_Install_WithDelete(t *testing.T) {
+	tempDir := t.TempDir()
+	claudeDir := filepath.Join(tempDir, ".claude")
+	manager := NewManager(claudeDir)
+
+	ctx := context.Background()
+
+	// 第一次安装
+	err := manager.Install(ctx, Options{Commands: true})
+	assert.NoError(t, err)
+
+	// 添加孤立文件
+	commandsDir := filepath.Join(claudeDir, "commands")
+	orphanedFile := filepath.Join(commandsDir, "orphaned.md")
+	err = os.WriteFile(orphanedFile, []byte("orphaned"), 0644)
+	assert.NoError(t, err)
+
+	// 第二次安装,启用删除功能
+	err = manager.Install(ctx, Options{
+		Commands: true,
+		Delete:   true,
+		Force:    true,
+	})
+	assert.NoError(t, err)
+
+	// 验证孤立文件已被删除
+	assert.NoFileExists(t, orphanedFile, "孤立文件应该被删除")
+
+	// 验证嵌入资源中的文件仍然存在
+	entries, err := os.ReadDir(commandsDir)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, entries, "应该还有嵌入资源中的文件")
+}
+
+func TestManager_cleanupOrphanedFiles_SkipSpecialFiles(t *testing.T) {
+	tempDir := t.TempDir()
+	claudeDir := filepath.Join(tempDir, ".claude")
+	manager := NewManager(claudeDir)
+
+	// 创建特殊文件
+	settingsFile := filepath.Join(claudeDir, "settings.json")
+	claudeMdFile := filepath.Join(claudeDir, "CLAUDE.md")
+
+	err := os.MkdirAll(claudeDir, 0755)
+	assert.NoError(t, err)
+
+	err = os.WriteFile(settingsFile, []byte("{}"), 0644)
+	assert.NoError(t, err)
+
+	err = os.WriteFile(claudeMdFile, []byte("# Test"), 0644)
+	assert.NoError(t, err)
+
+	// 执行删除 (这些文件不应该出现在孤立文件列表中)
+	options := Options{
+		Settings: true,
+		Delete:   true,
+		Force:    true,
+	}
+
+	// settings.json组件会被跳过
+	err = manager.cleanupOrphanedFiles("settings.json", options)
+	assert.NoError(t, err)
+
+	// 验证特殊文件仍然存在
+	assert.FileExists(t, settingsFile, "settings.json不应被删除")
+	assert.FileExists(t, claudeMdFile, "CLAUDE.md不应被删除")
+}

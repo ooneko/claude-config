@@ -1,194 +1,194 @@
-# Claude Command: iCafe
+# Claude 命令：iCafe
 
-This command helps you create iCafe cards based on current Git code changes, automatically analyzing modifications and generating titles, content, and types.
+此命令帮助您基于当前 Git 代码更改创建 iCafe 卡片，自动分析修改并生成标题、内容和类型。
 
-## Usage
+## 使用方法
 
-Create an iCafe card:
+创建 iCafe 卡片：
 ```
 /icafe
 ```
 
-With options:
+使用选项：
 ```
 /icafe --type=bug
 /icafe --type=story
-/icafe --title="Custom title"
+/icafe --title="自定义标题"
 ```
 
 
-## What This Command Does
+## 此命令功能
 
-1. **Analyze Git Status and Changes**:
-   - Execute `git status` to get current repository state
-   - **Smart File Selection Logic**:
-     - **If files are already staged**: Only analyzes the manually staged files
-     - **If no files are staged**: Analyzes all modified, deleted, and untracked files
-   - Get both staged and unstaged changes based on selection
+1. **分析 Git 状态和更改**：
+   - 执行 `git status` 获取当前仓库状态
+   - **智能文件选择逻辑**：
+     - **如果文件已暂存**：仅分析手动暂存的文件
+     - **如果文件未暂存**：分析所有修改、删除和未跟踪的文件
+   - 根据选择获取暂存和未暂存的更改
 
-2. **Smart Content Generation**:
-   - Execute `git diff --cached` for staged files or `git diff` for unstaged files
-   - Intelligently determine card type (bug or story) based on changes
-   - Auto-generate clear titles and description content
-   - Extract key information like affected modules and features
+2. **智能内容生成**：
+   - 对暂存文件执行 `git diff --cached`，对未暂存文件执行 `git diff`
+   - 基于更改智能确定卡片类型（bug 或 story）
+   - 自动生成清晰的标题和描述内容
+   - 提取受影响模块和功能等关键信息
 
-3. **Card Type Detection Logic**: 
-   - **Bug Type**: Detects error fixes, patches, rollbacks with keywords
-   - **Story Type**: Detects new features, enhancements, refactoring with keywords
-   **Note**: This command only supports two card types: `bug` and `story`
-   
+3. **卡片类型检测逻辑**：
+   - **Bug 类型**：通过关键词检测错误修复、补丁、回滚
+   - **Story 类型**：通过关键词检测新功能、增强、重构
+   **注意**：此命令仅支持两种卡片类型：`bug` 和 `story`
 
-4. **iCafe MCP Integration**:
-   - Call iCafe MCP service to create cards
-   - Pass generated title, content, and type
-   - Return creation result and card link
 
-## Card Content Generation Rules
+4. **iCafe MCP 集成**：
+   - 调用 iCafe MCP 服务创建卡片
+   - 传递生成的标题、内容和类型
+   - 返回创建结果和卡片链接
 
-### Title Generation
-- Generate concise titles based on main changed modules and features
-- Format: `[Module] Feature Description`
-- Examples:
-  - `[User Auth] Fix login failure issue`
-  - `[API] Add user management endpoints`
-  - `[Frontend] Optimize responsive layout`
+## 卡片内容生成规则
 
-### Content Generation
-Contains structured information:
-- **Change Overview**: Brief description of the change purpose
-- **Affected Files**: List main modified files
-- **Key Changes**: Detailed description of core changes
-- **Technical Details**: Important implementation points
+### 标题生成
+- 基于主要更改模块和功能生成简洁标题
+- 格式：`[模块] 功能描述`
+- 示例：
+  - `[用户认证] 修复登录失败问题`
+  - `[API] 添加用户管理端点`
+  - `[前端] 优化响应式布局`
 
-### Type Detection Rules
+### 内容生成
+包含结构化信息：
+- **更改概述**：更改目的的简要描述
+- **受影响文件**：主要修改文件列表
+- **关键更改**：核心更改的详细描述
+- **技术细节**：重要实现要点
 
-**Bug Type Triggers**:
-- Code changes include error fix patterns
-- Commit messages contain "fix", "bug", "patch", "hotfix" keywords
-- Deleted or modified exception handling logic
-- Fixed test cases
+### 类型检测规则
 
-**Story Type Triggers**:
-- New files or substantial new code
-- Commit messages contain "feat", "add", "enhance", "improve" keywords
-- New API endpoints or feature modules
-- New test cases added
+**Bug 类型触发器**：
+- 代码更改包含错误修复模式
+- 提交消息包含"fix"、"bug"、"patch"、"hotfix"关键词
+- 删除或修改异常处理逻辑
+- 修复的测试用例
 
-## Use Cases
+**Story 类型触发器**：
+- 新文件或大量新代码
+- 提交消息包含"feat"、"add"、"enhance"、"improve"关键词
+- 新 API 端点或功能模块
+- 新增的测试用例
 
-1. **Record After Development**:
+## 使用场景
+
+1. **开发后记录**：
    ```bash
-   # After completing feature development
+   # 完成功能开发后
    git add .
    /icafe
    ```
 
-2. **Bug Fix Recording**:
+2. **错误修复记录**：
    ```bash
-   # After fixing issues
+   # 修复问题后
    git add fixed_files.go
    /icafe --type=bug
    ```
 
-3. **Before Code Review**:
+3. **代码审查前**：
    ```bash
-   # Preparing for code review
-   /icafe --title="[Code Review] User permission module refactor"
+   # 准备代码审查
+   /icafe --title="[代码审查] 用户权限模块重构"
    ```
 
-## Command Options
+## 命令选项
 
-- `--type=<bug|story>`: Manually specify card type, skip auto-detection
-- `--title="<title>"`: Custom card title, skip auto-generation
-- `--content="<content>"`: Custom card content, skip auto-generation
-- `--no-analysis`: Skip Git change analysis, use manual input
+- `--type=<bug|story>`: 手动指定卡片类型，跳过自动检测
+- `--title="<标题>"`: 自定义卡片标题，跳过自动生成
+- `--content="<内容>"`: 自定义卡片内容，跳过自动生成
+- `--no-analysis`: 跳过 Git 更改分析，使用手动输入
 
-## Smart Analysis Examples
+## 智能分析示例
 
-### Bug Type Example
+### Bug 类型示例
 ```
-Title: [Auth Module] Fix JWT token expiration handling issue
-Content:
-Change Overview: Fix issue where user JWT tokens cannot refresh properly after expiration
+标题：[认证模块] 修复 JWT 令牌过期处理问题
+内容：
+更改概述：修复用户 JWT 令牌过期后无法正常刷新的问题
 
-Affected Files:
-- src/auth/jwt.go: Fix token refresh logic
-- src/middleware/auth.go: Improve expiration detection
+受影响文件：
+- src/auth/jwt.go: 修复令牌刷新逻辑
+- src/middleware/auth.go: 改进过期检测
 
-Key Changes:
-- Fix timestamp calculation error in token refresh
-- Add automatic refresh mechanism before expiration
-- Improve error handling and logging
+关键更改：
+- 修复令牌刷新中的时间戳计算错误
+- 在过期前添加自动刷新机制
+- 改进错误处理和日志记录
 
-Technical Details: Use time.Now().Unix() to replace incorrect time calculation
-```
-
-### Story Type Example
-```
-Title: [User Module] Add user preference settings feature
-Content:
-Change Overview: Implement user personal preference settings supporting themes, languages, etc.
-
-Affected Files:
-- src/models/user_preference.go: New user preference data model
-- src/api/preference.go: Implement preference settings API
-- src/frontend/settings.tsx: Add settings page component
-
-Key Changes:
-- Design and implement user preference data structure
-- Create CRUD API interfaces
-- Implement frontend settings interface
-- Add database migration files
-
-Technical Details: Use JSON fields for flexible configuration with dynamic extension support
+技术细节：使用 time.Now().Unix() 替换不正确的时间计算
 ```
 
-## MCP Integration
+### Story 类型示例
+```
+标题：[用户模块] 添加用户偏好设置功能
+内容：
+更改概述：实现用户个人偏好设置，支持主题、语言等
 
-This command depends on iCafe MCP service for card creation:
+受影响文件：
+- src/models/user_preference.go: 新建用户偏好数据模型
+- src/api/preference.go: 实现偏好设置 API
+- src/frontend/settings.tsx: 添加设置页面组件
 
-1. **Connection Verification**: Check if iCafe MCP service is available
-2. **Data Transfer**: Send generated content to iCafe
-3. **Result Handling**: Return creation result and card access link
-4. **Error Handling**: Handle network errors and service exceptions
+关键更改：
+- 设计并实现用户偏好数据结构
+- 创建 CRUD API 接口
+- 实现前端设置界面
+- 添加数据库迁移文件
 
-## Best Practices
+技术细节：使用 JSON 字段实现灵活配置，支持动态扩展
+```
 
-1. **Timely Recording**: Create cards immediately after development or fixes
-2. **Clear Commits**: Ensure Git changes reflect actual work content
-3. **Reasonable Splitting**: Consider multiple commits and records for large changes
-4. **Regular Organization**: Use cards for work summary and review
+## MCP 集成
 
-## Important Notes
+此命令依赖 iCafe MCP 服务进行卡片创建：
 
-- Command must be executed in Git repository
-- Recommend using when there are clear code changes, avoid empty changes
-- Auto-generated content can be overridden with options
-- Supports Chinese and English code change analysis
-- Card creation failure won't affect local Git status
+1. **连接验证**：检查 iCafe MCP 服务是否可用
+2. **数据传输**：将生成的内容发送到 iCafe
+3. **结果处理**：返回创建结果和卡片访问链接
+4. **错误处理**：处理网络错误和服务异常
 
-## Examples
+## 最佳实践
 
-Simple usage:
+1. **及时记录**：在开发或修复后立即创建卡片
+2. **清晰提交**：确保 Git 更改反映实际工作内容
+3. **合理拆分**：对大更改考虑多次提交和记录
+4. **定期整理**：使用卡片进行工作总结和审查
+
+## 重要说明
+
+- 命令必须在 Git 仓库中执行
+- 建议在有明确代码更改时使用，避免空更改
+- 自动生成的内容可以用选项覆盖
+- 支持中英文代码更改分析
+- 卡片创建失败不会影响本地 Git 状态
+
+## 示例
+
+简单使用：
 ```bash
-# Auto-analyze and create card
+# 自动分析并创建卡片
 /icafe
 ```
 
-Specify type:
+指定类型：
 ```bash
-# Explicitly specify bug type
+# 明确指定 bug 类型
 /icafe --type=bug
 ```
 
-Custom title:
+自定义标题：
 ```bash
-# Use custom title
-/icafe --title="[Performance] Database query optimization"
+# 使用自定义标题
+/icafe --title="[性能] 数据库查询优化"
 ```
 
-Fully customized:
+完全自定义：
 ```bash
-# Fully manual content specification
-/icafe --type=story --title="New feature development" --content="Detailed feature description..."
+# 完全手动内容指定
+/icafe --type=story --title="新功能开发" --content="详细功能描述..."
 ```

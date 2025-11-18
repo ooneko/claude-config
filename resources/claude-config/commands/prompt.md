@@ -1,52 +1,52 @@
 ---
 allowed-tools: all
-description: Synthesize a complete prompt by combining next.md with your arguments
+description: 通过结合 next.md 和您的参数来合成完整的提示词
 ---
 
-## 🎯 PROMPT SYNTHESIZER
+## 🎯 提示词合成器
 
-You will create a **complete, ready-to-copy prompt** by combining:
-1. The next.md command template from ~/.claude/commands/next.md
-2. The specific task details provided here: $ARGUMENTS
+您将通过结合以下内容创建一个**完整的、可直接复制的提示词**：
+1. 来自 ~/.claude/commands/next.md 的 next.md 命令模板
+2. 此处提供的具体任务详情：$ARGUMENTS
 
-### 📋 YOUR TASK:
+### 📋 您的任务：
 
-1. **READ** the next.md command file at ~/.claude/commands/next.md
-2. **EXTRACT** the core prompt structure and requirements
-3. **INTEGRATE** the user's arguments seamlessly into the prompt
-4. **OUTPUT** a complete prompt in a code block that can be easily copied
+1. **读取** ~/.claude/commands/next.md 中的 next.md 命令文件
+2. **提取** 核心提示词结构和要求
+3. **整合** 用户的参数到提示词中，确保无缝衔接
+4. **输出** 一个完整的、易于复制的提示词代码块
 
-### 🎨 OUTPUT FORMAT:
+### 🎨 输出格式：
 
-Present the synthesized prompt in a markdown code block like this:
+在 markdown 代码块中呈现合成的提示词，如下所示：
 
 ```
-[The complete synthesized prompt that combines next.md instructions with the user's specific task]
+[结合了 next.md 指令和用户具体任务的完整合成提示词]
 ```
 
-### ⚡ SYNTHESIS RULES:
+### ⚡ 合成规则：
 
-1. **Preserve Structure** - Maintain the workflow, checkpoints, and requirements from next.md
-2. **Integrate Naturally** - Replace `$ARGUMENTS` placeholder with the actual task details
-3. **Context Aware** - If the user's arguments reference specific technologies, emphasize relevant sections
-4. **Complete & Standalone** - The output should work perfectly when pasted into a fresh Claude conversation
-5. **No Meta-Commentary** - Don't explain what you're doing, just output the synthesized prompt
+1. **保持结构** - 维护来自 next.md 的工作流程、检查点和要求
+2. **自然整合** - 用实际任务详情替换 `$ARGUMENTS` 占位符
+3. **上下文感知** - 如果用户的参数引用了特定技术，强调相关部分
+4. **完整且独立** - 输出在粘贴到新的 Claude 对话时应该完美运行
+5. **无元注释** - 不要解释您在做什么，只需输出合成的提示词
 
-### 🔧 ENHANCEMENT GUIDELINES:
+### 🔧 增强指南：
 
-- If the task mentions specific languages (Go, Python, etc.), emphasize those language-specific rules
-- If the task seems complex, ensure the "ultrathink" and "multiple agents" sections are prominent
-- If the task involves refactoring, highlight the "delete old code" requirements
-- Keep ALL critical requirements (hooks, linting, testing) regardless of the task
+- 如果任务提及特定语言（Go、Python 等），强调那些特定语言的规则
+- 如果任务看起来复杂，确保突出 "ultrathink" 和 "multiple agents" 部分
+- 如果任务涉及重构，强调 "delete old code" 要求
+- 无论任务如何，都要保留所有关键要求（hooks、linting、testing）
 
-### 📦 EXAMPLE BEHAVIOR:
+### 📦 示例行为：
 
-If user provides: "implement a REST API for user management with JWT authentication"
+如果用户提供："implement a REST API for user management with JWT authentication"
 
-You would:
-1. Read next.md
-2. Replace $ARGUMENTS with the user's task
-3. Emphasize relevant sections (API design, security, testing)
-4. Output the complete, integrated prompt
+您应该：
+1. 读取 next.md
+2. 用用户的任务替换 $ARGUMENTS
+3. 强调相关部分（API 设计、安全性、测试）
+4. 输出完整的、集成的提示词
 
-**BEGIN SYNTHESIS NOW** - Read next.md and create the perfect prompt!
+**立即开始合成** - 读取 next.md 并创建完美的提示词！

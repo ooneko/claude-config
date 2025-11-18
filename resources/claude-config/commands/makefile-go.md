@@ -14,7 +14,6 @@ Generate a comprehensive Makefile for Go projects with essential development tar
 3. **Includes essential targets**:
    - `make lint` - Run golangci-lint with fallback detection
    - `make test` - Run all tests with verbose output
-   - `make test-changed` - Run tests only for git-changed Go files
    - `make fmt` - Format code with go fmt
    - `make vet` - Run go vet static analysis
    - `make build` - Build the application
@@ -78,24 +77,6 @@ test-coverage:
 	@echo "Running tests with coverage..."
 	go test -v -coverprofile=coverage.out ./...
 	go tool cover -html=coverage.out -o coverage.html
-
-# Run tests only for git changed files (untracked + modified)
-.PHONY: test-changed
-test-changed:
-	@echo "Running tests for git changed files..."
-	@if command -v git >/dev/null 2>&1 && git rev-parse --git-dir >/dev/null 2>&1; then \
-		CHANGED_DIRS=$$(git status --porcelain | grep -E '^\?\?|^ M|^M |^A ' | awk '{print $$2}' | grep '\.go$$' | xargs -I {} dirname {} | sort -u | sed 's|^|./|' | tr '\n' ' '); \
-		if [ -n "$$CHANGED_DIRS" ]; then \
-			echo "Testing changed directories: $$CHANGED_DIRS"; \
-			go test -v $$CHANGED_DIRS; \
-		else \
-			echo "No Go files changed in git, running full test suite..."; \
-			go test -v ./...; \
-		fi \
-	else \
-		echo "Not in a git repository or git not available, running full test suite..."; \
-		go test -v ./...; \
-	fi
 
 # Run go fmt
 .PHONY: fmt

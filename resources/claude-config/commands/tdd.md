@@ -1,41 +1,65 @@
 ---
 allowed-tools: all
-description: Test-Driven Development workflow for writing tests first
+description: 测试驱动开发工作流 - 先写测试，后实现，确保生产级质量
 ---
 
-# TDD - Test-Driven Development
+# TDD - 测试驱动开发
 
-Strictly follow TDD workflow: write tests first, then implement.
+严格遵循TDD工作流：先写测试，再实现功能，确保生产级代码质量。
 
-## TDD Three-Step Process
+## 必需工作流
 
-### RED - Write Failing Test
-1. Write test cases that define expected functionality
-2. Run tests to confirm they fail
+1. **研究** - "让我研究代码库并在实现前创建计划"
+2. **计划** - 提出方案以供验证
+3. **实现** - 通过TDD流程持续验证构建
 
-### GREEN - Minimal Implementation
-1. Write minimal code to make tests pass
-2. Verify all tests are passing
+对于复杂的架构决策："让我深度思考这个架构"
 
-### REFACTOR - Improve Code
-1. Improve code quality and design
-2. Keep tests green
+对于包含独立部分的任务：并行启动多个代理
 
-## Usage
+## TDD三步流程
+
+### RED - 编写失败的测试
+1. 编写定义预期功能的测试用例
+2. 运行测试确认它们会失败
+
+### GREEN - 最小化实现
+1. 编写最少的代码使测试通过
+2. 验证所有测试都通过
+
+### REFACTOR - 重构改进
+1. 改进代码质量和设计
+2. 保持测试通过状态
+
+## 使用方法
 
 ```bash
-# Start TDD workflow
-/tdd [feature-name]
+# 启动TDD工作流
+/tdd [功能名称]
 
-# Example: develop user authentication
+# 示例：开发用户认证功能
 /tdd user-auth
 ```
 
-## Core Principles
+## 核心原则
 
-- **Test First**: Tests must exist before feature code
-- **Minimal Implementation**: Write only code needed to pass tests
-- **Continuous Refactor**: Improve design while keeping tests green
-- **Fast Cycles**: Maintain short red-green-refactor cycles
+- **测试优先**：测试必须在功能代码之前存在
+- **最小化实现**：只编写通过测试所需的代码
+- **持续重构**：在保持测试通过的同时改进设计
+- **快速循环**：维持简短的红-绿-重构循环
 
-**Start TDD Workflow**: Let's build high-quality code with test-driven development!
+## 实现标准
+
+### 代码演进
+- 重构时完全替换旧代码
+- 无版本化函数名（processV2、handleNew）
+- 无兼容层或迁移代码
+- 这是功能分支 - 直接实现最终解决方案
+
+## 完成标准
+- lint 通过零警告
+- test通过零失败
+- 功能在现实场景中正常工作
+- 无待办事项或临时代码残留
+
+**开始TDD工作流**：让我们通过测试驱动开发构建生产级高质量代码！
