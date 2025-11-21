@@ -224,15 +224,6 @@ func configureMacOSNotifications(settings *claude.Settings) {
 				},
 			},
 		},
-		{
-			Matcher: "idle_prompt",
-			Hooks: []*claude.HookItem{
-				{
-					Type:    "command",
-					Command: "~/.claude/hooks/ntfy-notifier.sh notification idle_prompt",
-				},
-			},
-		},
 	}
 
 	// 将通知规则添加到 hooks.Notification 中

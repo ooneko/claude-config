@@ -28,15 +28,6 @@ func TestHooksConfig_NotificationStructure(t *testing.T) {
 						},
 					},
 				},
-				{
-					Matcher: "idle_prompt",
-					Hooks: []*HookItem{
-						{
-							Type:    "command",
-							Command: "~/.claude/hooks/ntfy-notifier.sh notification idle_prompt",
-						},
-					},
-				},
 			},
 		},
 	}
@@ -51,9 +42,8 @@ func TestHooksConfig_NotificationStructure(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NotNil(t, unmarshaled.Hooks)
-	assert.Len(t, unmarshaled.Hooks.Notification, 2)
+	assert.Len(t, unmarshaled.Hooks.Notification, 1)
 	assert.Equal(t, "permission_prompt", unmarshaled.Hooks.Notification[0].Matcher)
-	assert.Equal(t, "idle_prompt", unmarshaled.Hooks.Notification[1].Matcher)
 }
 
 // TestHooksConfig_NotificationFileRoundTrip tests saving and loading
@@ -78,15 +68,6 @@ func TestHooksConfig_NotificationFileRoundTrip(t *testing.T) {
 						},
 					},
 				},
-				{
-					Matcher: "idle_prompt",
-					Hooks: []*HookItem{
-						{
-							Type:    "command",
-							Command: "~/.claude/hooks/ntfy-notifier.sh notification idle_prompt",
-						},
-					},
-				},
 			},
 		},
 	}
@@ -108,7 +89,7 @@ func TestHooksConfig_NotificationFileRoundTrip(t *testing.T) {
 
 	// Verify loaded settings match original
 	require.NotNil(t, loadedSettings.Hooks)
-	assert.Len(t, loadedSettings.Hooks.Notification, 2)
+	assert.Len(t, loadedSettings.Hooks.Notification, 1)
 	assert.False(t, loadedSettings.IncludeCoAuthoredBy)
 
 	// Verify notification rules are preserved
@@ -116,11 +97,6 @@ func TestHooksConfig_NotificationFileRoundTrip(t *testing.T) {
 	assert.Equal(t, "permission_prompt", permissionRule.Matcher)
 	assert.Len(t, permissionRule.Hooks, 1)
 	assert.Contains(t, permissionRule.Hooks[0].Command, "permission_prompt")
-
-	idleRule := loadedSettings.Hooks.Notification[1]
-	assert.Equal(t, "idle_prompt", idleRule.Matcher)
-	assert.Len(t, idleRule.Hooks, 1)
-	assert.Contains(t, idleRule.Hooks[0].Command, "idle_prompt")
 }
 
 // TestHooksConfig_FindNotificationRuleByMatcher tests finding notification rules
@@ -134,12 +110,6 @@ func TestHooksConfig_FindNotificationRuleByMatcher(t *testing.T) {
 						{Type: "command", Command: "command1"},
 					},
 				},
-				{
-					Matcher: "idle_prompt",
-					Hooks: []*HookItem{
-						{Type: "command", Command: "command2"},
-					},
-				},
 			},
 		},
 	}
@@ -148,10 +118,6 @@ func TestHooksConfig_FindNotificationRuleByMatcher(t *testing.T) {
 	permissionRule := FindHookRuleByMatcher(settings.Hooks.Notification, "permission_prompt")
 	require.NotNil(t, permissionRule)
 	assert.Equal(t, "permission_prompt", permissionRule.Matcher)
-
-	idleRule := FindHookRuleByMatcher(settings.Hooks.Notification, "idle_prompt")
-	require.NotNil(t, idleRule)
-	assert.Equal(t, "idle_prompt", idleRule.Matcher)
 
 	// Test finding non-existing rule
 	nonExistingRule := FindHookRuleByMatcher(settings.Hooks.Notification, "non_existing")

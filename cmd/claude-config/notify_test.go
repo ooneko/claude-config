@@ -26,7 +26,7 @@ func TestConfigureMacOSNotifications(t *testing.T) {
 
 	// Verify notification configuration was added to hooks.Notification
 	require.NotNil(t, settings.Hooks)
-	assert.Len(t, settings.Hooks.Notification, 2)
+	assert.Len(t, settings.Hooks.Notification, 1)
 
 	// Verify existing settings are preserved
 	assert.True(t, settings.IncludeCoAuthoredBy)
@@ -39,14 +39,6 @@ func TestConfigureMacOSNotifications(t *testing.T) {
 	assert.Equal(t, "command", permissionRule.Hooks[0].Type)
 	expectedPermissionCommand := "~/.claude/hooks/ntfy-notifier.sh notification permission_prompt"
 	assert.Equal(t, expectedPermissionCommand, permissionRule.Hooks[0].Command)
-
-	// Verify idle prompt rule uses ntfy-notifier.sh
-	idleRule := findHookRuleByMatcher(settings.Hooks.Notification, "idle_prompt")
-	require.NotNil(t, idleRule)
-	assert.Len(t, idleRule.Hooks, 1)
-	assert.Equal(t, "command", idleRule.Hooks[0].Type)
-	expectedIdleCommand := "~/.claude/hooks/ntfy-notifier.sh notification idle_prompt"
-	assert.Equal(t, expectedIdleCommand, idleRule.Hooks[0].Command)
 }
 
 // TestConfigureMacOSNotifications_Idempotent tests that calling the function multiple times works correctly
@@ -62,7 +54,7 @@ func TestConfigureMacOSNotifications_Idempotent(t *testing.T) {
 
 	// Should still have the same configuration (not duplicated)
 	assert.NotNil(t, secondNotificationConfig)
-	assert.Len(t, secondNotificationConfig, 2)
+	assert.Len(t, secondNotificationConfig, 1)
 	assert.Equal(t, len(firstNotificationConfig), len(secondNotificationConfig))
 }
 
