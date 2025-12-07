@@ -70,7 +70,7 @@ func createProxyCmd() *cobra.Command {
 	proxyCmd := &cobra.Command{
 		Use:   "proxy <command>",
 		Short: "代理管理",
-		Long:  "管理 HTTP/HTTPS 代理设置 (127.0.0.1:7890)",
+		Long:  "管理 HTTP/HTTPS 代理设置",
 		Run: func(cmd *cobra.Command, _ []string) {
 			_ = cmd.Help()
 		},
@@ -116,6 +116,31 @@ func createProxyCmd() *cobra.Command {
 		},
 	}
 
-	proxyCmd.AddCommand(proxyOnCmd, proxyOffCmd, proxyToggleCmd, proxyResetCmd)
+	proxyStatusCmd := &cobra.Command{
+		Use:   "status",
+		Short: "显示代理状态",
+		Long:  "显示当前代理的启用状态和代理地址",
+		RunE: func(_ *cobra.Command, _ []string) error {
+			ctx := context.Background()
+			isEnabled, err := proxyMgr.IsEnabled(ctx)
+			if err != nil {
+				return fmt.Errorf("获取代理状态失败: %w", err)
+			}
+
+			if isEnabled {
+				config, err := proxyMgr.GetConfig(ctx)
+				if err != nil {
+					return fmt.Errorf("获取代理配置失败: %w", err)
+				}
+				fmt.Printf("🌐 代理状态: ✅ 已启用 (%s)\n", config.HTTPProxy)
+			} else {
+				fmt.Println("🌐 代理状态: ❌ 已禁用")
+			}
+
+			return nil
+		},
+	}
+
+	proxyCmd.AddCommand(proxyOnCmd, proxyOffCmd, proxyToggleCmd, proxyResetCmd, proxyStatusCmd)
 	return proxyCmd
 }
