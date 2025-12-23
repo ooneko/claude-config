@@ -76,8 +76,8 @@ func (p *GLMProvider) GetDefaultConfig(apiKey string) *ProviderConfig {
 		Type:           ProviderGLM,
 		AuthToken:      apiKey,
 		BaseURL:        "https://open.bigmodel.cn/api/anthropic",
-		Model:          "glm-4.6",
-		SmallFastModel: "glm-4.6",
+		Model:          "glm-4.7",
+		SmallFastModel: "glm-4.7",
 	}
 }
 
