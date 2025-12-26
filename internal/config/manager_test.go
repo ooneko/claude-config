@@ -179,11 +179,13 @@ func TestConfigManager_GetStatus(t *testing.T) {
 	settings := &claude.Settings{
 		IncludeCoAuthoredBy: true,
 		Env: map[string]string{
-			"http_proxy":           "http://127.0.0.1:7890",
-			"https_proxy":          "http://127.0.0.1:7890",
-			"ANTHROPIC_AUTH_TOKEN": "sk-test123",
-			"ANTHROPIC_BASE_URL":   "https://api.deepseek.com/anthropic",
-			"ANTHROPIC_MODEL":      "deepseek-chat",
+			"http_proxy":                     "http://127.0.0.1:7890",
+			"https_proxy":                    "http://127.0.0.1:7890",
+			"ANTHROPIC_AUTH_TOKEN":           "sk-test123",
+			"ANTHROPIC_BASE_URL":             "https://api.deepseek.com/anthropic",
+			"ANTHROPIC_DEFAULT_HAIKU_MODEL":  "deepseek-chat",
+			"ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-chat",
+			"ANTHROPIC_DEFAULT_OPUS_MODEL":   "deepseek-chat",
 		},
 		Hooks: &claude.HooksConfig{
 			PostToolUse: []*claude.HookRule{

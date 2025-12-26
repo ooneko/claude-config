@@ -102,7 +102,7 @@ func TestCreateStartCmd(t *testing.T) {
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "old-token",
     "ANTHROPIC_BASE_URL": "old-url",
-    "ANTHROPIC_MODEL": "old-model"
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "old-model"
   }
 }`
 				err = os.WriteFile(claudeDir+"/settings.json", []byte(settingsContent), 0644)
@@ -208,8 +208,9 @@ func TestStartNativeClaude(t *testing.T) {
   "env": {
     "ANTHROPIC_AUTH_TOKEN": "old-token",
     "ANTHROPIC_BASE_URL": "old-url",
-    "ANTHROPIC_MODEL": "old-model",
-    "ANTHROPIC_SMALL_FAST_MODEL": "old-fast-model"
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "old-haiku",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "old-sonnet",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "old-opus"
   }
 }`,
 			wantErr: false,
@@ -222,8 +223,9 @@ func TestStartNativeClaude(t *testing.T) {
 				// 验证不再包含 ANTHROPIC_ 配置
 				assert.NotContains(t, string(content), "ANTHROPIC_AUTH_TOKEN")
 				assert.NotContains(t, string(content), "ANTHROPIC_BASE_URL")
-				assert.NotContains(t, string(content), "ANTHROPIC_MODEL")
-				assert.NotContains(t, string(content), "ANTHROPIC_SMALL_FAST_MODEL")
+				assert.NotContains(t, string(content), "ANTHROPIC_DEFAULT_HAIKU_MODEL")
+				assert.NotContains(t, string(content), "ANTHROPIC_DEFAULT_SONNET_MODEL")
+				assert.NotContains(t, string(content), "ANTHROPIC_DEFAULT_OPUS_MODEL")
 			},
 		},
 		{
@@ -235,7 +237,7 @@ func TestStartNativeClaude(t *testing.T) {
   },
   "env": {
     "OTHER_VAR": "other-value",
-    "ANTHROPIC_MODEL": "old-model"
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "old-model"
   }
 }`,
 			wantErr: false,
@@ -250,7 +252,7 @@ func TestStartNativeClaude(t *testing.T) {
 				assert.Contains(t, string(content), "hooks")
 
 				// 验证 ANTHROPIC 配置被清理
-				assert.NotContains(t, string(content), "ANTHROPIC_MODEL")
+				assert.NotContains(t, string(content), "ANTHROPIC_DEFAULT_HAIKU_MODEL")
 			},
 		},
 	}

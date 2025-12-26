@@ -70,8 +70,9 @@ func (m *Manager) Enable(_ context.Context, provider ProviderType, apiKey string
 	// Set provider configuration
 	settings.Env["ANTHROPIC_AUTH_TOKEN"] = config.AuthToken
 	settings.Env["ANTHROPIC_BASE_URL"] = config.BaseURL
-	settings.Env["ANTHROPIC_MODEL"] = config.Model
-	settings.Env["ANTHROPIC_SMALL_FAST_MODEL"] = config.SmallFastModel
+
+	// Set default model environment variables
+	m.addDefaultModelEnvVars(settings.Env, provider, config)
 
 	// Save settings
 	if err := m.saveSettings(settings); err != nil {
@@ -93,8 +94,9 @@ func (m *Manager) Reset(_ context.Context, provider ProviderType) error {
 		// Remove AI provider environment variables
 		delete(settings.Env, "ANTHROPIC_AUTH_TOKEN")
 		delete(settings.Env, "ANTHROPIC_BASE_URL")
-		delete(settings.Env, "ANTHROPIC_MODEL")
-		delete(settings.Env, "ANTHROPIC_SMALL_FAST_MODEL")
+		delete(settings.Env, "ANTHROPIC_DEFAULT_HAIKU_MODEL")
+		delete(settings.Env, "ANTHROPIC_DEFAULT_SONNET_MODEL")
+		delete(settings.Env, "ANTHROPIC_DEFAULT_OPUS_MODEL")
 
 		// If env map is empty, set it to nil
 		if len(settings.Env) == 0 {
@@ -133,8 +135,9 @@ func (m *Manager) Off(ctx context.Context) error {
 		// Remove all AI provider environment variables
 		delete(settings.Env, "ANTHROPIC_AUTH_TOKEN")
 		delete(settings.Env, "ANTHROPIC_BASE_URL")
-		delete(settings.Env, "ANTHROPIC_MODEL")
-		delete(settings.Env, "ANTHROPIC_SMALL_FAST_MODEL")
+		delete(settings.Env, "ANTHROPIC_DEFAULT_HAIKU_MODEL")
+		delete(settings.Env, "ANTHROPIC_DEFAULT_SONNET_MODEL")
+		delete(settings.Env, "ANTHROPIC_DEFAULT_OPUS_MODEL")
 
 		// If env map is empty, set it to nil
 		if len(settings.Env) == 0 {
@@ -217,12 +220,33 @@ func (m *Manager) GetProviderConfig(_ context.Context, provider ProviderType) (*
 		return nil, nil
 	}
 
+	// Get provider implementation for default config
+	providerImpl, exists := m.providers[provider]
+	if !exists {
+		return nil, fmt.Errorf("provider implementation not found: %s", provider)
+	}
+	defaultConfig := providerImpl.GetDefaultConfig("")
+
+	// Use ANTHROPIC_DEFAULT_SONNET_MODEL as the primary model,
+	// fall back to default config if not set
+	model := settings.Env["ANTHROPIC_DEFAULT_SONNET_MODEL"]
+	if model == "" {
+		model = defaultConfig.Model
+	}
+
+	// Use ANTHROPIC_DEFAULT_HAIKU_MODEL as the fast model,
+	// fall back to default config if not set
+	smallFastModel := settings.Env["ANTHROPIC_DEFAULT_HAIKU_MODEL"]
+	if smallFastModel == "" {
+		smallFastModel = defaultConfig.SmallFastModel
+	}
+
 	return &ProviderConfig{
 		Type:           provider,
 		AuthToken:      authToken,
 		BaseURL:        baseURL,
-		Model:          settings.Env["ANTHROPIC_MODEL"],
-		SmallFastModel: settings.Env["ANTHROPIC_SMALL_FAST_MODEL"],
+		Model:          model,
+		SmallFastModel: smallFastModel,
 	}, nil
 }
 
@@ -390,4 +414,32 @@ func (m *Manager) loadAPIKey(provider ProviderType) (string, error) {
 	}
 
 	return string(data), nil
+}
+
+// addDefaultModelEnvVars 添加默认模型环境变量
+func (m *Manager) addDefaultModelEnvVars(env map[string]string, provider ProviderType, config *ProviderConfig) {
+	var haikuModel, sonnetModel, opusModel string
+
+	switch provider {
+	case ProviderDeepSeek:
+		haikuModel = config.Model
+		sonnetModel = config.Model
+		opusModel = config.Model
+	case ProviderKimi:
+		haikuModel = config.Model
+		sonnetModel = config.Model
+		opusModel = config.Model
+	case ProviderGLM:
+		haikuModel = "glm-4.7"
+		sonnetModel = "glm-4.7"
+		opusModel = "glm-4.7"
+	case ProviderDoubao:
+		haikuModel = config.Model
+		sonnetModel = config.Model
+		opusModel = config.Model
+	}
+
+	env["ANTHROPIC_DEFAULT_HAIKU_MODEL"] = haikuModel
+	env["ANTHROPIC_DEFAULT_SONNET_MODEL"] = sonnetModel
+	env["ANTHROPIC_DEFAULT_OPUS_MODEL"] = opusModel
 }
