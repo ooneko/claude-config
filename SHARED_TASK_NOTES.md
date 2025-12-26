@@ -9,9 +9,10 @@ internal/aiprovider: 76.4% ✓
 internal/claude:     83.3% ✓
 internal/config:     76.5% ✓
 internal/file:       79.9% ✓
-internal/install:    87.8% ✓
-internal/provider:   89.3% ✓
-internal/check:      0.0%  ❌ (无测试)
+internal/install:    83.4% ✓
+internal/provider:   94.1% ✓
+internal/check:      82.8% ✓
+internal/proxy:      68.4% ✓
 ```
 
 ### 立即可执行的改进任务
@@ -26,15 +27,9 @@ internal/check:      0.0%  ❌ (无测试)
   - `proxy.go` - 代理命令
   - `aiprovider.go` - AI提供商配置命令
 
-#### 2. 为 internal/check 添加测试
-- 当前: 0% (无测试文件)
-- 文件: `internal/check/manager.go`
-- 优先级: 高
-
-#### 3. 运行深度静态分析
-```bash
-make lint  # 需要 golangci-lint
-```
+#### 2. 提升 internal/proxy 覆盖率
+- 当前: 68.4%
+- 目标: >75%
 
 ### 运行命令
 ```bash
@@ -46,12 +41,12 @@ make test-coverage
 
 # 仅针对特定包测试
 go test ./cmd/claude-config -cover
-go test ./internal/check -cover
+go test ./internal/proxy -cover
 ```
 
 ### 下次迭代建议
-1. 为 `internal/check` 编写单元测试（高优先级）
-2. 为 `cmd/claude-config/utils.go` 添加测试
+1. 为 `cmd/claude-config/utils.go` 添加测试（高优先级）
+2. 提升 `internal/proxy` 测试覆盖率
 3. 逐步提升 CLI 命令文件覆盖率（backup.go, install.go, proxy.go, aiprovider.go）
 
 ---
@@ -59,11 +54,18 @@ go test ./internal/check -cover
 ## 本次迭代完成 (2025-12-26)
 
 ### 已完成任务
-- [x] 分析项目测试覆盖率
-- [x] 修复 golangci-lint 版本不匹配问题（v1.64.8 → v2.7.2）
-- [x] 验证所有代码检查通过（fmt, vet, test, lint）
+- [x] 为 `internal/check` 编写完整的单元测试
+- [x] 达到 82.8% 测试覆盖率（从 0% 提升）
 
 ### 改进成果
-- **golangci-lint**: 从 v1 升级到 v2.7.2，解决配置版本不匹配
-- **代码检查**: 所有检查通过，0 issues
-- **测试状态**: 所有测试通过（cached）
+- **internal/check 测试覆盖率**: 0% → 82.8%
+- **测试文件**: 新增 `internal/check/manager_test.go`
+- **测试用例**:
+  - NewManager 构造函数测试
+  - EnableCheck 启用钩子测试（4 个场景）
+  - DisableCheck 禁用钩子测试（4 个场景）
+  - createDefaultHooksConfig 默认配置测试
+  - loadSettings/saveSettings 文件操作测试（3 个场景）
+  - saveHooksBackup/loadHooksBackup 备份操作测试
+  - EnableDisableIntegration 集成测试
+- **代码质量**: 所有 lint 和测试检查通过
