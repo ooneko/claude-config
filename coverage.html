@@ -1,0 +1,4510 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>claude-config: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/ooneko/claude-config/cmd/claude-config/aiprovider.go (0.0%)</option>
+				
+				<option value="file1">github.com/ooneko/claude-config/cmd/claude-config/backup.go (0.0%)</option>
+				
+				<option value="file2">github.com/ooneko/claude-config/cmd/claude-config/check.go (0.0%)</option>
+				
+				<option value="file3">github.com/ooneko/claude-config/cmd/claude-config/commands.go (0.0%)</option>
+				
+				<option value="file4">github.com/ooneko/claude-config/cmd/claude-config/install.go (0.0%)</option>
+				
+				<option value="file5">github.com/ooneko/claude-config/cmd/claude-config/main.go (58.3%)</option>
+				
+				<option value="file6">github.com/ooneko/claude-config/cmd/claude-config/notify.go (4.7%)</option>
+				
+				<option value="file7">github.com/ooneko/claude-config/cmd/claude-config/proxy.go (0.0%)</option>
+				
+				<option value="file8">github.com/ooneko/claude-config/cmd/claude-config/start.go (83.8%)</option>
+				
+				<option value="file9">github.com/ooneko/claude-config/cmd/claude-config/status.go (0.0%)</option>
+				
+				<option value="file10">github.com/ooneko/claude-config/cmd/claude-config/utils.go (0.0%)</option>
+				
+				<option value="file11">github.com/ooneko/claude-config/internal/aiprovider/manager.go (82.4%)</option>
+				
+				<option value="file12">github.com/ooneko/claude-config/internal/aiprovider/providers.go (35.7%)</option>
+				
+				<option value="file13">github.com/ooneko/claude-config/internal/check/manager.go (1.6%)</option>
+				
+				<option value="file14">github.com/ooneko/claude-config/internal/claude/types.go (83.3%)</option>
+				
+				<option value="file15">github.com/ooneko/claude-config/internal/config/manager.go (76.5%)</option>
+				
+				<option value="file16">github.com/ooneko/claude-config/internal/file/merger.go (84.3%)</option>
+				
+				<option value="file17">github.com/ooneko/claude-config/internal/file/operations.go (75.8%)</option>
+				
+				<option value="file18">github.com/ooneko/claude-config/internal/install/manager.go (83.9%)</option>
+				
+				<option value="file19">github.com/ooneko/claude-config/internal/install/merger.go (79.4%)</option>
+				
+				<option value="file20">github.com/ooneko/claude-config/internal/install/permissions.go (100.0%)</option>
+				
+				<option value="file21">github.com/ooneko/claude-config/internal/install/types.go (100.0%)</option>
+				
+				<option value="file22">github.com/ooneko/claude-config/internal/provider/envmapper.go (94.1%)</option>
+				
+				<option value="file23">github.com/ooneko/claude-config/internal/proxy/manager.go (68.4%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "path/filepath"
+
+        "github.com/ooneko/claude-config/internal/aiprovider"
+        "github.com/ooneko/claude-config/internal/claude"
+        "github.com/spf13/cobra"
+)
+
+func createAIProviderCmd() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "ai",
+                Short: "AI提供商配置管理",
+                Long:  `管理AI提供商配置，支持DeepSeek、Kimi、GLM、Doubao等多个提供商。`,
+                Run: func(_ *cobra.Command, _ []string) </span><span class="cov0" title="0">{
+                        showAIProviderStatus()
+                }</span>,
+        }
+
+        <span class="cov0" title="0">cmd.AddCommand(
+                createAIProviderResetCmd(),
+                createAIProviderOffCmd(),
+                createAIProviderOnCmd(),
+                createAIProviderListCmd(),
+        )
+
+        return cmd</span>
+}
+
+func createAIProviderResetCmd() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "reset &lt;provider&gt;",
+                Short: "重置AI提供商",
+                Long:  `重置指定的AI提供商（删除API密钥和配置）。支持的提供商：deepseek, kimi, glm, doubao`,
+                Args:  cobra.ExactArgs(1),
+                Run: func(_ *cobra.Command, args []string) </span><span class="cov0" title="0">{
+                        provider := claude.NormalizeProviderName(args[0])
+
+                        if provider == claude.ProviderNone </span><span class="cov0" title="0">{
+                                fmt.Printf("❌ 不支持的提供商: %s\n", args[0])
+                                fmt.Println("支持的提供商: deepseek, kimi, glm, doubao")
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">ctx := context.Background()
+                        err := aiProviderMgr.Reset(ctx, provider)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("❌ 重置AI提供商失败: %v\n", err)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Printf("✅ 成功重置 %s\n", provider)</span>
+                },
+        }
+}
+
+func createAIProviderOffCmd() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "off",
+                Short: "关闭所有AI提供商",
+                Long:  `完全关闭所有AI提供商功能（保留所有API密钥）。`,
+                Run: func(_ *cobra.Command, _ []string) </span><span class="cov0" title="0">{
+                        ctx := context.Background()
+                        err := aiProviderMgr.Off(ctx)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("❌ 关闭AI提供商失败: %v\n", err)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Println("✅ 已关闭所有AI提供商")</span>
+                },
+        }
+}
+
+func createAIProviderOnCmd() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "on [provider]",
+                Short: "启用AI提供商",
+                Long:  `启用指定的AI提供商，如果未指定则恢复最后一次关闭前配置的AI提供商。支持的提供商：deepseek, kimi, glm, doubao`,
+                Args:  cobra.MaximumNArgs(1),
+                Run: func(_ *cobra.Command, args []string) </span><span class="cov0" title="0">{
+                        ctx := context.Background()
+
+                        if len(args) == 0 </span><span class="cov0" title="0">{
+                                // 恢复之前的配置
+                                err := aiProviderMgr.On(ctx)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        fmt.Printf("❌ 恢复AI提供商失败: %v\n", err)
+                                        return
+                                }</span>
+                                <span class="cov0" title="0">fmt.Println("✅ 已恢复AI提供商配置")
+                                return</span>
+                        }
+
+                        // 启用指定的提供商
+                        <span class="cov0" title="0">provider := claude.NormalizeProviderName(args[0])
+
+                        if provider == claude.ProviderNone </span><span class="cov0" title="0">{
+                                fmt.Printf("❌ 不支持的提供商: %s\n", args[0])
+                                fmt.Println("支持的提供商: deepseek, kimi, glm, doubao")
+                                return
+                        }</span>
+
+                        // 检查是否有保存的API密钥
+                        <span class="cov0" title="0">hasKey, err := aiProviderMgr.HasAPIKey(ctx, provider)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("❌ 检查API密钥失败: %v\n", err)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">if !hasKey </span><span class="cov0" title="0">{
+                                fmt.Printf("⚠️  提供商 %s 的API密钥未配置\n", provider)
+                                fmt.Printf("请使用以下命令配置API密钥:\n")
+                                fmt.Printf("  echo 'your-api-key' | claude-config ai on %s\n", provider)
+                                fmt.Printf("或者:\n")
+                                fmt.Printf("  claude-config ai on %s\n", provider)
+                                fmt.Printf("然后输入您的API密钥\n")
+
+                                // 尝试从标准输入读取API密钥
+                                fmt.Printf("\n请输入 %s 的API密钥: ", provider)
+                                var apiKey string
+                                if _, err := fmt.Scanln(&amp;apiKey); err != nil </span><span class="cov0" title="0">{
+                                        fmt.Printf("❌ 读取API密钥失败: %v\n", err)
+                                        return
+                                }</span>
+
+                                <span class="cov0" title="0">if apiKey == "" </span><span class="cov0" title="0">{
+                                        fmt.Println("❌ API密钥不能为空")
+                                        return
+                                }</span>
+
+                                // 启用提供商
+                                <span class="cov0" title="0">err = aiProviderMgr.Enable(ctx, provider, apiKey)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        fmt.Printf("❌ 启用AI提供商失败: %v\n", err)
+                                        return
+                                }</span>
+
+                                <span class="cov0" title="0">fmt.Printf("✅ 成功配置并启用 %s\n", provider)
+                                return</span>
+                        }
+
+                        // 有API密钥，直接启用
+                        // 首先获取保存的API密钥
+                        <span class="cov0" title="0">apiKey, err := getAPIKeyForProvider(provider)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("❌ 加载API密钥失败: %v\n", err)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">err = aiProviderMgr.Enable(ctx, provider, apiKey)
+                        if err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("❌ 启用AI提供商失败: %v\n", err)
+                                return
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Printf("✅ 成功启用 %s\n", provider)</span>
+                },
+        }
+}
+
+func createAIProviderListCmd() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "list",
+                Short: "列出支持的AI提供商",
+                Long:  `列出所有支持的AI提供商及其状态。`,
+                Run: func(_ *cobra.Command, _ []string) </span><span class="cov0" title="0">{
+                        showAIProviderList()
+                }</span>,
+        }
+}
+
+func showAIProviderStatus() <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        fmt.Println("🤖 AI提供商状态")
+        fmt.Println("================")
+
+        // 获取当前活跃的提供商
+        activeProvider, err := aiProviderMgr.GetActiveProvider(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("❌ 获取活跃提供商失败: %v\n", err)
+                return
+        }</span>
+
+        <span class="cov0" title="0">if activeProvider == aiprovider.ProviderNone </span><span class="cov0" title="0">{
+                fmt.Println("📍 当前状态: 未启用任何AI提供商")
+        }</span> else<span class="cov0" title="0"> {
+                fmt.Printf("📍 当前活跃提供商: %s\n", activeProvider)
+
+                // 获取配置信息
+                config, err := aiProviderMgr.GetProviderConfig(ctx, activeProvider)
+                if err != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("❌ 获取配置失败: %v\n", err)
+                        return
+                }</span>
+
+                <span class="cov0" title="0">if config != nil </span><span class="cov0" title="0">{
+                        fmt.Printf("   📡 基础URL: %s\n", config.BaseURL)
+                        fmt.Printf("   🧠 模型: %s\n", config.Model)
+                        fmt.Printf("   ⚡ 快速模型: %s\n", config.SmallFastModel)
+                }</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println()</span>
+}
+
+// getAPIKeyForProvider 获取指定提供商的API密钥
+func getAPIKeyForProvider(provider aiprovider.ProviderType) (string, error) <span class="cov0" title="0">{
+        // 通过manager的内部方法获取API密钥，但manager的loadAPIKey是私有的
+        // 我们需要通过文件系统直接读取
+        claudeDir := getClaudeDir()
+        apiKeyPath := filepath.Join(claudeDir, fmt.Sprintf(".%s_api_key", provider))
+
+        data, err := os.ReadFile(apiKeyPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return "", fmt.Errorf("failed to read API key file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return string(data), nil</span>
+}
+
+// getClaudeDir 获取Claude配置目录路径
+func getClaudeDir() string <span class="cov0" title="0">{
+        homeDir, err := os.UserHomeDir()
+        if err != nil </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov0" title="0">return filepath.Join(homeDir, ".claude")</span>
+}
+
+func showAIProviderList() <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        fmt.Println("🤖 支持的AI提供商")
+        fmt.Println("==================")
+
+        providers := aiProviderMgr.ListSupportedProviders()
+        activeProvider, _ := aiProviderMgr.GetActiveProvider(ctx)
+
+        for _, provider := range providers </span><span class="cov0" title="0">{
+                status := "⚪"
+                if provider == activeProvider </span><span class="cov0" title="0">{
+                        status = "🟢"
+                }</span>
+
+                <span class="cov0" title="0">hasKey, _ := aiProviderMgr.HasAPIKey(ctx, provider)
+                keyStatus := ""
+                if hasKey </span><span class="cov0" title="0">{
+                        keyStatus = " (已保存API密钥)"
+                }</span>
+
+                <span class="cov0" title="0">fmt.Printf("%s %s%s\n", status, provider, keyStatus)</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println()
+        fmt.Println("说明:")
+        fmt.Println("🟢 当前活跃提供商")
+        fmt.Println("⚪ 可用提供商")
+        fmt.Println()
+        fmt.Println("使用方法:")
+        fmt.Println("  claude-config ai on [provider]")
+        fmt.Println("  claude-config ai reset &lt;provider&gt;")
+        fmt.Println("  claude-config ai off")
+        fmt.Println("  claude-config ai list")</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/spf13/cobra"
+)
+
+// createBackupCmd creates the backup command
+func createBackupCmd() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "backup",
+                Short: "备份配置",
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        ctx := context.Background()
+                        backupInfo, err := configMgr.Backup(ctx)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">fmt.Printf("✅ 配置已备份到：%s\n", backupInfo.FilePath)
+                        fmt.Printf("   大小：%s\n", formatBytes(backupInfo.Size))
+                        fmt.Printf("   时间：%s\n", backupInfo.Timestamp.Format("2006-01-02 15:04:05"))
+                        return nil</span>
+                },
+        }
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/spf13/cobra"
+)
+
+// createCheckCmd creates the check command
+func createCheckCmd() *cobra.Command <span class="cov0" title="0">{
+        checkCmd := &amp;cobra.Command{
+                Use:   "check &lt;on|off&gt;",
+                Short: "检查功能控制",
+                Long: `检查功能控制 - 管理 lint 和 test 等代码检查 hooks
+
+启用时会添加以下hooks到settings.json:
+  - smart-lint.sh (智能代码检查)
+  - smart-test.sh (智能测试)
+
+这些hooks会在代码编辑后自动运行，确保代码质量。`,
+                Example: `  claude-config check on   # 启用代码检查hooks
+  claude-config check off  # 禁用代码检查hooks`,
+                Args: cobra.ExactArgs(1),
+                RunE: func(_ *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        action := args[0]
+                        return handleCheckCommand(action)
+                }</span>,
+        }
+
+        <span class="cov0" title="0">return checkCmd</span>
+}
+
+// handleCheckCommand handles the check command
+func handleCheckCommand(action string) error <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        switch action </span>{
+        case "on", "enable":<span class="cov0" title="0">
+                err := checkMgr.EnableCheck(ctx)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("启用代码检查功能失败: %w", err)
+                }</span>
+                <span class="cov0" title="0">fmt.Println("✅ 代码检查功能已启用")
+                fmt.Println("   - smart-lint.sh (智能代码检查)")
+                fmt.Println("   - smart-test.sh (智能测试)")
+                fmt.Println()
+                fmt.Println("这些hooks将在代码编辑后自动运行，确保代码质量。")</span>
+
+        case "off", "disable":<span class="cov0" title="0">
+                err := checkMgr.DisableCheck(ctx)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("禁用代码检查功能失败: %w", err)
+                }</span>
+                <span class="cov0" title="0">fmt.Println("❌ 代码检查功能已禁用")</span>
+
+        default:<span class="cov0" title="0">
+                return fmt.Errorf("无效操作: %s\n\n支持的操作: on, off, enable, disable\n使用方法: claude-config check &lt;on|off&gt;", action)</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package main
+
+import (
+        "fmt"
+
+        "github.com/spf13/cobra"
+)
+
+func createRootCmd() *cobra.Command <span class="cov0" title="0">{
+        rootCmd := &amp;cobra.Command{
+                Use:   "claude-config",
+                Short: "Claude 配置管理工具",
+                Long:  `Claude Configuration Tool 是一个统一配置管理工具，整合了配置管理和文件复制功能。`,
+                Run: func(cmd *cobra.Command, _ []string) </span><span class="cov0" title="0">{
+                        // 没有子命令时显示帮助信息
+                        fmt.Println("欢迎使用 Claude 配置管理工具！")
+                        fmt.Println()
+                        _ = cmd.Help()
+                }</span>,
+        }
+
+        <span class="cov0" title="0">initCommands(rootCmd)
+        return rootCmd</span>
+}
+
+func initCommands(rootCmd *cobra.Command) <span class="cov0" title="0">{
+        // 添加所有子命令
+        rootCmd.AddCommand(
+                createStatusCmd(),
+                createProxyCmd(),
+                createCheckCmd(),
+                createAIProviderCmd(),
+                createNotifyCmd(),
+                createInstallCmd(),
+                createBackupCmd(),
+                createStartCmd(),
+        )
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/spf13/cobra"
+
+        "github.com/ooneko/claude-config/internal/install"
+)
+
+// runInstall executes the install command
+func runInstall(cmd *cobra.Command) error <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        // 解析命令行参数
+        options := install.Options{}
+
+        allFlag, _ := cmd.Flags().GetBool("all")
+        agentsFlag, _ := cmd.Flags().GetBool("agents")
+        commandsFlag, _ := cmd.Flags().GetBool("commands")
+        hooksFlag, _ := cmd.Flags().GetBool("hooks")
+        outputStylesFlag, _ := cmd.Flags().GetBool("output-styles")
+        settingsFlag, _ := cmd.Flags().GetBool("settings")
+        claudeFlag, _ := cmd.Flags().GetBool("claude")
+        statuslineFlag, _ := cmd.Flags().GetBool("statusline")
+        forceFlag, _ := cmd.Flags().GetBool("force")
+        deleteFlag, _ := cmd.Flags().GetBool("delete")
+
+        // 如果没有指定任何选项，默认安装所有
+        if !allFlag &amp;&amp; !agentsFlag &amp;&amp; !commandsFlag &amp;&amp; !hooksFlag &amp;&amp;
+                !outputStylesFlag &amp;&amp; !settingsFlag &amp;&amp; !claudeFlag &amp;&amp; !statuslineFlag </span><span class="cov0" title="0">{
+                options.All = true
+        }</span> else<span class="cov0" title="0"> {
+                options.All = allFlag
+                options.Agents = agentsFlag
+                options.Commands = commandsFlag
+                options.Hooks = hooksFlag
+                options.OutputStyles = outputStylesFlag
+                options.Settings = settingsFlag
+                options.Claude = claudeFlag
+                options.Statusline = statuslineFlag
+        }</span>
+
+        // 设置 Force 和 Delete 选项
+        <span class="cov0" title="0">options.Force = forceFlag
+        options.Delete = deleteFlag
+
+        // 验证选项
+        if err := options.Validate(); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("无效的安装选项: %w", err)
+        }</span>
+
+        // 创建安装管理器并执行安装
+        <span class="cov0" title="0">installMgr := install.NewManager(claudeDir)
+
+        fmt.Println("🚀 开始安装Claude配置文件...")
+        if err := installMgr.Install(ctx, options); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("安装失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("✅ 安装完成！")
+        fmt.Printf("配置目录：%s\n", claudeDir)
+
+        return nil</span>
+}
+
+// createInstallCmd creates the install command
+func createInstallCmd() *cobra.Command <span class="cov0" title="0">{
+        installCmd := &amp;cobra.Command{
+                Use:   "install",
+                Short: "安装配置文件",
+                Long:  `安装Claude Code配置文件到 ~/.claude 目录`,
+                RunE: func(cmd *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        return runInstall(cmd)
+                }</span>,
+        }
+
+        // Install command flags
+        <span class="cov0" title="0">installCmd.Flags().Bool("all", false, "安装所有配置文件")
+        installCmd.Flags().Bool("agents", false, "仅安装agents")
+        installCmd.Flags().Bool("commands", false, "仅安装commands")
+        installCmd.Flags().Bool("hooks", false, "仅安装hooks")
+        installCmd.Flags().Bool("output-styles", false, "仅安装output-styles")
+        installCmd.Flags().Bool("settings", false, "仅安装settings.json")
+        installCmd.Flags().Bool("claude", false, "仅安装CLAUDE.md")
+        installCmd.Flags().Bool("statusline", false, "仅安装statusline.js")
+        installCmd.Flags().Bool("force", false, "强制覆盖已存在的文件")
+        installCmd.Flags().Bool("delete", false, "删除目标目录中不在源资源中的文件 (默认dry-run模式,与--force配合实际删除)")
+
+        return installCmd</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package main
+
+import (
+        "fmt"
+        "os"
+        "path/filepath"
+
+        "github.com/ooneko/claude-config/internal/aiprovider"
+        "github.com/ooneko/claude-config/internal/check"
+        "github.com/ooneko/claude-config/internal/claude"
+        "github.com/ooneko/claude-config/internal/config"
+        "github.com/ooneko/claude-config/internal/proxy"
+)
+
+var (
+        claudeDir string
+
+        // Managers
+        configMgr     claude.ConfigManager
+        proxyMgr      claude.ProxyManager
+        checkMgr      *check.Manager
+        aiProviderMgr claude.AIProviderManager
+)
+
+func init() <span class="cov8" title="1">{
+        // Get default claude directory
+        homeDir, err := os.UserHomeDir()
+        if err != nil </span><span class="cov0" title="0">{
+                claudeDir = ".claude"
+        }</span> else<span class="cov8" title="1"> {
+                claudeDir = filepath.Join(homeDir, ".claude")
+        }</span>
+
+        // Initialize managers
+        <span class="cov8" title="1">configMgr = config.NewManager(claudeDir)
+        proxyMgr = proxy.NewManager(claudeDir)
+        checkMgr = check.NewManager(claudeDir)
+        aiProviderMgr = aiprovider.NewManager(claudeDir)</span>
+}
+
+func main() <span class="cov0" title="0">{
+        rootCmd := createRootCmd()
+        if err := rootCmd.Execute(); err != nil </span><span class="cov0" title="0">{
+                fmt.Fprintln(os.Stderr, err)
+                os.Exit(1)
+        }</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+        "runtime"
+        "strings"
+
+        "github.com/ooneko/claude-config/internal/claude"
+        "github.com/spf13/cobra"
+)
+
+// createNotifyCmd creates the notify command
+func createNotifyCmd() *cobra.Command <span class="cov0" title="0">{
+        notifyCmd := &amp;cobra.Command{
+                Use:   "notify",
+                Short: "通知配置管理",
+                Long:  `管理通知配置，支持NTFY和macOS原生通知功能。在macOS系统上会自动配置原生通知。`,
+                Run: func(cmd *cobra.Command, _ []string) </span><span class="cov0" title="0">{
+                        fmt.Println("使用 'claude-config notify on' 启用通知或 'claude-config notify off' 禁用通知")
+                        _ = cmd.Help()
+                }</span>,
+        }
+
+        // 添加子命令
+        <span class="cov0" title="0">notifyCmd.AddCommand(createNotifyOnCmd())
+        notifyCmd.AddCommand(createNotifyOffCmd())
+
+        return notifyCmd</span>
+}
+
+// createNotifyOnCmd creates the notify on command
+func createNotifyOnCmd() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "on",
+                Short: "启用NTFY通知",
+                Long:  `启用NTFY通知功能，如果未配置NTFY_TOPIC则提示用户输入，并添加通知hooks`,
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        return enableNTFY()
+                }</span>,
+        }
+}
+
+// createNotifyOffCmd creates the notify off command
+func createNotifyOffCmd() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "off",
+                Short: "禁用NTFY通知",
+                Long:  `禁用NTFY通知功能，保留NTFY_TOPIC但移除通知hooks`,
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        return disableNTFY()
+                }</span>,
+        }
+}
+
+// enableNTFY 启用NTFY通知功能
+func enableNTFY() error <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        // 读取当前配置
+        settings, err := configMgr.Load(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("读取配置失败: %w", err)
+        }</span>
+
+        // 确保env部分存在
+        <span class="cov0" title="0">if settings.Env == nil </span><span class="cov0" title="0">{
+                settings.Env = make(map[string]string)
+        }</span>
+
+        // 检查是否已有NTFY_TOPIC配置，如果没有则提示用户输入
+        <span class="cov0" title="0">ntfyTopic := settings.Env["NTFY_TOPIC"]
+        if ntfyTopic == "" </span><span class="cov0" title="0">{
+                fmt.Print("请输入NTFY Topic: ")
+                _, _ = fmt.Scanln(&amp;ntfyTopic)
+
+                ntfyTopic = strings.TrimSpace(ntfyTopic)
+                if ntfyTopic == "" </span><span class="cov0" title="0">{
+                        return fmt.Errorf("NTFY Topic不能为空")
+                }</span>
+
+                // 更新配置
+                <span class="cov0" title="0">settings.Env["NTFY_TOPIC"] = ntfyTopic</span>
+        }
+
+        // 确保hooks配置存在
+        <span class="cov0" title="0">if settings.Hooks == nil </span><span class="cov0" title="0">{
+                settings.Hooks = &amp;claude.HooksConfig{}
+        }</span>
+
+        // 检查Stop hooks中是否已存在ntfy-notifier.sh
+        <span class="cov0" title="0">ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh stop"
+        ntfyExists := false
+
+        for _, rule := range settings.Hooks.Stop </span><span class="cov0" title="0">{
+                if rule.Matcher == "" </span><span class="cov0" title="0">{
+                        for _, hook := range rule.Hooks </span><span class="cov0" title="0">{
+                                if hook.Command == ntfyCommand </span><span class="cov0" title="0">{
+                                        ntfyExists = true
+                                        break</span>
+                                }
+                        }
+                }
+                <span class="cov0" title="0">if ntfyExists </span><span class="cov0" title="0">{
+                        break</span>
+                }
+        }
+
+        // 如果ntfy hook不存在，添加它
+        <span class="cov0" title="0">if !ntfyExists </span><span class="cov0" title="0">{
+                // 查找空matcher的rule，如果不存在则创建
+                var targetRule *claude.HookRule
+                for _, rule := range settings.Hooks.Stop </span><span class="cov0" title="0">{
+                        if rule.Matcher == "" </span><span class="cov0" title="0">{
+                                targetRule = rule
+                                break</span>
+                        }
+                }
+
+                <span class="cov0" title="0">if targetRule == nil </span><span class="cov0" title="0">{
+                        targetRule = &amp;claude.HookRule{
+                                Matcher: "",
+                                Hooks:   []*claude.HookItem{},
+                        }
+                        settings.Hooks.Stop = append(settings.Hooks.Stop, targetRule)
+                }</span>
+
+                // 添加ntfy hook
+                <span class="cov0" title="0">ntfyHook := &amp;claude.HookItem{
+                        Type:    "command",
+                        Command: ntfyCommand,
+                }
+                targetRule.Hooks = append(targetRule.Hooks, ntfyHook)</span>
+        }
+
+        // 在 macOS 上自动配置原生通知
+        <span class="cov0" title="0">if runtime.GOOS == "darwin" </span><span class="cov0" title="0">{
+                configureMacOSNotifications(settings)
+        }</span>
+
+        // 保存配置
+        <span class="cov0" title="0">if err := configMgr.Save(ctx, settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("保存配置失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("✅ 通知已启用！Topic: %s\n", ntfyTopic)
+        if runtime.GOOS == "darwin" </span><span class="cov0" title="0">{
+                fmt.Println("🍎 macOS原生通知已自动配置")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// disableNTFY 禁用NTFY通知功能
+func disableNTFY() error <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        // 读取当前配置
+        settings, err := configMgr.Load(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("读取配置失败: %w", err)
+        }</span>
+
+        // 检查hooks配置是否存在
+        <span class="cov0" title="0">if settings.Hooks == nil || settings.Hooks.Stop == nil </span><span class="cov0" title="0">{
+                fmt.Println("✅ NTFY通知已经是禁用状态")
+                return nil
+        }</span>
+
+        // 查找并移除ntfy-notifier.sh hook
+        <span class="cov0" title="0">ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh stop"
+        removed := false
+
+        for i, rule := range settings.Hooks.Stop </span><span class="cov0" title="0">{
+                if rule.Matcher == "" </span><span class="cov0" title="0">{
+                        // 在该rule的hooks中查找并移除ntfy hook
+                        newHooks := []*claude.HookItem{}
+                        for _, hook := range rule.Hooks </span><span class="cov0" title="0">{
+                                if hook.Command != ntfyCommand </span><span class="cov0" title="0">{
+                                        newHooks = append(newHooks, hook)
+                                }</span> else<span class="cov0" title="0"> {
+                                        removed = true
+                                }</span>
+                        }
+
+                        // 如果该rule没有hooks了，移除整个rule
+                        <span class="cov0" title="0">if len(newHooks) == 0 </span><span class="cov0" title="0">{
+                                settings.Hooks.Stop = append(settings.Hooks.Stop[:i], settings.Hooks.Stop[i+1:]...)
+                        }</span> else<span class="cov0" title="0"> {
+                                rule.Hooks = newHooks
+                        }</span>
+                        <span class="cov0" title="0">break</span>
+                }
+        }
+
+        <span class="cov0" title="0">if !removed </span><span class="cov0" title="0">{
+                fmt.Println("✅ NTFY通知已经是禁用状态")
+                return nil
+        }</span>
+
+        // 保存配置
+        <span class="cov0" title="0">if err := configMgr.Save(ctx, settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("保存配置失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Println("✅ NTFY通知已禁用（保留NTFY_TOPIC配置）")
+        return nil</span>
+}
+
+// configureMacOSNotifications 配置macOS原生通知
+func configureMacOSNotifications(settings *claude.Settings) <span class="cov8" title="1">{
+        // 确保 hooks 配置存在
+        if settings.Hooks == nil </span><span class="cov8" title="1">{
+                settings.Hooks = &amp;claude.HooksConfig{}
+        }</span>
+
+        // 创建通知规则，使用统一的ntfy-notifier.sh脚本
+        <span class="cov8" title="1">notificationRules := []*claude.HookRule{
+                {
+                        Matcher: "permission_prompt",
+                        Hooks: []*claude.HookItem{
+                                {
+                                        Type:    "command",
+                                        Command: "~/.claude/hooks/ntfy-notifier.sh notification permission_prompt",
+                                },
+                        },
+                },
+        }
+
+        // 将通知规则添加到 hooks.Notification 中
+        settings.Hooks.Notification = notificationRules</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package main
+
+import (
+        "bufio"
+        "context"
+        "fmt"
+        "os"
+        "strings"
+
+        "github.com/spf13/cobra"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// enableProxy enables proxy with saved or user-input configuration
+func enableProxy() error <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        // Try to load saved proxy configuration first
+        proxyConfig, err := proxyMgr.LoadSavedConfig(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                // No saved configuration, ask user for input
+                proxyConfig, err = promptForProxyConfig()
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("获取代理配置失败: %w", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">err = proxyMgr.Enable(ctx, proxyConfig)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("启用代理失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("✅ 代理已启用：%s\n", proxyConfig.HTTPProxy)
+        return nil</span>
+}
+
+// promptForProxyConfig prompts user for proxy configuration
+func promptForProxyConfig() (*claude.ProxyConfig, error) <span class="cov0" title="0">{
+        reader := bufio.NewReader(os.Stdin)
+
+        fmt.Print("请输入HTTP代理地址 (默认: http://127.0.0.1:7890): ")
+        httpProxy, err := reader.ReadString('\n')
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("读取HTTP代理地址失败: %w", err)
+        }</span>
+        <span class="cov0" title="0">httpProxy = strings.TrimSpace(httpProxy)
+        if httpProxy == "" </span><span class="cov0" title="0">{
+                httpProxy = "http://127.0.0.1:7890"
+        }</span>
+
+        <span class="cov0" title="0">fmt.Print("请输入HTTPS代理地址 (默认: 与HTTP代理相同): ")
+        httpsProxy, err := reader.ReadString('\n')
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("读取HTTPS代理地址失败: %w", err)
+        }</span>
+        <span class="cov0" title="0">httpsProxy = strings.TrimSpace(httpsProxy)
+        if httpsProxy == "" </span><span class="cov0" title="0">{
+                httpsProxy = httpProxy
+        }</span>
+
+        <span class="cov0" title="0">return &amp;claude.ProxyConfig{
+                HTTPProxy:  httpProxy,
+                HTTPSProxy: httpsProxy,
+        }, nil</span>
+}
+
+// createProxyCmd creates the proxy command and subcommands
+func createProxyCmd() *cobra.Command <span class="cov0" title="0">{
+        proxyCmd := &amp;cobra.Command{
+                Use:   "proxy &lt;command&gt;",
+                Short: "代理管理",
+                Long:  "管理 HTTP/HTTPS 代理设置",
+                Run: func(cmd *cobra.Command, _ []string) </span><span class="cov0" title="0">{
+                        _ = cmd.Help()
+                }</span>,
+        }
+
+        <span class="cov0" title="0">proxyOnCmd := &amp;cobra.Command{
+                Use:   "on",
+                Short: "启用代理",
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        return enableProxy()
+                }</span>,
+        }
+
+        <span class="cov0" title="0">proxyOffCmd := &amp;cobra.Command{
+                Use:   "off",
+                Short: "禁用代理",
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        ctx := context.Background()
+                        return proxyMgr.Disable(ctx)
+                }</span>,
+        }
+
+        <span class="cov0" title="0">proxyToggleCmd := &amp;cobra.Command{
+                Use:   "toggle",
+                Short: "切换代理状态",
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        ctx := context.Background()
+                        return proxyMgr.Toggle(ctx)
+                }</span>,
+        }
+
+        <span class="cov0" title="0">proxyResetCmd := &amp;cobra.Command{
+                Use:   "reset",
+                Short: "重置代理配置",
+                Long:  "删除保存的代理配置文件并禁用代理",
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        ctx := context.Background()
+                        if err := proxyMgr.Reset(ctx); err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">fmt.Println("✅ 代理配置已重置")
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">proxyStatusCmd := &amp;cobra.Command{
+                Use:   "status",
+                Short: "显示代理状态",
+                Long:  "显示当前代理的启用状态和代理地址",
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        ctx := context.Background()
+                        isEnabled, err := proxyMgr.IsEnabled(ctx)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("获取代理状态失败: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">if isEnabled </span><span class="cov0" title="0">{
+                                config, err := proxyMgr.GetConfig(ctx)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return fmt.Errorf("获取代理配置失败: %w", err)
+                                }</span>
+                                <span class="cov0" title="0">fmt.Printf("🌐 代理状态: ✅ 已启用 (%s)\n", config.HTTPProxy)</span>
+                        } else<span class="cov0" title="0"> {
+                                fmt.Println("🌐 代理状态: ❌ 已禁用")
+                        }</span>
+
+                        <span class="cov0" title="0">return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">proxyCmd.AddCommand(proxyOnCmd, proxyOffCmd, proxyToggleCmd, proxyResetCmd, proxyStatusCmd)
+        return proxyCmd</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "os/exec"
+        "path/filepath"
+        "strings"
+
+        "github.com/ooneko/claude-config/internal/aiprovider"
+        "github.com/ooneko/claude-config/internal/claude"
+        "github.com/ooneko/claude-config/internal/provider"
+        "github.com/spf13/cobra"
+)
+
+// anthropicEnvVars 需要清理的 ANTHROPIC 相关环境变量
+var anthropicEnvVars = []string{
+        "ANTHROPIC_AUTH_TOKEN",
+        "ANTHROPIC_BASE_URL",
+        "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+        "ANTHROPIC_DEFAULT_SONNET_MODEL",
+        "ANTHROPIC_DEFAULT_OPUS_MODEL",
+}
+
+type startOptions struct {
+        apiKey string
+        model  string
+}
+
+func createStartCmd() *cobra.Command <span class="cov8" title="1">{
+        opts := &amp;startOptions{}
+
+        cmd := &amp;cobra.Command{
+                Use:   "start [provider] [-- passthrough-args...]",
+                Short: "启动 Claude Code，可指定 AI provider",
+                Long: `启动 Claude Code，可选择指定 AI provider 通过环境变量设置配置。
+
+无参数时启动原生 Claude Code（清理现有配置）。
+支持以下 provider:
+- deepseek: DeepSeek API
+- kimi: Kimi API
+- GLM: 智谱 GLM API
+- doubao: 豆包 API
+
+透传参数:
+使用 -- 可以将后续参数直接传递给 Claude Code
+
+示例:
+  claude-config start              # 启动原生 Claude Code
+  claude-config start deepseek
+  claude-config start kimi --model kimi-plus
+  claude-config start GLM --api-key sk-xxxxxxxx
+  claude-config start deepseek -- --dangerously-skip-permissions
+  claude-config start -- --verbose --debug`,
+                Args: func(cmd *cobra.Command, args []string) error </span><span class="cov8" title="1">{
+                        // 使用 ArgsLenAtDash 获取 -- 的位置
+                        argsLenAtDash := cmd.ArgsLenAtDash()
+
+                        // 如果没有 --，则只允许最多 1 个参数
+                        if argsLenAtDash == -1 </span><span class="cov8" title="1">{
+                                if len(args) &gt; 1 </span><span class="cov0" title="0">{
+                                        return fmt.Errorf("accepts at most 1 arg(s), received %d", len(args))
+                                }</span>
+                                <span class="cov8" title="1">return nil</span>
+                        }
+
+                        // 如果有 --，则 -- 之前只允许最多 1 个参数
+                        <span class="cov8" title="1">if argsLenAtDash &gt; 1 </span><span class="cov0" title="0">{
+                                return fmt.Errorf("accepts at most 1 arg(s) before --, received %d", argsLenAtDash)
+                        }</span>
+
+                        <span class="cov8" title="1">return nil</span>
+                },
+                RunE: func(cmd *cobra.Command, args []string) error <span class="cov8" title="1">{
+                        return runStart(cmd, args, opts)
+                }</span>,
+        }
+
+        <span class="cov8" title="1">cmd.Flags().StringVar(&amp;opts.apiKey, "api-key", "", "API 密钥 (可选，优先使用存储的密钥)")
+        cmd.Flags().StringVar(&amp;opts.model, "model", "", "指定模型 (可选，使用 provider 默认模型)")
+
+        return cmd</span>
+}
+
+func runStart(cmd *cobra.Command, args []string, opts *startOptions) error <span class="cov8" title="1">{
+        // 获取 home 目录
+        homeDir, err := os.UserHomeDir()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to get home directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">claudeDir := filepath.Join(homeDir, ".claude")
+
+        // 使用 Cobra 的 ArgsLenAtDash 来分离参数
+        argsLenAtDash := cmd.ArgsLenAtDash()
+        var providerArg string
+        var passthroughArgs []string
+
+        if argsLenAtDash == -1 </span><span class="cov8" title="1">{
+                // 没有 --
+                if len(args) &gt; 0 </span><span class="cov8" title="1">{
+                        providerArg = args[0]
+                }</span>
+                <span class="cov8" title="1">passthroughArgs = []string{}</span>
+        } else<span class="cov8" title="1"> {
+                // 有 --
+                if argsLenAtDash &gt; 0 </span><span class="cov8" title="1">{
+                        providerArg = args[0]
+                }</span>
+                <span class="cov8" title="1">passthroughArgs = args[argsLenAtDash:]</span>
+        }
+
+        // 无 provider：启动原生 Claude Code
+        <span class="cov8" title="1">if providerArg == "" </span><span class="cov8" title="1">{
+                return startNativeClaude(claudeDir, passthroughArgs)
+        }</span>
+
+        // 有 provider：启动指定 provider
+        <span class="cov8" title="1">return startWithProvider(claudeDir, providerArg, opts, passthroughArgs)</span>
+}
+
+func parseProviderFromArg(arg string) (claude.ProviderType, error) <span class="cov8" title="1">{
+        providerType := claude.NormalizeProviderName(arg)
+
+        if providerType == claude.ProviderNone </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("unsupported provider: %s", arg)
+        }</span>
+
+        <span class="cov8" title="1">return providerType, nil</span>
+}
+
+func loadStoredAPIKey(claudeDir string, providerType claude.ProviderType) (string, error) <span class="cov8" title="1">{
+        apiKeyPath := filepath.Join(claudeDir, "."+string(providerType)+"_api_key")
+
+        data, err := os.ReadFile(apiKeyPath)
+        if err != nil </span><span class="cov8" title="1">{
+                if os.IsNotExist(err) </span><span class="cov8" title="1">{
+                        return "", fmt.Errorf("API key not found for provider %s, please provide --api-key or configure first", providerType)
+                }</span>
+                <span class="cov0" title="0">return "", fmt.Errorf("failed to read API key file: %w", err)</span>
+        }
+
+        <span class="cov8" title="1">return strings.TrimSpace(string(data)), nil</span>
+}
+
+func getProvider(providerType claude.ProviderType) aiprovider.Provider <span class="cov8" title="1">{
+        switch providerType </span>{
+        case claude.ProviderDeepSeek:<span class="cov8" title="1">
+                return &amp;aiprovider.DeepSeekProvider{}</span>
+        case claude.ProviderKimi:<span class="cov8" title="1">
+                return &amp;aiprovider.KimiProvider{}</span>
+        case claude.ProviderGLM:<span class="cov8" title="1">
+                return &amp;aiprovider.GLMProvider{}</span>
+        case claude.ProviderDoubao:<span class="cov0" title="0">
+                return &amp;aiprovider.DoubaoProvider{}</span>
+        default:<span class="cov0" title="0">
+                return nil</span>
+        }
+}
+
+func startClaudeCode(envVars map[string]string, passthroughArgs []string) error <span class="cov8" title="1">{
+        // 设置环境变量
+        for key, value := range envVars </span><span class="cov8" title="1">{
+                os.Setenv(key, value)
+        }</span>
+
+        // 设置透传参数到环境变量（用于测试验证）
+        <span class="cov8" title="1">if len(passthroughArgs) &gt; 0 </span><span class="cov8" title="1">{
+                os.Setenv("CLAUDE_PASSTHROUGH_ARGS", strings.Join(passthroughArgs, " "))
+        }</span>
+
+        // 检查是否存在 CLAUDE_MOCK 环境变量（用于测试）
+        <span class="cov8" title="1">if mockCmd := os.Getenv("CLAUDE_MOCK"); mockCmd != "" </span><span class="cov8" title="1">{
+                args := passthroughArgs
+                cmd := exec.Command(mockCmd, args...)
+                cmd.Stdin = os.Stdin
+                cmd.Stdout = os.Stdout
+                cmd.Stderr = os.Stderr
+                return cmd.Run()
+        }</span>
+
+        // 启动 Claude Code (假设 claude 命令在 PATH 中)
+        <span class="cov0" title="0">args := passthroughArgs
+        cmd := exec.Command("claude", args...)
+        cmd.Stdin = os.Stdin
+        cmd.Stdout = os.Stdout
+        cmd.Stderr = os.Stderr
+
+        return cmd.Run()</span>
+}
+
+// startNativeClaude 启动原生 Claude Code（清理配置）
+func startNativeClaude(claudeDir string, passthroughArgs []string) error <span class="cov8" title="1">{
+        if err := cleanAnthropicConfig(claudeDir); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("Warning: failed to clean existing config: %v\n", err)
+        }</span>
+
+        // 启动原生 Claude Code（无环境变量）
+        <span class="cov8" title="1">return startClaudeCode(map[string]string{}, passthroughArgs)</span>
+}
+
+// cleanAnthropicConfig 清理 settings.json 和环境变量中的 ANTHROPIC 配置
+func cleanAnthropicConfig(claudeDir string) error <span class="cov8" title="1">{
+        // 清理 settings.json 中的配置
+        manager := aiprovider.NewManager(claudeDir)
+        if err := manager.Off(context.Background()); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clean settings.json: %w", err)
+        }</span>
+
+        // 清理环境变量
+        <span class="cov8" title="1">for _, envVar := range anthropicEnvVars </span><span class="cov8" title="1">{
+                os.Unsetenv(envVar)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// startWithProvider 启动指定 provider 的 Claude Code
+func startWithProvider(claudeDir string, providerArg string, opts *startOptions, passthroughArgs []string) error <span class="cov8" title="1">{
+        providerType, err := parseProviderFromArg(providerArg)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        // 获取 API 密钥
+        <span class="cov8" title="1">apiKey, err := getAPIKey(claudeDir, providerType, opts.apiKey)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        // 获取环境变量配置
+        <span class="cov8" title="1">envVars, err := buildProviderEnvVars(providerType, apiKey, opts.model)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // 启动 Claude Code
+        <span class="cov8" title="1">return startClaudeCode(envVars, passthroughArgs)</span>
+}
+
+// getAPIKey 获取 API 密钥，优先使用命令行参数，其次使用存储的密钥
+func getAPIKey(claudeDir string, providerType claude.ProviderType, cmdAPIKey string) (string, error) <span class="cov8" title="1">{
+        if cmdAPIKey != "" </span><span class="cov8" title="1">{
+                return cmdAPIKey, nil
+        }</span>
+
+        <span class="cov8" title="1">return loadStoredAPIKey(claudeDir, providerType)</span>
+}
+
+// buildProviderEnvVars 构建 provider 的环境变量配置
+func buildProviderEnvVars(providerType claude.ProviderType, apiKey, model string) (map[string]string, error) <span class="cov8" title="1">{
+        // 获取 provider 配置
+        prov := getProvider(providerType)
+        providerConfig := prov.GetDefaultConfig(apiKey)
+
+        // 应用命令行参数覆盖
+        if model != "" </span><span class="cov8" title="1">{
+                providerConfig.Model = model
+                providerConfig.SmallFastModel = model
+        }</span>
+
+        // 映射到环境变量
+        <span class="cov8" title="1">mapper := provider.NewEnvMapper()
+        return mapper.MapToEnvironment(providerType, providerConfig, apiKey)</span>
+}
+
+// parseStartArgs 解析启动命令参数
+func parseStartArgs(cmd *cobra.Command) (string, string, string, error) <span class="cov8" title="1">{
+        // 获取位置参数（非 flag 参数）
+        args := cmd.Flags().Args()
+
+        // 获取 provider 参数（-- 之前的第一个参数）
+        argsLenAtDash := cmd.ArgsLenAtDash()
+        var providerArg string
+
+        if argsLenAtDash == -1 </span><span class="cov8" title="1">{
+                // 没有 --
+                if len(args) &gt; 0 </span><span class="cov8" title="1">{
+                        providerArg = args[0]
+                }</span>
+        } else<span class="cov0" title="0"> {
+                // 有 --
+                if argsLenAtDash &gt; 0 </span><span class="cov0" title="0">{
+                        providerArg = args[0]
+                }</span>
+        }
+
+        <span class="cov8" title="1">apiKey, _ := cmd.Flags().GetString("api-key")
+        model, _ := cmd.Flags().GetString("model")
+
+        return providerArg, apiKey, model, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package main
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/spf13/cobra"
+)
+
+// createStatusCmd creates the status command
+func createStatusCmd() *cobra.Command <span class="cov0" title="0">{
+        statusCmd := &amp;cobra.Command{
+                Use:   "status",
+                Short: "显示当前配置状态",
+                Long:  `显示代理、检查功能和通知的当前状态`,
+                RunE: func(_ *cobra.Command, _ []string) error </span><span class="cov0" title="0">{
+                        return showStatus()
+                }</span>,
+        }
+
+        <span class="cov0" title="0">return statusCmd</span>
+}
+
+// showStatus displays the current status of all services
+func showStatus() error <span class="cov0" title="0">{
+        ctx := context.Background()
+
+        fmt.Println("Claude 配置状态:")
+        fmt.Println("================")
+        fmt.Println()
+
+        // Check proxy status
+        if err := showProxyStatus(ctx); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("❌ 代理状态检查失败: %v\n", err)
+        }</span>
+        <span class="cov0" title="0">fmt.Println()
+
+        // Check hooks/check status
+        if err := showCheckStatus(ctx); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("❌ 检查功能状态检查失败: %v\n", err)
+        }</span>
+        <span class="cov0" title="0">fmt.Println()
+
+        // Check notify status
+        if err := showNotifyStatus(ctx); err != nil </span><span class="cov0" title="0">{
+                fmt.Printf("❌ 通知状态检查失败: %v\n", err)
+        }</span>
+        <span class="cov0" title="0">fmt.Println()
+
+        // Check AI provider status
+        showAIProviderStatus()
+
+        return nil</span>
+}
+
+// showProxyStatus shows the current proxy status
+func showProxyStatus(ctx context.Context) error <span class="cov0" title="0">{
+        isEnabled, err := proxyMgr.IsEnabled(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("获取代理状态失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if isEnabled </span><span class="cov0" title="0">{
+                config, err := proxyMgr.GetConfig(ctx)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("获取代理配置失败: %w", err)
+                }</span>
+                <span class="cov0" title="0">fmt.Printf("🌐 代理状态: ✅ 已启用 (%s)\n", config.HTTPProxy)</span>
+        } else<span class="cov0" title="0"> {
+                fmt.Println("🌐 代理状态: ❌ 已禁用")
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// showCheckStatus shows the current check/hooks status
+func showCheckStatus(ctx context.Context) error <span class="cov0" title="0">{
+        isEnabled, err := isCheckEnabled(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("获取检查功能状态失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if isEnabled </span><span class="cov0" title="0">{
+                fmt.Println("🔍 检查功能: ✅ 已启用 ")
+        }</span> else<span class="cov0" title="0"> {
+                fmt.Println("🔍 检查功能: ❌ 已禁用")
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// showNotifyStatus shows the current notify status
+func showNotifyStatus(ctx context.Context) error <span class="cov0" title="0">{
+        isEnabled, ntfyTopic, err := isNotifyEnabled(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("获取通知状态失败: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if isEnabled </span><span class="cov0" title="0">{
+                if ntfyTopic != "" </span><span class="cov0" title="0">{
+                        fmt.Printf("📱 通知状态: ✅ 已启用 (Topic: %s)\n", ntfyTopic)
+                }</span> else<span class="cov0" title="0"> {
+                        fmt.Println("📱 通知状态: ⚠️  hooks已启用但未配置NTFY_TOPIC")
+                }</span>
+        } else<span class="cov0" title="0"> {
+                fmt.Println("📱 通知状态: ❌ 已禁用")
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// isCheckEnabled checks if the check functionality is enabled
+func isCheckEnabled(ctx context.Context) (bool, error) <span class="cov0" title="0">{
+        settings, err := configMgr.Load(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, fmt.Errorf("读取配置失败: %w", err)
+        }</span>
+
+        // Check if PostToolUse hooks exist and contain smart-lint.sh or smart-test.sh
+        <span class="cov0" title="0">if settings.Hooks == nil || settings.Hooks.PostToolUse == nil </span><span class="cov0" title="0">{
+                return false, nil
+        }</span>
+
+        <span class="cov0" title="0">smartLintCommand := "~/.claude/hooks/smart-lint.sh"
+        smartTestCommand := "~/.claude/hooks/smart-test.sh"
+
+        for _, rule := range settings.Hooks.PostToolUse </span><span class="cov0" title="0">{
+                if rule.Matcher == "Write|Edit|MultiEdit" </span><span class="cov0" title="0">{
+                        hasSmartLint := false
+                        hasSmartTest := false
+
+                        for _, hook := range rule.Hooks </span><span class="cov0" title="0">{
+                                if hook.Command == smartLintCommand </span><span class="cov0" title="0">{
+                                        hasSmartLint = true
+                                }</span>
+                                <span class="cov0" title="0">if hook.Command == smartTestCommand </span><span class="cov0" title="0">{
+                                        hasSmartTest = true
+                                }</span>
+                        }
+
+                        // Consider enabled if we have at least one of the smart hooks
+                        <span class="cov0" title="0">if hasSmartLint || hasSmartTest </span><span class="cov0" title="0">{
+                                return true, nil
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return false, nil</span>
+}
+
+// isNotifyEnabled checks if the notify functionality is enabled
+func isNotifyEnabled(ctx context.Context) (enabled bool, ntfyTopic string, err error) <span class="cov0" title="0">{
+        settings, err := configMgr.Load(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return false, "", fmt.Errorf("读取配置失败: %w", err)
+        }</span>
+
+        // Get NTFY_TOPIC from env
+        <span class="cov0" title="0">if settings.Env != nil </span><span class="cov0" title="0">{
+                ntfyTopic = settings.Env["NTFY_TOPIC"]
+        }</span>
+
+        // Check if NTFY hooks exist in Stop hooks
+        <span class="cov0" title="0">if settings.Hooks == nil || settings.Hooks.Stop == nil </span><span class="cov0" title="0">{
+                return false, ntfyTopic, nil
+        }</span>
+
+        <span class="cov0" title="0">ntfyCommand := "~/.claude/hooks/ntfy-notifier.sh"
+
+        for _, rule := range settings.Hooks.Stop </span><span class="cov0" title="0">{
+                if rule.Matcher == "" </span><span class="cov0" title="0">{ // Empty matcher for stop hooks
+                        for _, hook := range rule.Hooks </span><span class="cov0" title="0">{
+                                if hook.Command == ntfyCommand </span><span class="cov0" title="0">{
+                                        return true, ntfyTopic, nil
+                                }</span>
+                        }
+                }
+        }
+
+        <span class="cov0" title="0">return false, ntfyTopic, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package main
+
+import (
+        "fmt"
+)
+
+// formatBytes converts bytes to human-readable format
+func formatBytes(bytes int64) string <span class="cov0" title="0">{
+        const unit = 1024
+        if bytes &lt; unit </span><span class="cov0" title="0">{
+                return fmt.Sprintf("%d B", bytes)
+        }</span>
+        <span class="cov0" title="0">div, exp := int64(unit), 0
+        for n := bytes / unit; n &gt;= unit; n /= unit </span><span class="cov0" title="0">{
+                div *= unit
+                exp++
+        }</span>
+        <span class="cov0" title="0">return fmt.Sprintf("%.1f %cB", float64(bytes)/float64(div), "KMGTPE"[exp])</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package aiprovider
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "os"
+        "path/filepath"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// Manager implements the claude.AIProviderManager interface
+type Manager struct {
+        claudeDir string
+        providers map[ProviderType]Provider
+}
+
+// NewManager creates a new AI provider manager
+func NewManager(claudeDir string) claude.AIProviderManager <span class="cov8" title="1">{
+        m := &amp;Manager{
+                claudeDir: claudeDir,
+                providers: make(map[ProviderType]Provider),
+        }
+
+        // Register supported providers
+        m.providers[ProviderDeepSeek] = &amp;DeepSeekProvider{}
+        m.providers[ProviderKimi] = &amp;KimiProvider{}
+        m.providers[ProviderGLM] = &amp;GLMProvider{}
+        m.providers[ProviderDoubao] = &amp;DoubaoProvider{}
+
+        return m
+}</span>
+
+// Enable enables an AI provider with the given API key
+func (m *Manager) Enable(_ context.Context, provider ProviderType, apiKey string) error <span class="cov8" title="1">{
+        if !provider.IsValid() </span><span class="cov8" title="1">{
+                return fmt.Errorf("unsupported provider: %s", provider)
+        }</span>
+
+        <span class="cov8" title="1">if apiKey == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("API key cannot be empty")
+        }</span>
+
+        // Save API key
+        <span class="cov8" title="1">if err := m.saveAPIKey(provider, apiKey); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save API key: %w", err)
+        }</span>
+
+        // Get provider implementation
+        <span class="cov8" title="1">providerImpl, exists := m.providers[provider]
+        if !exists </span><span class="cov0" title="0">{
+                return fmt.Errorf("provider implementation not found: %s", provider)
+        }</span>
+
+        // Get default configuration
+        <span class="cov8" title="1">config := providerImpl.GetDefaultConfig(apiKey)
+
+        // Load current settings
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        // Initialize env map if it doesn't exist
+        <span class="cov8" title="1">if settings.Env == nil </span><span class="cov8" title="1">{
+                settings.Env = make(map[string]string)
+        }</span>
+
+        // Set provider configuration
+        <span class="cov8" title="1">settings.Env["ANTHROPIC_AUTH_TOKEN"] = config.AuthToken
+        settings.Env["ANTHROPIC_BASE_URL"] = config.BaseURL
+
+        // Set default model environment variables
+        m.addDefaultModelEnvVars(settings.Env, provider, config)
+
+        // Save settings
+        if err := m.saveSettings(settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Reset removes the API key and disables the provider
+func (m *Manager) Reset(_ context.Context, provider ProviderType) error <span class="cov8" title="1">{
+        // First disable the provider by clearing environment variables
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if settings.Env != nil </span><span class="cov8" title="1">{
+                // Remove AI provider environment variables
+                delete(settings.Env, "ANTHROPIC_AUTH_TOKEN")
+                delete(settings.Env, "ANTHROPIC_BASE_URL")
+                delete(settings.Env, "ANTHROPIC_DEFAULT_HAIKU_MODEL")
+                delete(settings.Env, "ANTHROPIC_DEFAULT_SONNET_MODEL")
+                delete(settings.Env, "ANTHROPIC_DEFAULT_OPUS_MODEL")
+
+                // If env map is empty, set it to nil
+                if len(settings.Env) == 0 </span><span class="cov8" title="1">{
+                        settings.Env = nil
+                }</span>
+        }
+
+        // Save settings
+        <span class="cov8" title="1">if err := m.saveSettings(settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save settings: %w", err)
+        }</span>
+
+        // Remove API key file
+        <span class="cov8" title="1">apiKeyPath := m.getAPIKeyPath(provider)
+        if err := os.Remove(apiKeyPath); err != nil &amp;&amp; !os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to remove API key file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Off disables all AI providers completely
+func (m *Manager) Off(ctx context.Context) error <span class="cov8" title="1">{
+        // First, save the current active provider for restoration
+        if err := m.saveLastActiveProvider(ctx); err != nil </span><span class="cov0" title="0">{
+                // Don't fail the off operation, just log it
+                fmt.Printf("警告: 无法保存当前配置用于恢复: %v\n", err)
+        }</span>
+
+        <span class="cov8" title="1">settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if settings.Env != nil </span><span class="cov8" title="1">{
+                // Remove all AI provider environment variables
+                delete(settings.Env, "ANTHROPIC_AUTH_TOKEN")
+                delete(settings.Env, "ANTHROPIC_BASE_URL")
+                delete(settings.Env, "ANTHROPIC_DEFAULT_HAIKU_MODEL")
+                delete(settings.Env, "ANTHROPIC_DEFAULT_SONNET_MODEL")
+                delete(settings.Env, "ANTHROPIC_DEFAULT_OPUS_MODEL")
+
+                // If env map is empty, set it to nil
+                if len(settings.Env) == 0 </span><span class="cov8" title="1">{
+                        settings.Env = nil
+                }</span>
+        }
+
+        // Save settings
+        <span class="cov8" title="1">if err := m.saveSettings(settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// On restores the previously active AI provider
+func (m *Manager) On(ctx context.Context) error <span class="cov8" title="1">{
+        // Load the last active provider
+        lastProvider, err := m.loadLastActiveProvider()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load last active provider: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if lastProvider == ProviderNone </span><span class="cov8" title="1">{
+                return fmt.Errorf("没有找到之前的AI提供商配置")
+        }</span>
+
+        // Check if we have API key for this provider
+        <span class="cov8" title="1">hasKey, err := m.HasAPIKey(ctx, lastProvider)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to check API key: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if !hasKey </span><span class="cov8" title="1">{
+                return fmt.Errorf("提供商 %s 的API密钥已丢失，请重新启用", lastProvider)
+        }</span>
+
+        // Load the API key
+        <span class="cov8" title="1">apiKey, err := m.loadAPIKey(lastProvider)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load API key: %w", err)
+        }</span>
+
+        // Re-enable the provider
+        <span class="cov8" title="1">if err := m.Enable(ctx, lastProvider, apiKey); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to restore provider %s: %w", lastProvider, err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// HasAPIKey returns whether an API key is stored for the provider
+func (m *Manager) HasAPIKey(_ context.Context, provider ProviderType) (bool, error) <span class="cov8" title="1">{
+        apiKeyPath := m.getAPIKeyPath(provider)
+        _, err := os.Stat(apiKeyPath)
+        if os.IsNotExist(err) </span><span class="cov8" title="1">{
+                return false, nil
+        }</span>
+        <span class="cov8" title="1">if err != nil </span><span class="cov0" title="0">{
+                return false, fmt.Errorf("failed to check API key file: %w", err)
+        }</span>
+        <span class="cov8" title="1">return true, nil</span>
+}
+
+// GetProviderConfig returns current configuration for a provider
+func (m *Manager) GetProviderConfig(_ context.Context, provider ProviderType) (*ProviderConfig, error) <span class="cov8" title="1">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if settings.Env == nil </span><span class="cov8" title="1">{
+                return nil, nil
+        }</span>
+
+        <span class="cov8" title="1">authToken := settings.Env["ANTHROPIC_AUTH_TOKEN"]
+        baseURL := settings.Env["ANTHROPIC_BASE_URL"]
+
+        if authToken == "" &amp;&amp; baseURL == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        // Get provider implementation for default config
+        <span class="cov8" title="1">providerImpl, exists := m.providers[provider]
+        if !exists </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("provider implementation not found: %s", provider)
+        }</span>
+        <span class="cov8" title="1">defaultConfig := providerImpl.GetDefaultConfig("")
+
+        // Use ANTHROPIC_DEFAULT_SONNET_MODEL as the primary model,
+        // fall back to default config if not set
+        model := settings.Env["ANTHROPIC_DEFAULT_SONNET_MODEL"]
+        if model == "" </span><span class="cov0" title="0">{
+                model = defaultConfig.Model
+        }</span>
+
+        // Use ANTHROPIC_DEFAULT_HAIKU_MODEL as the fast model,
+        // fall back to default config if not set
+        <span class="cov8" title="1">smallFastModel := settings.Env["ANTHROPIC_DEFAULT_HAIKU_MODEL"]
+        if smallFastModel == "" </span><span class="cov0" title="0">{
+                smallFastModel = defaultConfig.SmallFastModel
+        }</span>
+
+        <span class="cov8" title="1">return &amp;ProviderConfig{
+                Type:           provider,
+                AuthToken:      authToken,
+                BaseURL:        baseURL,
+                Model:          model,
+                SmallFastModel: smallFastModel,
+        }, nil</span>
+}
+
+// GetActiveProvider returns the currently active provider
+func (m *Manager) GetActiveProvider(_ context.Context) (ProviderType, error) <span class="cov8" title="1">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return ProviderNone, fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if settings.Env == nil </span><span class="cov8" title="1">{
+                return ProviderNone, nil
+        }</span>
+
+        <span class="cov8" title="1">baseURL := settings.Env["ANTHROPIC_BASE_URL"]
+
+        // Determine provider based on base URL
+        for providerType, provider := range m.providers </span><span class="cov8" title="1">{
+                config := provider.GetDefaultConfig("")
+                if config.BaseURL == baseURL </span><span class="cov8" title="1">{
+                        return providerType, nil
+                }</span>
+        }
+
+        <span class="cov0" title="0">return ProviderNone, nil</span>
+}
+
+// ListSupportedProviders returns all supported provider types
+func (m *Manager) ListSupportedProviders() []ProviderType <span class="cov8" title="1">{
+        providers := make([]ProviderType, 0, len(m.providers))
+        for providerType := range m.providers </span><span class="cov8" title="1">{
+                providers = append(providers, providerType)
+        }</span>
+        <span class="cov8" title="1">return providers</span>
+}
+
+// getAPIKeyPath returns the API key file path for a provider
+func (m *Manager) getAPIKeyPath(provider ProviderType) string <span class="cov8" title="1">{
+        return filepath.Join(m.claudeDir, fmt.Sprintf(".%s_api_key", provider))
+}</span>
+
+// saveAPIKey saves API key to a secure file with restricted permissions
+func (m *Manager) saveAPIKey(provider ProviderType, apiKey string) error <span class="cov8" title="1">{
+        apiKeyPath := m.getAPIKeyPath(provider)
+
+        // Ensure directory exists
+        if err := os.MkdirAll(m.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create claude directory: %w", err)
+        }</span>
+
+        // Write API key with restricted permissions
+        <span class="cov8" title="1">if err := os.WriteFile(apiKeyPath, []byte(apiKey), 0600); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write API key file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// loadSettings loads settings from settings.json
+func (m *Manager) loadSettings() (*claude.Settings, error) <span class="cov8" title="1">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // If file doesn't exist, return default settings
+        if _, err := os.Stat(settingsPath); os.IsNotExist(err) </span><span class="cov8" title="1">{
+                return &amp;claude.Settings{
+                        IncludeCoAuthoredBy: false,
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">data, err := os.ReadFile(settingsPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">var settings claude.Settings
+        if err := json.Unmarshal(data, &amp;settings); err != nil </span><span class="cov8" title="1">{
+                return nil, fmt.Errorf("failed to parse settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;settings, nil</span>
+}
+
+// saveSettings saves settings to settings.json
+func (m *Manager) saveSettings(settings *claude.Settings) error <span class="cov8" title="1">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // Ensure directory exists
+        if err := os.MkdirAll(m.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create claude directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">data, err := json.MarshalIndent(settings, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := os.WriteFile(settingsPath, data, 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// getLastActiveProviderPath returns the path for storing last active provider
+func (m *Manager) getLastActiveProviderPath() string <span class="cov8" title="1">{
+        return filepath.Join(m.claudeDir, ".last_active_provider")
+}</span>
+
+// saveLastActiveProvider saves the currently active provider
+func (m *Manager) saveLastActiveProvider(ctx context.Context) error <span class="cov8" title="1">{
+        activeProvider, err := m.GetActiveProvider(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to get active provider: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if activeProvider == ProviderNone </span><span class="cov8" title="1">{
+                // No active provider to save
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">lastProviderPath := m.getLastActiveProviderPath()
+
+        // Ensure directory exists
+        if err := os.MkdirAll(m.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create claude directory: %w", err)
+        }</span>
+
+        // Write last active provider
+        <span class="cov8" title="1">if err := os.WriteFile(lastProviderPath, []byte(string(activeProvider)), 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write last active provider file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// loadLastActiveProvider loads the last active provider
+func (m *Manager) loadLastActiveProvider() (ProviderType, error) <span class="cov8" title="1">{
+        lastProviderPath := m.getLastActiveProviderPath()
+
+        // If file doesn't exist, return ProviderNone
+        if _, err := os.Stat(lastProviderPath); os.IsNotExist(err) </span><span class="cov8" title="1">{
+                return ProviderNone, nil
+        }</span>
+
+        <span class="cov8" title="1">data, err := os.ReadFile(lastProviderPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return ProviderNone, fmt.Errorf("failed to read last active provider file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">providerType := ProviderType(string(data))
+        if !providerType.IsValid() </span><span class="cov0" title="0">{
+                return ProviderNone, fmt.Errorf("invalid provider type: %s", providerType)
+        }</span>
+
+        <span class="cov8" title="1">return providerType, nil</span>
+}
+
+// loadAPIKey loads API key from file
+func (m *Manager) loadAPIKey(provider ProviderType) (string, error) <span class="cov8" title="1">{
+        apiKeyPath := m.getAPIKeyPath(provider)
+
+        data, err := os.ReadFile(apiKeyPath)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", fmt.Errorf("failed to read API key file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return string(data), nil</span>
+}
+
+// addDefaultModelEnvVars 添加默认模型环境变量
+func (m *Manager) addDefaultModelEnvVars(env map[string]string, provider ProviderType, config *ProviderConfig) <span class="cov8" title="1">{
+        var haikuModel, sonnetModel, opusModel string
+
+        switch provider </span>{
+        case ProviderDeepSeek:<span class="cov8" title="1">
+                haikuModel = config.Model
+                sonnetModel = config.Model
+                opusModel = config.Model</span>
+        case ProviderKimi:<span class="cov8" title="1">
+                haikuModel = config.Model
+                sonnetModel = config.Model
+                opusModel = config.Model</span>
+        case ProviderGLM:<span class="cov8" title="1">
+                haikuModel = "glm-4.7"
+                sonnetModel = "glm-4.7"
+                opusModel = "glm-4.7"</span>
+        case ProviderDoubao:<span class="cov8" title="1">
+                haikuModel = config.Model
+                sonnetModel = config.Model
+                opusModel = config.Model</span>
+        }
+
+        <span class="cov8" title="1">env["ANTHROPIC_DEFAULT_HAIKU_MODEL"] = haikuModel
+        env["ANTHROPIC_DEFAULT_SONNET_MODEL"] = sonnetModel
+        env["ANTHROPIC_DEFAULT_OPUS_MODEL"] = opusModel</span>
+}
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package aiprovider
+
+import "fmt"
+
+// DeepSeekProvider implements the Provider interface for DeepSeek
+type DeepSeekProvider struct{}
+
+// GetType returns the provider type
+func (p *DeepSeekProvider) GetType() ProviderType <span class="cov0" title="0">{
+        return ProviderDeepSeek
+}</span>
+
+// GetDefaultConfig returns the default configuration for DeepSeek
+func (p *DeepSeekProvider) GetDefaultConfig(apiKey string) *ProviderConfig <span class="cov8" title="1">{
+        return &amp;ProviderConfig{
+                Type:           ProviderDeepSeek,
+                AuthToken:      apiKey,
+                BaseURL:        "https://api.deepseek.com/anthropic",
+                Model:          "deepseek-chat",
+                SmallFastModel: "deepseek-chat",
+        }
+}</span>
+
+// ValidateConfig validates the DeepSeek configuration
+func (p *DeepSeekProvider) ValidateConfig(config *ProviderConfig) error <span class="cov0" title="0">{
+        if config.AuthToken == "" </span><span class="cov0" title="0">{
+                return fmt.Errorf("auth token is required for DeepSeek")
+        }</span>
+        <span class="cov0" title="0">if config.BaseURL == "" </span><span class="cov0" title="0">{
+                return fmt.Errorf("base URL is required for DeepSeek")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// KimiProvider implements the Provider interface for Kimi
+type KimiProvider struct{}
+
+// GetType returns the provider type
+func (p *KimiProvider) GetType() ProviderType <span class="cov0" title="0">{
+        return ProviderKimi
+}</span>
+
+// GetDefaultConfig returns the default configuration for Kimi
+func (p *KimiProvider) GetDefaultConfig(apiKey string) *ProviderConfig <span class="cov8" title="1">{
+        return &amp;ProviderConfig{
+                Type:           ProviderKimi,
+                AuthToken:      apiKey,
+                BaseURL:        "https://api.kimi.com/coding/",
+                Model:          "kimi-for-coding",
+                SmallFastModel: "kimi-for-coding",
+        }
+}</span>
+
+// ValidateConfig validates the Kimi configuration
+func (p *KimiProvider) ValidateConfig(config *ProviderConfig) error <span class="cov0" title="0">{
+        if config.AuthToken == "" </span><span class="cov0" title="0">{
+                return fmt.Errorf("auth token is required for Kimi")
+        }</span>
+        <span class="cov0" title="0">if config.BaseURL == "" </span><span class="cov0" title="0">{
+                return fmt.Errorf("base URL is required for Kimi")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// GLMProvider implements the Provider interface for GLM
+type GLMProvider struct{}
+
+// GetType returns the provider type
+func (p *GLMProvider) GetType() ProviderType <span class="cov0" title="0">{
+        return ProviderGLM
+}</span>
+
+// GetDefaultConfig returns the default configuration for GLM
+func (p *GLMProvider) GetDefaultConfig(apiKey string) *ProviderConfig <span class="cov8" title="1">{
+        return &amp;ProviderConfig{
+                Type:           ProviderGLM,
+                AuthToken:      apiKey,
+                BaseURL:        "https://open.bigmodel.cn/api/anthropic",
+                Model:          "glm-4.7",
+                SmallFastModel: "glm-4.7",
+        }
+}</span>
+
+// ValidateConfig validates the GLM configuration
+func (p *GLMProvider) ValidateConfig(config *ProviderConfig) error <span class="cov0" title="0">{
+        if config.AuthToken == "" </span><span class="cov0" title="0">{
+                return fmt.Errorf("auth token is required for GLM")
+        }</span>
+        <span class="cov0" title="0">if config.BaseURL == "" </span><span class="cov0" title="0">{
+                return fmt.Errorf("base URL is required for GLM")
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+// DoubaoProvider implements the Provider interface for Doubao
+type DoubaoProvider struct{}
+
+// GetType returns the provider type
+func (p *DoubaoProvider) GetType() ProviderType <span class="cov8" title="1">{
+        return ProviderDoubao
+}</span>
+
+// GetDefaultConfig returns the default configuration for Doubao
+func (p *DoubaoProvider) GetDefaultConfig(apiKey string) *ProviderConfig <span class="cov8" title="1">{
+        return &amp;ProviderConfig{
+                Type:           ProviderDoubao,
+                AuthToken:      apiKey,
+                BaseURL:        "https://ark.cn-beijing.volces.com/api/coding",
+                Model:          "doubao-seed-code-preview-latest",
+                SmallFastModel: "doubao-seed-code-preview-latest",
+        }
+}</span>
+
+// ValidateConfig validates the Doubao configuration
+func (p *DoubaoProvider) ValidateConfig(config *ProviderConfig) error <span class="cov8" title="1">{
+        if config.AuthToken == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("auth token is required for Doubao")
+        }</span>
+        <span class="cov8" title="1">if config.BaseURL == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("base URL is required for Doubao")
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package check
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "os"
+        "path/filepath"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// Manager implements check functionality management
+type Manager struct {
+        claudeDir string
+}
+
+// NewManager creates a new check manager
+func NewManager(claudeDir string) *Manager <span class="cov8" title="1">{
+        return &amp;Manager{
+                claudeDir: claudeDir,
+        }
+}</span>
+
+// EnableCheck enables code checking hooks (PostToolUse hooks)
+func (m *Manager) EnableCheck(_ context.Context) error <span class="cov0" title="0">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        // Initialize hooks config if it doesn't exist
+        <span class="cov0" title="0">if settings.Hooks == nil </span><span class="cov0" title="0">{
+                settings.Hooks = &amp;claude.HooksConfig{}
+        }</span>
+
+        // Load from backup or create default configuration
+        <span class="cov0" title="0">var hooksConfig *claude.HooksConfig
+        if backupConfig, err := m.loadHooksBackup(); err == nil </span><span class="cov0" title="0">{
+                hooksConfig = backupConfig
+        }</span> else<span class="cov0" title="0"> {
+                hooksConfig = m.createDefaultHooksConfig()
+        }</span>
+
+        // Enable PostToolUse hooks
+        <span class="cov0" title="0">settings.Hooks.PostToolUse = hooksConfig.PostToolUse
+
+        // Save settings
+        if err := m.saveSettings(settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save settings: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// DisableCheck disables code checking hooks (PostToolUse hooks)
+func (m *Manager) DisableCheck(_ context.Context) error <span class="cov0" title="0">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        // If hooks config doesn't exist, nothing to disable
+        <span class="cov0" title="0">if settings.Hooks == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        // Save current hooks configuration before modifying
+        <span class="cov0" title="0">if err := m.saveHooksBackup(settings.Hooks); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save hooks backup: %w", err)
+        }</span>
+
+        // Remove PostToolUse hooks
+        <span class="cov0" title="0">settings.Hooks.PostToolUse = nil
+
+        // If all hooks are removed, set hooks to nil
+        if len(settings.Hooks.PostToolUse) == 0 &amp;&amp;
+                len(settings.Hooks.Stop) == 0 </span><span class="cov0" title="0">{
+                settings.Hooks = nil
+        }</span>
+
+        // Save settings
+        <span class="cov0" title="0">if err := m.saveSettings(settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save settings: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// createDefaultHooksConfig creates a default hooks configuration
+func (m *Manager) createDefaultHooksConfig() *claude.HooksConfig <span class="cov0" title="0">{
+        return &amp;claude.HooksConfig{
+                PostToolUse: []*claude.HookRule{
+                        {
+                                Matcher: "Write|Edit|MultiEdit",
+                                Hooks: []*claude.HookItem{
+                                        {
+                                                Type:    "command",
+                                                Command: "~/.claude/hooks/smart-lint.sh",
+                                                Timeout: 120,
+                                        },
+                                        {
+                                                Type:    "command",
+                                                Command: "~/.claude/hooks/smarter-test.sh",
+                                                Timeout: 120,
+                                        },
+                                },
+                        },
+                },
+        }
+}</span>
+
+// loadSettings loads settings from settings.json
+func (m *Manager) loadSettings() (*claude.Settings, error) <span class="cov0" title="0">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // If file doesn't exist, return default settings
+        if _, err := os.Stat(settingsPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return &amp;claude.Settings{
+                        IncludeCoAuthoredBy: false,
+                }, nil
+        }</span>
+
+        <span class="cov0" title="0">data, err := os.ReadFile(settingsPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read settings file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">var settings claude.Settings
+        if err := json.Unmarshal(data, &amp;settings); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse settings file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;settings, nil</span>
+}
+
+// saveSettings saves settings to settings.json
+func (m *Manager) saveSettings(settings *claude.Settings) error <span class="cov0" title="0">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // Ensure directory exists
+        if err := os.MkdirAll(m.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create claude directory: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">data, err := json.MarshalIndent(settings, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal settings: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if err := os.WriteFile(settingsPath, data, 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write settings file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// saveHooksBackup saves hooks configuration to backup file
+func (m *Manager) saveHooksBackup(hooksConfig *claude.HooksConfig) error <span class="cov0" title="0">{
+        backupPath := filepath.Join(m.claudeDir, "settings.json.hooks_backup")
+
+        data, err := json.Marshal(hooksConfig)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal hooks config: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if err := os.WriteFile(backupPath, data, 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write hooks backup file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+// loadHooksBackup loads hooks configuration from backup file
+func (m *Manager) loadHooksBackup() (*claude.HooksConfig, error) <span class="cov0" title="0">{
+        backupPath := filepath.Join(m.claudeDir, "settings.json.hooks_backup")
+
+        if _, err := os.Stat(backupPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("hooks backup file not found")
+        }</span>
+
+        <span class="cov0" title="0">data, err := os.ReadFile(backupPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read hooks backup file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">var hooksConfig claude.HooksConfig
+        if err := json.Unmarshal(data, &amp;hooksConfig); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse hooks backup file: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;hooksConfig, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package claude
+
+import (
+        "encoding/json"
+        "strings"
+        "time"
+)
+
+// Settings represents the main configuration structure for Claude Code
+type Settings struct {
+        IncludeCoAuthoredBy bool              `json:"includeCoAuthoredBy"`
+        Env                 map[string]string `json:"env,omitempty"`
+        Hooks               *HooksConfig      `json:"hooks,omitempty"`
+        StatusLine          *StatusLineConfig `json:"statusLine,omitempty"`
+}
+
+// HooksConfig represents the hooks configuration
+type HooksConfig struct {
+        PostToolUse  []*HookRule `json:"PostToolUse,omitempty"`
+        Stop         []*HookRule `json:"Stop,omitempty"`
+        Notification []*HookRule `json:"Notification,omitempty"`
+}
+
+// HookRule represents a single hook rule with matcher and hooks
+type HookRule struct {
+        Matcher string      `json:"matcher"`
+        Hooks   []*HookItem `json:"hooks"`
+}
+
+// HookItem represents a single hook command
+type HookItem struct {
+        Type    string `json:"type"`
+        Command string `json:"command"`
+        Timeout int    `json:"timeout,omitempty"` // Timeout in seconds, 0 means no timeout
+}
+
+// StatusLineConfig represents status line configuration
+type StatusLineConfig map[string]interface{}
+
+// ProviderType represents the type of AI provider
+type ProviderType string
+
+const (
+        ProviderNone     ProviderType = ""
+        ProviderDeepSeek ProviderType = "deepseek"
+        ProviderKimi     ProviderType = "kimi"
+        ProviderGLM      ProviderType = "GLM"
+        ProviderDoubao   ProviderType = "doubao"
+)
+
+// String returns the string representation of ProviderType
+func (p ProviderType) String() string <span class="cov0" title="0">{
+        return string(p)
+}</span>
+
+// IsValid checks if the provider type is valid
+func (p ProviderType) IsValid() bool <span class="cov8" title="1">{
+        switch p </span>{
+        case ProviderDeepSeek, ProviderKimi, ProviderGLM, ProviderDoubao:<span class="cov8" title="1">
+                return true</span>
+        default:<span class="cov8" title="1">
+                return false</span>
+        }
+}
+
+// NormalizeProviderName converts user input to the correct ProviderType
+// This allows case-insensitive provider names for better user experience
+func NormalizeProviderName(input string) ProviderType <span class="cov8" title="1">{
+        switch strings.ToLower(input) </span>{
+        case "deepseek":<span class="cov8" title="1">
+                return ProviderDeepSeek</span>
+        case "kimi":<span class="cov8" title="1">
+                return ProviderKimi</span>
+        case "glm":<span class="cov8" title="1">
+                return ProviderGLM</span>
+        case "zhipu", "zhipu-ai":<span class="cov8" title="1"> // Backwards compatibility
+                return ProviderGLM</span>
+        case "doubao":<span class="cov0" title="0">
+                return ProviderDoubao</span>
+        default:<span class="cov8" title="1">
+                // If exact match, return as-is for backwards compatibility
+                p := ProviderType(input)
+                if p.IsValid() </span><span class="cov0" title="0">{
+                        return p
+                }</span>
+                <span class="cov8" title="1">return ProviderNone</span>
+        }
+}
+
+// ProviderConfig represents configuration for an AI provider
+type ProviderConfig struct {
+        Type           ProviderType `json:"type"`
+        AuthToken      string       `json:"auth_token"`
+        BaseURL        string       `json:"base_url"`
+        Model          string       `json:"model"`
+        SmallFastModel string       `json:"small_fast_model"`
+}
+
+// ProxyConfig represents proxy configuration
+type ProxyConfig struct {
+        HTTPProxy  string `json:"http_proxy"`
+        HTTPSProxy string `json:"https_proxy"`
+}
+
+// ConfigStatus represents configuration status information
+type ConfigStatus struct {
+        ConfigExists    bool         `json:"config_exists"`
+        ConfigPath      string       `json:"config_path"`
+        LastModified    string       `json:"last_modified,omitempty"`
+        HooksConfigured bool         `json:"hooks_configured"`
+        HooksEnabled    bool         `json:"hooks_enabled"`
+        ProxyEnabled    bool         `json:"proxy_enabled"`
+        ProxyConfig     *ProxyConfig `json:"proxy_config,omitempty"`
+        DeepSeekEnabled bool         `json:"deepseek_enabled"`
+}
+
+// BackupInfo represents backup operation result
+type BackupInfo struct {
+        Filename    string    `json:"filename"`
+        FilePath    string    `json:"file_path"`
+        ContentType string    `json:"content_type"`
+        Size        int64     `json:"size"`
+        Timestamp   time.Time `json:"timestamp"`
+}
+
+// MarshalJSON implements json.Marshaler for Settings
+func (s *Settings) MarshalJSON() ([]byte, error) <span class="cov8" title="1">{
+        type alias Settings
+        return json.MarshalIndent((*alias)(s), "", "  ")
+}</span>
+
+// UnmarshalJSON implements json.Unmarshaler for Settings
+func (s *Settings) UnmarshalJSON(data []byte) error <span class="cov8" title="1">{
+        type alias Settings
+        return json.Unmarshal(data, (*alias)(s))
+}</span>
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package config
+
+import (
+        "archive/tar"
+        "compress/gzip"
+        "context"
+        "encoding/json"
+        "fmt"
+        "io"
+        "os"
+        "path/filepath"
+        "strings"
+        "time"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// Manager implements the ConfigManager interface
+type Manager struct {
+        claudeDir string
+}
+
+// NewManager creates a new configuration manager
+func NewManager(claudeDir string) *Manager <span class="cov8" title="1">{
+        return &amp;Manager{
+                claudeDir: claudeDir,
+        }
+}</span>
+
+// Load loads the current configuration from settings.json
+func (m *Manager) Load(_ context.Context) (*claude.Settings, error) <span class="cov8" title="1">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // If file doesn't exist, return default settings
+        if _, err := os.Stat(settingsPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return &amp;claude.Settings{
+                        IncludeCoAuthoredBy: false,
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">data, err := os.ReadFile(settingsPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">var settings claude.Settings
+        if err := json.Unmarshal(data, &amp;settings); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;settings, nil</span>
+}
+
+// Save saves the configuration to settings.json
+func (m *Manager) Save(_ context.Context, config *claude.Settings) error <span class="cov8" title="1">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // Ensure directory exists
+        if err := os.MkdirAll(m.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create claude directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">data, err := json.MarshalIndent(config, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := os.WriteFile(settingsPath, data, 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetStatus returns current configuration status
+func (m *Manager) GetStatus(ctx context.Context) (*claude.ConfigStatus, error) <span class="cov8" title="1">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        status := &amp;claude.ConfigStatus{
+                ConfigPath: settingsPath,
+        }
+
+        // Check if config file exists
+        if stat, err := os.Stat(settingsPath); err == nil </span><span class="cov8" title="1">{
+                status.ConfigExists = true
+                status.LastModified = stat.ModTime().Format(time.RFC3339)
+        }</span> else<span class="cov0" title="0"> if os.IsNotExist(err) </span><span class="cov0" title="0">{
+                status.ConfigExists = false
+        }</span> else<span class="cov0" title="0"> {
+                return nil, fmt.Errorf("failed to check config file: %w", err)
+        }</span>
+
+        // Check hooks configuration and other settings
+        <span class="cov8" title="1">if status.ConfigExists </span><span class="cov8" title="1">{
+                settings, err := m.Load(ctx)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to load settings: %w", err)
+                }</span>
+
+                <span class="cov8" title="1">status.HooksConfigured = settings.Hooks != nil &amp;&amp; len(settings.Hooks.PostToolUse) &gt; 0
+                status.HooksEnabled = status.HooksConfigured
+                status.ProxyEnabled = settings.Env != nil &amp;&amp; (settings.Env["http_proxy"] != "" || settings.Env["https_proxy"] != "")
+
+                // Set proxy config if enabled
+                if status.ProxyEnabled </span><span class="cov8" title="1">{
+                        status.ProxyConfig = &amp;claude.ProxyConfig{
+                                HTTPProxy:  settings.Env["http_proxy"],
+                                HTTPSProxy: settings.Env["https_proxy"],
+                        }
+                }</span>
+
+                // Check if DeepSeek is enabled by looking for DeepSeek-specific configuration
+                <span class="cov8" title="1">status.DeepSeekEnabled = settings.Env["ANTHROPIC_AUTH_TOKEN"] != "" &amp;&amp;
+                        settings.Env["ANTHROPIC_BASE_URL"] != "" &amp;&amp;
+                        strings.Contains(settings.Env["ANTHROPIC_BASE_URL"], "deepseek")</span>
+        }
+
+        <span class="cov8" title="1">return status, nil</span>
+}
+
+// Backup creates a backup of configuration
+func (m *Manager) Backup(_ context.Context) (*claude.BackupInfo, error) <span class="cov8" title="1">{
+        homeDir, err := os.UserHomeDir()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get home directory: %w", err)
+        }</span>
+
+        // Generate backup filename with timestamp
+        <span class="cov8" title="1">timestamp := time.Now().Format("20060102_150405")
+        filename := fmt.Sprintf("claude-config-backup-%s.tar.gz", timestamp)
+        backupPath := filepath.Join(homeDir, filename)
+
+        // Create tar.gz archive of claude directory
+        if err := m.createTarGzArchive(m.claudeDir, backupPath); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create backup archive: %w", err)
+        }</span>
+
+        // Get file size
+        <span class="cov8" title="1">stat, err := os.Stat(backupPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to get backup file stats: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;claude.BackupInfo{
+                Filename:    filename,
+                FilePath:    backupPath,
+                ContentType: "directory",
+                Size:        stat.Size(),
+                Timestamp:   time.Now(),
+        }, nil</span>
+}
+
+// createTarGzArchive creates a tar.gz archive of the source directory
+func (m *Manager) createTarGzArchive(sourceDir, destPath string) error <span class="cov8" title="1">{
+        // Create destination file
+        outFile, err := os.Create(destPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create archive file: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer outFile.Close()
+
+        // Create gzip writer
+        gzWriter := gzip.NewWriter(outFile)
+        defer gzWriter.Close()
+
+        // Create tar writer
+        tarWriter := tar.NewWriter(gzWriter)
+        defer tarWriter.Close()
+
+        // Walk through source directory
+        return filepath.Walk(sourceDir, func(filePath string, info os.FileInfo, err error) error </span><span class="cov8" title="1">{
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // Get relative path for tar header
+                <span class="cov8" title="1">relPath, err := filepath.Rel(sourceDir, filePath)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // Skip if it's the source directory itself
+                <span class="cov8" title="1">if relPath == "." </span><span class="cov8" title="1">{
+                        return nil
+                }</span>
+
+                // Create tar header
+                <span class="cov8" title="1">header, err := tar.FileInfoHeader(info, "")
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+                <span class="cov8" title="1">header.Name = strings.ReplaceAll(relPath, string(filepath.Separator), "/")
+
+                // Write header
+                if err := tarWriter.WriteHeader(header); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // If it's a regular file, copy its content
+                <span class="cov8" title="1">if info.Mode().IsRegular() </span><span class="cov8" title="1">{
+                        file, err := os.Open(filePath)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov8" title="1">defer file.Close()
+
+                        _, err = io.Copy(tarWriter, file)
+                        return err</span>
+                }
+
+                <span class="cov8" title="1">return nil</span>
+        })
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package file
+
+import (
+        "fmt"
+        "strings"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// SettingsJSONMerger implements intelligent merging of settings.json files
+type SettingsJSONMerger struct{}
+
+// NewSettingsJSONMerger creates a new settings merger
+func NewSettingsJSONMerger() *SettingsJSONMerger <span class="cov8" title="1">{
+        return &amp;SettingsJSONMerger{}
+}</span>
+
+// MergeSettings intelligently merges source settings into destination settings
+// Following the design rules:
+// 1. Proxy configuration protection: user's proxy settings have priority
+// 2. Environment variable merging: preserve existing settings
+// 3. Hooks intelligent merging: merge by matcher, avoid duplicates
+func (m *SettingsJSONMerger) MergeSettings(dest, source *claude.Settings) (*claude.Settings, error) <span class="cov8" title="1">{
+        if dest == nil </span><span class="cov8" title="1">{
+                dest = &amp;claude.Settings{}
+        }</span>
+        <span class="cov8" title="1">if source == nil </span><span class="cov0" title="0">{
+                return dest, nil
+        }</span>
+
+        // Create result by copying destination
+        <span class="cov8" title="1">result := &amp;claude.Settings{
+                IncludeCoAuthoredBy: source.IncludeCoAuthoredBy, // Use source value
+                StatusLine:          dest.StatusLine,            // Keep destination status line
+        }
+
+        // Merge environment variables with proxy protection
+        result.Env = m.mergeEnvironmentVariables(dest.Env, source.Env)
+
+        // Merge hooks intelligently
+        var err error
+        result.Hooks, err = m.mergeHooksConfig(dest.Hooks, source.Hooks)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to merge hooks: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// mergeEnvironmentVariables merges env vars with proxy configuration protection
+func (m *SettingsJSONMerger) mergeEnvironmentVariables(destEnv, sourceEnv map[string]string) map[string]string <span class="cov8" title="1">{
+        if destEnv == nil &amp;&amp; sourceEnv == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">result := make(map[string]string)
+
+        // First, add all destination variables
+        for key, value := range destEnv </span><span class="cov8" title="1">{
+                result[key] = value
+        }</span>
+
+        // Then, add source variables, but protect proxy settings
+        <span class="cov8" title="1">for key, value := range sourceEnv </span><span class="cov8" title="1">{
+                // Proxy configuration protection: skip proxy vars if they exist in destination
+                if m.isProxyVar(key) &amp;&amp; destEnv != nil &amp;&amp; destEnv[key] != "" </span><span class="cov8" title="1">{
+                        continue</span> // Keep destination proxy settings
+                }
+                <span class="cov8" title="1">result[key] = value</span>
+        }
+
+        <span class="cov8" title="1">if len(result) == 0 </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">return result</span>
+}
+
+// mergeHooksConfig intelligently merges hooks configurations
+func (m *SettingsJSONMerger) mergeHooksConfig(destHooks, sourceHooks *claude.HooksConfig) (*claude.HooksConfig, error) <span class="cov8" title="1">{
+        if destHooks == nil &amp;&amp; sourceHooks == nil </span><span class="cov8" title="1">{
+                return nil, nil
+        }</span>
+        <span class="cov8" title="1">if destHooks == nil </span><span class="cov0" title="0">{
+                return sourceHooks, nil
+        }</span>
+        <span class="cov8" title="1">if sourceHooks == nil </span><span class="cov0" title="0">{
+                return destHooks, nil
+        }</span>
+
+        <span class="cov8" title="1">result := &amp;claude.HooksConfig{}
+
+        // Merge PostToolUse hooks
+        var err error
+        result.PostToolUse, err = m.mergeHookRules(destHooks.PostToolUse, sourceHooks.PostToolUse)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to merge PostToolUse hooks: %w", err)
+        }</span>
+
+        // Merge Stop hooks
+        <span class="cov8" title="1">result.Stop, err = m.mergeHookRules(destHooks.Stop, sourceHooks.Stop)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to merge Stop hooks: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// mergeHookRules merges hook rules by matcher, avoiding duplicates
+func (m *SettingsJSONMerger) mergeHookRules(destRules, sourceRules []*claude.HookRule) ([]*claude.HookRule, error) <span class="cov8" title="1">{
+        if len(destRules) == 0 &amp;&amp; len(sourceRules) == 0 </span><span class="cov8" title="1">{
+                return nil, nil
+        }</span>
+        <span class="cov8" title="1">if len(destRules) == 0 </span><span class="cov8" title="1">{
+                return sourceRules, nil
+        }</span>
+        <span class="cov8" title="1">if len(sourceRules) == 0 </span><span class="cov0" title="0">{
+                return destRules, nil
+        }</span>
+
+        // Check for overlapping matchers and merge intelligently
+        <span class="cov8" title="1">var result []*claude.HookRule
+        processedDestRules := make([]bool, len(destRules))
+
+        // Process each source rule
+        for _, sourceRule := range sourceRules </span><span class="cov8" title="1">{
+                merged := false
+                sourceMatcher := m.normalizeMatcherPattern(sourceRule.Matcher)
+
+                // Look for overlapping destination rules
+                for i, destRule := range destRules </span><span class="cov8" title="1">{
+                        if processedDestRules[i] </span><span class="cov0" title="0">{
+                                continue</span>
+                        }
+
+                        <span class="cov8" title="1">destMatcher := m.normalizeMatcherPattern(destRule.Matcher)
+
+                        // Check if matchers overlap
+                        if m.matchersOverlap(destMatcher, sourceMatcher) </span><span class="cov8" title="1">{
+                                // Merge these two rules
+                                mergedRule, err := m.mergeHookRule(destRule, sourceRule)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return nil, err
+                                }</span>
+                                <span class="cov8" title="1">result = append(result, mergedRule)
+                                processedDestRules[i] = true
+                                merged = true
+                                break</span>
+                        }
+                }
+
+                // If no overlap found, add source rule as-is
+                <span class="cov8" title="1">if !merged </span><span class="cov0" title="0">{
+                        result = append(result, sourceRule)
+                }</span>
+        }
+
+        // Add any remaining destination rules that weren't merged
+        <span class="cov8" title="1">for i, destRule := range destRules </span><span class="cov8" title="1">{
+                if !processedDestRules[i] </span><span class="cov0" title="0">{
+                        result = append(result, destRule)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// matchersOverlap checks if two normalized matcher patterns overlap
+func (m *SettingsJSONMerger) matchersOverlap(matcher1, matcher2 string) bool <span class="cov8" title="1">{
+        if matcher1 == matcher2 </span><span class="cov0" title="0">{
+                return true
+        }</span>
+
+        // Check if one is a subset of the other
+        <span class="cov8" title="1">parts1 := strings.Split(matcher1, "|")
+        parts2 := strings.Split(matcher2, "|")
+
+        // Create sets for easier comparison
+        set1 := make(map[string]bool)
+        for _, part := range parts1 </span><span class="cov8" title="1">{
+                set1[part] = true
+        }</span>
+
+        <span class="cov8" title="1">set2 := make(map[string]bool)
+        for _, part := range parts2 </span><span class="cov8" title="1">{
+                set2[part] = true
+        }</span>
+
+        // Check if there's any overlap
+        <span class="cov8" title="1">for part := range set1 </span><span class="cov8" title="1">{
+                if set2[part] </span><span class="cov8" title="1">{
+                        return true
+                }</span>
+        }
+
+        <span class="cov0" title="0">return false</span>
+}
+
+// mergeHookRule merges two hook rules with the same matcher
+func (m *SettingsJSONMerger) mergeHookRule(destRule, sourceRule *claude.HookRule) (*claude.HookRule, error) <span class="cov8" title="1">{
+        // Use the more comprehensive matcher pattern
+        matcher := m.choosePreferredMatcher(destRule.Matcher, sourceRule.Matcher)
+
+        // Merge hooks, avoiding duplicates
+        mergedHooks := make([]*claude.HookItem, 0)
+        commandsSeen := make(map[string]bool)
+
+        // Add destination hooks first
+        for _, hook := range destRule.Hooks </span><span class="cov8" title="1">{
+                if !commandsSeen[hook.Command] </span><span class="cov8" title="1">{
+                        mergedHooks = append(mergedHooks, hook)
+                        commandsSeen[hook.Command] = true
+                }</span>
+        }
+
+        // Add source hooks, avoiding duplicates
+        <span class="cov8" title="1">for _, hook := range sourceRule.Hooks </span><span class="cov8" title="1">{
+                if !commandsSeen[hook.Command] </span><span class="cov8" title="1">{
+                        mergedHooks = append(mergedHooks, hook)
+                        commandsSeen[hook.Command] = true
+                }</span>
+        }
+
+        <span class="cov8" title="1">return &amp;claude.HookRule{
+                Matcher: matcher,
+                Hooks:   mergedHooks,
+        }, nil</span>
+}
+
+// normalizeMatcherPattern normalizes matcher patterns for comparison
+func (m *SettingsJSONMerger) normalizeMatcherPattern(matcher string) string <span class="cov8" title="1">{
+        if matcher == "" </span><span class="cov8" title="1">{
+                return ""
+        }</span>
+
+        // Split by | and sort for consistent comparison
+        <span class="cov8" title="1">parts := strings.Split(matcher, "|")
+
+        // Remove duplicates and sort
+        seen := make(map[string]bool)
+        var unique []string
+        for _, part := range parts </span><span class="cov8" title="1">{
+                part = strings.TrimSpace(part)
+                if part != "" &amp;&amp; !seen[part] </span><span class="cov8" title="1">{
+                        unique = append(unique, part)
+                        seen[part] = true
+                }</span>
+        }
+
+        // Sort for consistent comparison
+        <span class="cov8" title="1">for i := 0; i &lt; len(unique)-1; i++ </span><span class="cov8" title="1">{
+                for j := i + 1; j &lt; len(unique); j++ </span><span class="cov8" title="1">{
+                        if unique[i] &gt; unique[j] </span><span class="cov8" title="1">{
+                                unique[i], unique[j] = unique[j], unique[i]
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return strings.Join(unique, "|")</span>
+}
+
+// choosePreferredMatcher chooses the more comprehensive matcher pattern
+func (m *SettingsJSONMerger) choosePreferredMatcher(matcher1, matcher2 string) string <span class="cov8" title="1">{
+        norm1 := m.normalizeMatcherPattern(matcher1)
+        norm2 := m.normalizeMatcherPattern(matcher2)
+
+        parts1 := strings.Split(norm1, "|")
+        parts2 := strings.Split(norm2, "|")
+
+        // Choose the one with more parts (more comprehensive)
+        if len(parts2) &gt; len(parts1) </span><span class="cov8" title="1">{
+                return matcher2
+        }</span>
+        <span class="cov0" title="0">if len(parts1) &gt; len(parts2) </span><span class="cov0" title="0">{
+                return matcher1
+        }</span>
+
+        // Same length, choose alphabetically last (arbitrary but consistent)
+        <span class="cov0" title="0">if norm2 &gt; norm1 </span><span class="cov0" title="0">{
+                return matcher2
+        }</span>
+        <span class="cov0" title="0">return matcher1</span>
+}
+
+// isProxyVar checks if a variable is a proxy-related variable
+func (m *SettingsJSONMerger) isProxyVar(key string) bool <span class="cov8" title="1">{
+        return key == "http_proxy" || key == "https_proxy"
+}</span>
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package file
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "path/filepath"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// Operations implements the FileOperations interface
+type Operations struct {
+        sourceDir string
+        claudeDir string
+        merger    *SettingsJSONMerger
+}
+
+// NewOperations creates a new file operations manager
+func NewOperations(sourceDir, claudeDir string) *Operations <span class="cov8" title="1">{
+        return &amp;Operations{
+                sourceDir: sourceDir,
+                claudeDir: claudeDir,
+                merger:    NewSettingsJSONMerger(),
+        }
+}</span>
+
+// Copy copies configuration files to Claude directory based on options
+func (o *Operations) Copy(ctx context.Context, options *claude.CopyOptions) error <span class="cov8" title="1">{
+        if options == nil </span><span class="cov0" title="0">{
+                options = &amp;claude.CopyOptions{All: true}
+        }</span>
+
+        // Ensure target directory exists
+        <span class="cov8" title="1">if err := os.MkdirAll(o.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create claude directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">var copyTargets []string
+
+        if options.All </span><span class="cov8" title="1">{
+                copyTargets = []string{"agents", "commands", "hooks", "output-styles", "settings.json", "CLAUDE.md.to.copy", "statusline.js"}
+        }</span> else<span class="cov8" title="1"> {
+                if options.Agents </span><span class="cov8" title="1">{
+                        copyTargets = append(copyTargets, "agents")
+                }</span>
+                <span class="cov8" title="1">if options.Commands </span><span class="cov8" title="1">{
+                        copyTargets = append(copyTargets, "commands")
+                }</span>
+                <span class="cov8" title="1">if options.Hooks </span><span class="cov0" title="0">{
+                        copyTargets = append(copyTargets, "hooks")
+                }</span>
+        }
+
+        // Always process settings.json specially
+        <span class="cov8" title="1">if err := o.handleSettingsJSON(ctx); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to handle settings.json: %w", err)
+        }</span>
+
+        // Copy other items
+        <span class="cov8" title="1">for _, target := range copyTargets </span><span class="cov8" title="1">{
+                if target == "settings.json" </span><span class="cov8" title="1">{
+                        continue</span> // Already handled
+                }
+
+                <span class="cov8" title="1">sourcePath := filepath.Join(o.sourceDir, target)
+                var destPath string
+
+                // Special handling for CLAUDE.md.to.copy
+                if target == "CLAUDE.md.to.copy" </span><span class="cov8" title="1">{
+                        destPath = filepath.Join(o.claudeDir, "CLAUDE.md")
+                }</span> else<span class="cov8" title="1"> {
+                        destPath = filepath.Join(o.claudeDir, target)
+                }</span>
+
+                <span class="cov8" title="1">if err := o.copyItem(sourcePath, destPath); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to copy %s: %w", target, err)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// handleSettingsJSON handles intelligent merging of settings.json
+func (o *Operations) handleSettingsJSON(_ context.Context) error <span class="cov8" title="1">{
+        sourcePath := filepath.Join(o.sourceDir, "settings.json")
+        destPath := filepath.Join(o.claudeDir, "settings.json")
+
+        // Check if source settings exists
+        if _, err := os.Stat(sourcePath); os.IsNotExist(err) </span><span class="cov8" title="1">{
+                return nil // No source settings to merge
+        }</span>
+
+        // Load source settings
+        <span class="cov8" title="1">sourceSettings, err := o.loadSettings(sourcePath)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load source settings: %w", err)
+        }</span>
+
+        // Load destination settings (if exists)
+        <span class="cov8" title="1">var destSettings *claude.Settings
+        if _, err := os.Stat(destPath); err == nil </span><span class="cov8" title="1">{
+                destSettings, err = o.loadSettings(destPath)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to load destination settings: %w", err)
+                }</span>
+        }
+
+        // Merge settings
+        <span class="cov8" title="1">mergedSettings, err := o.merger.MergeSettings(destSettings, sourceSettings)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to merge settings: %w", err)
+        }</span>
+
+        // Save merged settings
+        <span class="cov8" title="1">if err := o.saveSettings(destPath, mergedSettings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save merged settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// copyItem copies a file or directory recursively
+func (o *Operations) copyItem(src, dest string) error <span class="cov8" title="1">{
+        srcInfo, err := os.Stat(src)
+        if err != nil </span><span class="cov8" title="1">{
+                if os.IsNotExist(err) </span><span class="cov8" title="1">{
+                        return nil // Source doesn't exist, skip
+                }</span>
+                <span class="cov0" title="0">return fmt.Errorf("failed to stat source: %w", err)</span>
+        }
+
+        <span class="cov8" title="1">if srcInfo.IsDir() </span><span class="cov8" title="1">{
+                return o.copyDirectory(src, dest)
+        }</span>
+
+        <span class="cov8" title="1">return o.copyFile(src, dest)</span>
+}
+
+// copyFile copies a single file
+func (o *Operations) copyFile(src, dest string) error <span class="cov8" title="1">{
+        sourceFile, err := os.Open(src)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to open source file: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer sourceFile.Close()
+
+        // Ensure destination directory exists
+        destDir := filepath.Dir(dest)
+        if err := os.MkdirAll(destDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create destination directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">destFile, err := os.Create(dest)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create destination file: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer destFile.Close()
+
+        // Copy content
+        buffer := make([]byte, 32*1024)
+        for </span><span class="cov8" title="1">{
+                n, err := sourceFile.Read(buffer)
+                if n == 0 </span><span class="cov8" title="1">{
+                        break</span>
+                }
+                <span class="cov8" title="1">if err != nil &amp;&amp; err.Error() != "EOF" </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to read source file: %w", err)
+                }</span>
+
+                <span class="cov8" title="1">_, err = destFile.Write(buffer[:n])
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to write destination file: %w", err)
+                }</span>
+
+                <span class="cov8" title="1">if err != nil &amp;&amp; err.Error() == "EOF" </span><span class="cov0" title="0">{
+                        break</span>
+                }
+        }
+
+        // Copy permissions
+        <span class="cov8" title="1">srcInfo, err := os.Stat(src)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to stat source file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return os.Chmod(dest, srcInfo.Mode())</span>
+}
+
+// copyDirectory copies a directory recursively
+func (o *Operations) copyDirectory(src, dest string) error <span class="cov8" title="1">{
+        srcInfo, err := os.Stat(src)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to stat source directory: %w", err)
+        }</span>
+
+        // Create destination directory
+        <span class="cov8" title="1">if err := os.MkdirAll(dest, srcInfo.Mode()); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create destination directory: %w", err)
+        }</span>
+
+        // Read source directory
+        <span class="cov8" title="1">entries, err := os.ReadDir(src)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to read source directory: %w", err)
+        }</span>
+
+        // Copy each entry
+        <span class="cov8" title="1">for _, entry := range entries </span><span class="cov8" title="1">{
+                srcPath := filepath.Join(src, entry.Name())
+                destPath := filepath.Join(dest, entry.Name())
+
+                if err := o.copyItem(srcPath, destPath); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to copy %s: %w", entry.Name(), err)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// loadSettings loads settings from a JSON file
+func (o *Operations) loadSettings(path string) (*claude.Settings, error) <span class="cov8" title="1">{
+        data, err := os.ReadFile(path)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">settings := &amp;claude.Settings{}
+        if err := settings.UnmarshalJSON(data); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return settings, nil</span>
+}
+
+// saveSettings saves settings to a JSON file
+func (o *Operations) saveSettings(path string, settings *claude.Settings) error <span class="cov8" title="1">{
+        data, err := settings.MarshalJSON()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := os.WriteFile(path, data, 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Compare compares source and destination files
+func (o *Operations) Compare(_ context.Context, sourcePath, destPath string) (*claude.CompareResult, error) <span class="cov8" title="1">{
+        // Check if both files exist
+        sourceInfo, sourceErr := os.Stat(sourcePath)
+        destInfo, destErr := os.Stat(destPath)
+
+        if os.IsNotExist(sourceErr) &amp;&amp; os.IsNotExist(destErr) </span><span class="cov0" title="0">{
+                return &amp;claude.CompareResult{Same: true}, nil
+        }</span>
+
+        <span class="cov8" title="1">if os.IsNotExist(sourceErr) </span><span class="cov0" title="0">{
+                return &amp;claude.CompareResult{
+                        Same:        false,
+                        Differences: []string{"Source file does not exist"},
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">if os.IsNotExist(destErr) </span><span class="cov8" title="1">{
+                return &amp;claude.CompareResult{
+                        Same:        false,
+                        Differences: []string{"Destination file does not exist"},
+                }, nil
+        }</span>
+
+        // Compare file sizes
+        <span class="cov8" title="1">if sourceInfo.Size() != destInfo.Size() </span><span class="cov8" title="1">{
+                return &amp;claude.CompareResult{
+                        Same: false,
+                        Differences: []string{fmt.Sprintf("File sizes differ: source=%d, dest=%d",
+                                sourceInfo.Size(), destInfo.Size())},
+                }, nil
+        }</span>
+
+        // Compare file contents
+        <span class="cov8" title="1">sourceData, err := os.ReadFile(sourcePath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read source file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">destData, err := os.ReadFile(destPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read destination file: %w", err)
+        }</span>
+
+        // Simple byte comparison
+        <span class="cov8" title="1">same := string(sourceData) == string(destData)
+        if same </span><span class="cov8" title="1">{
+                return &amp;claude.CompareResult{Same: true}, nil
+        }</span>
+
+        <span class="cov0" title="0">return &amp;claude.CompareResult{
+                Same:        false,
+                Differences: []string{"File contents differ"},
+        }, nil</span>
+}
+
+// MergeSettings provides direct access to settings merging
+func (o *Operations) MergeSettings(_ context.Context, source, dest *claude.Settings) (*claude.Settings, error) <span class="cov0" title="0">{
+        return o.merger.MergeSettings(dest, source)
+}</span>
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package install
+
+import (
+        "context"
+        "embed"
+        "fmt"
+        "io/fs"
+        "os"
+        "path/filepath"
+        "strings"
+
+        "github.com/ooneko/claude-config/resources"
+)
+
+// Manager install功能管理器
+type Manager struct {
+        claudeDir string
+        resources *ResourceManager
+}
+
+// NewManager 创建新的install管理器
+func NewManager(claudeDir string) *Manager <span class="cov8" title="1">{
+        return &amp;Manager{
+                claudeDir: claudeDir,
+                resources: NewResourceManager(),
+        }
+}</span>
+
+// Install 安装配置文件
+func (m *Manager) Install(ctx context.Context, options Options) error <span class="cov8" title="1">{
+        if err := options.Validate(); err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("无效的安装选项: %w", err)
+        }</span>
+
+        // 确保目标目录存在
+        <span class="cov8" title="1">if err := os.MkdirAll(m.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("创建Claude目录失败: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">components := options.GetSelectedComponents()
+
+        // 第一阶段: 安装组件
+        for _, component := range components </span><span class="cov8" title="1">{
+                if err := m.installComponent(ctx, component, options.Force); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("安装组件%s失败: %w", component, err)
+                }</span>
+        }
+
+        // 第二阶段: 清理孤立文件(如果启用了删除功能)
+        <span class="cov8" title="1">if options.Delete </span><span class="cov8" title="1">{
+                for _, component := range components </span><span class="cov8" title="1">{
+                        if err := m.cleanupOrphanedFiles(component, options); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("清理组件%s的孤立文件失败: %w", component, err)
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// installComponent 安装单个组件
+func (m *Manager) installComponent(ctx context.Context, component string, force bool) error <span class="cov8" title="1">{
+        select </span>{
+        case &lt;-ctx.Done():<span class="cov8" title="1">
+                return ctx.Err()</span>
+        default:<span class="cov8" title="1"></span>
+        }
+
+        <span class="cov8" title="1">switch component </span>{
+        case "agents", "commands", "hooks", "output-styles":<span class="cov8" title="1">
+                return m.installDirectory(component, force)</span>
+        case "settings.json":<span class="cov8" title="1">
+                return m.installSettingsJSON()</span>
+        case "CLAUDE.md.template":<span class="cov8" title="1">
+                return m.installClaudeMd(force)</span>
+        case "statusline.js":<span class="cov8" title="1">
+                return m.installStatuslineJs(force)</span>
+        default:<span class="cov8" title="1">
+                return fmt.Errorf("未知组件: %s", component)</span>
+        }
+}
+
+// installDirectory 安装目录 - 根据force参数决定是否覆盖现有目录
+func (m *Manager) installDirectory(dirName string, force bool) error <span class="cov8" title="1">{
+        targetDir := filepath.Join(m.claudeDir, dirName)
+
+        // 如果不强制覆盖，检查目录是否存在
+        if !force </span><span class="cov8" title="1">{
+                if _, err := os.Stat(targetDir); err == nil </span><span class="cov0" title="0">{
+                        fmt.Printf("⚠️  目录 %s 已存在，跳过安装（使用 --force 强制覆盖）\n", dirName)
+                        return nil
+                }</span>
+        }
+
+        <span class="cov8" title="1">return m.resources.ExtractDirectory(dirName, targetDir)</span>
+}
+
+// installSettingsJSON 安装settings.json - 始终使用智能合并
+func (m *Manager) installSettingsJSON() error <span class="cov8" title="1">{
+        targetPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // 创建临时文件来存储源文件内容
+        tempDir := os.TempDir()
+        tempFile := filepath.Join(tempDir, "settings_source.json")
+
+        if err := m.resources.ExtractFile("settings.json", tempFile); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("提取源settings.json失败: %w", err)
+        }</span>
+        <span class="cov8" title="1">defer os.Remove(tempFile) // 清理临时文件
+
+        // 使用智能合并器合并文件
+        merger := NewSettingsJSONMerger()
+        return merger.MergeSettings(targetPath, tempFile)</span>
+}
+
+// installClaudeMd 安装CLAUDE.md文件 - 总是覆盖现有文件
+func (m *Manager) installClaudeMd(_ bool) error <span class="cov8" title="1">{
+        targetPath := filepath.Join(m.claudeDir, "CLAUDE.md")
+        // CLAUDE.md 默认总是覆盖，不受force参数影响
+        return m.resources.ExtractFile("CLAUDE.md.template", targetPath)
+}</span>
+
+// installStatuslineJs 安装statusline.js文件 - 根据force参数决定是否覆盖现有文件，并设置可执行权限
+func (m *Manager) installStatuslineJs(force bool) error <span class="cov8" title="1">{
+        targetPath := filepath.Join(m.claudeDir, "statusline.js")
+
+        // 如果不强制覆盖，检查文件是否存在
+        if !force </span><span class="cov8" title="1">{
+                if _, err := os.Stat(targetPath); err == nil </span><span class="cov0" title="0">{
+                        fmt.Printf("⚠️  文件 statusline.js 已存在，跳过安装（使用 --force 强制覆盖）\n")
+                        return nil
+                }</span>
+        }
+
+        // 提取文件
+        <span class="cov8" title="1">if err := m.resources.ExtractFile("statusline.js", targetPath); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // 设置可执行权限 (0755)
+        <span class="cov8" title="1">return os.Chmod(targetPath, 0755)</span>
+}
+
+// ResourceManager embed资源管理器
+type ResourceManager struct {
+        fs embed.FS
+}
+
+// NewResourceManager 创建新的资源管理器
+func NewResourceManager() *ResourceManager <span class="cov8" title="1">{
+        return &amp;ResourceManager{
+                fs: resources.EmbeddedFiles,
+        }
+}</span>
+
+// ListEmbeddedFiles 列出所有嵌入的文件
+func (rm *ResourceManager) ListEmbeddedFiles() ([]string, error) <span class="cov8" title="1">{
+        var files []string
+
+        err := fs.WalkDir(rm.fs, ".", func(path string, d fs.DirEntry, err error) error </span><span class="cov8" title="1">{
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">if path == "." </span><span class="cov8" title="1">{
+                        return nil
+                }</span>
+
+                // 移除claude-config前缀
+                <span class="cov8" title="1">if strings.HasPrefix(path, "claude-config/") </span><span class="cov8" title="1">{
+                        relativePath := path[len("claude-config/"):]
+                        if d.IsDir() </span><span class="cov8" title="1">{
+                                files = append(files, relativePath+"/")
+                        }</span> else<span class="cov8" title="1"> {
+                                files = append(files, relativePath)
+                        }</span>
+                }
+
+                <span class="cov8" title="1">return nil</span>
+        })
+
+        <span class="cov8" title="1">return files, err</span>
+}
+
+// ExtractFile 提取单个文件
+func (rm *ResourceManager) ExtractFile(srcPath, destPath string) error <span class="cov8" title="1">{
+        fullSrcPath := filepath.Join("claude-config", srcPath)
+
+        data, err := rm.fs.ReadFile(fullSrcPath)
+        if err != nil </span><span class="cov8" title="1">{
+                return fmt.Errorf("读取嵌入文件失败: %w", err)
+        }</span>
+
+        // 确保目标目录存在
+        <span class="cov8" title="1">if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("创建目标目录失败: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return os.WriteFile(destPath, data, GetFilePermissions(destPath))</span>
+}
+
+// ExtractDirectory 提取目录
+func (rm *ResourceManager) ExtractDirectory(srcDir, destDir string) error <span class="cov8" title="1">{
+        fullSrcDir := filepath.Join("claude-config", srcDir)
+
+        return fs.WalkDir(rm.fs, fullSrcDir, func(path string, d fs.DirEntry, err error) error </span><span class="cov8" title="1">{
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // 计算相对路径
+                <span class="cov8" title="1">relPath, err := filepath.Rel(fullSrcDir, path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">if relPath == "." </span><span class="cov8" title="1">{
+                        return nil
+                }</span>
+
+                <span class="cov8" title="1">destPath := filepath.Join(destDir, relPath)
+
+                if d.IsDir() </span><span class="cov0" title="0">{
+                        return os.MkdirAll(destPath, 0755)
+                }</span>
+
+                <span class="cov8" title="1">data, err := rm.fs.ReadFile(path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // 确保目标目录存在
+                <span class="cov8" title="1">if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">return os.WriteFile(destPath, data, GetFilePermissions(destPath))</span>
+        })
+}
+
+// isSpecialFile 检查文件是否为特殊文件(不应被删除的文件)
+func isSpecialFile(filePath string) bool <span class="cov8" title="1">{
+        // 标准化路径分隔符
+        normalizedPath := filepath.ToSlash(filePath)
+
+        // settings.json 和 CLAUDE.md 永不删除
+        specialFiles := []string{
+                "settings.json",
+                "CLAUDE.md",
+        }
+
+        for _, special := range specialFiles </span><span class="cov8" title="1">{
+                if normalizedPath == special || strings.HasSuffix(normalizedPath, "/"+special) </span><span class="cov8" title="1">{
+                        return true
+                }</span>
+        }
+
+        <span class="cov8" title="1">return false</span>
+}
+
+// listEmbeddedFilesForComponent 获取指定组件的嵌入资源文件列表
+func (m *Manager) listEmbeddedFilesForComponent(component string) ([]string, error) <span class="cov8" title="1">{
+        var files []string
+
+        // 对于目录型组件,遍历嵌入资源中的对应目录
+        if component == "agents" || component == "commands" || component == "hooks" || component == "output-styles" </span><span class="cov8" title="1">{
+                fullSrcDir := filepath.Join("claude-config", component)
+
+                err := fs.WalkDir(m.resources.fs, fullSrcDir, func(path string, d fs.DirEntry, err error) error </span><span class="cov8" title="1">{
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        // 跳过目录本身
+                        <span class="cov8" title="1">if d.IsDir() </span><span class="cov8" title="1">{
+                                return nil
+                        }</span>
+
+                        // 计算相对路径
+                        <span class="cov8" title="1">relPath, err := filepath.Rel("claude-config", path)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov8" title="1">files = append(files, relPath)
+                        return nil</span>
+                })
+
+                <span class="cov8" title="1">return files, err</span>
+        }
+
+        // 对于单文件组件
+        <span class="cov8" title="1">switch component </span>{
+        case "statusline.js":<span class="cov8" title="1">
+                files = append(files, "statusline.js")</span>
+        case "settings.json", "CLAUDE.md.template":<span class="cov8" title="1">
+                // 这些特殊文件不参与删除逻辑
+                return files, nil</span>
+        }
+
+        <span class="cov8" title="1">return files, nil</span>
+}
+
+// listInstalledFilesInDirectory 获取目标目录中已安装的文件列表
+func (m *Manager) listInstalledFilesInDirectory(component string) ([]string, error) <span class="cov8" title="1">{
+        var files []string
+
+        targetDir := filepath.Join(m.claudeDir, component)
+
+        // 检查目录是否存在
+        if _, err := os.Stat(targetDir); os.IsNotExist(err) </span><span class="cov8" title="1">{
+                return files, nil // 目录不存在,返回空列表
+        }</span>
+
+        // 遍历目录
+        <span class="cov8" title="1">err := filepath.WalkDir(targetDir, func(path string, d fs.DirEntry, err error) error </span><span class="cov8" title="1">{
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                // 跳过目录
+                <span class="cov8" title="1">if d.IsDir() </span><span class="cov8" title="1">{
+                        return nil
+                }</span>
+
+                // 计算相对于 claudeDir 的路径
+                <span class="cov8" title="1">relPath, err := filepath.Rel(m.claudeDir, path)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+
+                <span class="cov8" title="1">files = append(files, relPath)
+                return nil</span>
+        })
+
+        <span class="cov8" title="1">return files, err</span>
+}
+
+// listOrphanedFiles 获取孤立文件列表(在目标目录中存在但在嵌入资源中不存在的文件)
+func (m *Manager) listOrphanedFiles(component string) ([]string, error) <span class="cov8" title="1">{
+        // 获取嵌入资源文件列表
+        embeddedFiles, err := m.listEmbeddedFilesForComponent(component)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("获取嵌入资源文件列表失败: %w", err)
+        }</span>
+
+        // 获取已安装文件列表
+        <span class="cov8" title="1">installedFiles, err := m.listInstalledFilesInDirectory(component)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("获取已安装文件列表失败: %w", err)
+        }</span>
+
+        // 创建嵌入文件的映射,便于快速查找
+        <span class="cov8" title="1">embeddedSet := make(map[string]bool)
+        for _, file := range embeddedFiles </span><span class="cov8" title="1">{
+                // 标准化路径
+                normalizedPath := filepath.ToSlash(file)
+                embeddedSet[normalizedPath] = true
+        }</span>
+
+        // 找出孤立文件
+        <span class="cov8" title="1">var orphanedFiles []string
+        for _, installedFile := range installedFiles </span><span class="cov8" title="1">{
+                normalizedPath := filepath.ToSlash(installedFile)
+
+                // 跳过特殊文件
+                if isSpecialFile(normalizedPath) </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // 如果不在嵌入资源中,则为孤立文件
+                <span class="cov8" title="1">if !embeddedSet[normalizedPath] </span><span class="cov8" title="1">{
+                        orphanedFiles = append(orphanedFiles, installedFile)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return orphanedFiles, nil</span>
+}
+
+// deleteOrphanedFiles 删除孤立文件(或执行dry-run)
+func (m *Manager) deleteOrphanedFiles(orphanedFiles []string, dryRun bool) (int, error) <span class="cov8" title="1">{
+        count := 0
+
+        for _, file := range orphanedFiles </span><span class="cov8" title="1">{
+                fullPath := filepath.Join(m.claudeDir, file)
+
+                if dryRun </span><span class="cov8" title="1">{
+                        // Dry-run模式: 只显示,不删除
+                        fmt.Printf("🗑️  %s\n", file)
+                }</span> else<span class="cov8" title="1"> {
+                        // 实际删除
+                        if err := os.Remove(fullPath); err != nil </span><span class="cov0" title="0">{
+                                return count, fmt.Errorf("删除文件失败 %s: %w", file, err)
+                        }</span>
+                        <span class="cov8" title="1">fmt.Printf("🗑️  已删除: %s\n", file)</span>
+                }
+                <span class="cov8" title="1">count++</span>
+        }
+
+        <span class="cov8" title="1">return count, nil</span>
+}
+
+// cleanupOrphanedFiles 清理孤立文件的主入口
+func (m *Manager) cleanupOrphanedFiles(component string, options Options) error <span class="cov8" title="1">{
+        // 如果未启用删除功能,直接返回
+        if !options.Delete </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        // 跳过特殊组件
+        <span class="cov8" title="1">if component == "settings.json" || component == "CLAUDE.md.template" </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        // 获取孤立文件列表
+        <span class="cov8" title="1">orphanedFiles, err := m.listOrphanedFiles(component)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // 如果没有孤立文件,直接返回
+        <span class="cov8" title="1">if len(orphanedFiles) == 0 </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        // 确定是dry-run还是实际删除
+        <span class="cov8" title="1">dryRun := !options.Force
+
+        // 输出标题
+        if dryRun </span><span class="cov8" title="1">{
+                fmt.Printf("\n🔍 Dry-run 模式: 以下文件将被删除 (使用 --force 实际执行删除):\n\n")
+        }</span> else<span class="cov8" title="1"> {
+                fmt.Printf("\n⚠️  警告: 即将删除以下文件\n\n")
+        }</span>
+
+        // 删除或显示文件
+        <span class="cov8" title="1">count, err := m.deleteOrphanedFiles(orphanedFiles, dryRun)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        // 输出汇总
+        <span class="cov8" title="1">fmt.Println()
+        if dryRun </span><span class="cov8" title="1">{
+                fmt.Printf("📊 总计: %d 个文件将被删除\n", count)
+                fmt.Println("\n💡 提示: 使用 --force 参数实际执行删除")
+        }</span> else<span class="cov8" title="1"> {
+                fmt.Printf("✅ 成功删除 %d 个孤立文件\n", count)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package install
+
+import (
+        "encoding/json"
+        "fmt"
+        "os"
+        "path/filepath"
+)
+
+// SettingsJSONMerger settings.json智能合并器
+type SettingsJSONMerger struct{}
+
+// NewSettingsJSONMerger 创建新的settings.json合并器
+func NewSettingsJSONMerger() *SettingsJSONMerger <span class="cov8" title="1">{
+        return &amp;SettingsJSONMerger{}
+}</span>
+
+// ShouldPreserveProxyConfig 检查是否应该保留目标文件中的代理配置
+func (m *SettingsJSONMerger) ShouldPreserveProxyConfig(targetData map[string]interface{}) bool <span class="cov8" title="1">{
+        env, ok := targetData["env"].(map[string]interface{})
+        if !ok </span><span class="cov8" title="1">{
+                return false
+        }</span>
+
+        <span class="cov8" title="1">_, hasHTTP := env["http_proxy"]
+        _, hasHTTPS := env["https_proxy"]
+        return hasHTTP || hasHTTPS</span>
+}
+
+// FilterProxyFromSource 从源数据中移除代理配置
+func (m *SettingsJSONMerger) FilterProxyFromSource(sourceData map[string]interface{}) map[string]interface{} <span class="cov8" title="1">{
+        result := make(map[string]interface{})
+
+        // 深度复制
+        for k, v := range sourceData </span><span class="cov8" title="1">{
+                result[k] = m.deepCopyValue(v)
+        }</span>
+
+        <span class="cov8" title="1">if env, ok := result["env"].(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                delete(env, "http_proxy")
+                delete(env, "https_proxy")
+
+                // 如果env为空，删除env字段
+                if len(env) == 0 </span><span class="cov0" title="0">{
+                        delete(result, "env")
+                }</span>
+        }
+
+        <span class="cov8" title="1">return result</span>
+}
+
+// deepCopyValue 深度复制值
+func (m *SettingsJSONMerger) deepCopyValue(value interface{}) interface{} <span class="cov8" title="1">{
+        switch v := value.(type) </span>{
+        case map[string]interface{}:<span class="cov8" title="1">
+                result := make(map[string]interface{})
+                for k, val := range v </span><span class="cov8" title="1">{
+                        result[k] = m.deepCopyValue(val)
+                }</span>
+                <span class="cov8" title="1">return result</span>
+        case []interface{}:<span class="cov8" title="1">
+                result := make([]interface{}, len(v))
+                for i, val := range v </span><span class="cov8" title="1">{
+                        result[i] = m.deepCopyValue(val)
+                }</span>
+                <span class="cov8" title="1">return result</span>
+        default:<span class="cov8" title="1">
+                return v</span>
+        }
+}
+
+// DeepMergeDict 深度合并字典，source覆盖target
+func (m *SettingsJSONMerger) DeepMergeDict(target, source map[string]interface{}) map[string]interface{} <span class="cov8" title="1">{
+        result := m.deepCopyValue(target).(map[string]interface{})
+
+        for key, value := range source </span><span class="cov8" title="1">{
+                if existing, exists := result[key]; exists </span><span class="cov8" title="1">{
+                        if existingMap, ok := existing.(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                                if sourceMap, ok := value.(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                                        // 特殊处理hooks字典
+                                        if key == "hooks" </span><span class="cov8" title="1">{
+                                                result[key] = m.MergeHooks(existingMap, sourceMap)
+                                        }</span> else<span class="cov8" title="1"> {
+                                                result[key] = m.DeepMergeDict(existingMap, sourceMap)
+                                        }</span>
+                                        <span class="cov8" title="1">continue</span>
+                                }
+                        }
+                        <span class="cov8" title="1">if existingSlice, ok := existing.([]interface{}); ok </span><span class="cov0" title="0">{
+                                if sourceSlice, ok := value.([]interface{}); ok </span><span class="cov0" title="0">{
+                                        // 数组合并去重（只处理基本类型）
+                                        combined := append(existingSlice, sourceSlice...)
+                                        result[key] = m.uniqueSlice(combined)
+                                        continue</span>
+                                }
+                        }
+                }
+                <span class="cov8" title="1">result[key] = m.deepCopyValue(value)</span>
+        }
+
+        <span class="cov8" title="1">return result</span>
+}
+
+// uniqueSlice 数组去重
+func (m *SettingsJSONMerger) uniqueSlice(slice []interface{}) []interface{} <span class="cov0" title="0">{
+        seen := make(map[string]bool)
+        var result []interface{}
+
+        for _, item := range slice </span><span class="cov0" title="0">{
+                if itemMap, ok := item.(map[string]interface{}); ok </span><span class="cov0" title="0">{
+                        // 字典类型不能直接hash，直接添加
+                        result = append(result, itemMap)
+                }</span> else<span class="cov0" title="0"> {
+                        // 基本类型可以去重
+                        key := fmt.Sprintf("%v", item)
+                        if !seen[key] </span><span class="cov0" title="0">{
+                                seen[key] = true
+                                result = append(result, item)
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return result</span>
+}
+
+// MergeHooks 智能合并hooks配置
+func (m *SettingsJSONMerger) MergeHooks(targetHooks, sourceHooks map[string]interface{}) map[string]interface{} <span class="cov8" title="1">{
+        result := m.deepCopyValue(targetHooks).(map[string]interface{})
+
+        for eventType, sourceConfigs := range sourceHooks </span><span class="cov8" title="1">{
+                if existing, exists := result[eventType]; exists </span><span class="cov8" title="1">{
+                        // 合并同一事件类型的hooks
+                        if existingSlice, ok := existing.([]interface{}); ok </span><span class="cov8" title="1">{
+                                if sourceSlice, ok := sourceConfigs.([]interface{}); ok </span><span class="cov8" title="1">{
+                                        result[eventType] = m.mergeHookConfigs(existingSlice, sourceSlice)
+                                }</span>
+                        }
+                } else<span class="cov8" title="1"> {
+                        result[eventType] = m.deepCopyValue(sourceConfigs)
+                }</span>
+        }
+
+        <span class="cov8" title="1">return result</span>
+}
+
+// mergeHookConfigs 合并同一事件类型的hook配置
+func (m *SettingsJSONMerger) mergeHookConfigs(existing, source []interface{}) []interface{} <span class="cov8" title="1">{
+        // 按matcher建立映射
+        existingMatchers := make(map[string]int)
+        for i, config := range existing </span><span class="cov8" title="1">{
+                if configMap, ok := config.(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                        if matcher, ok := configMap["matcher"].(string); ok </span><span class="cov8" title="1">{
+                                existingMatchers[matcher] = i
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">result := m.deepCopyValue(existing).([]interface{})
+
+        for _, config := range source </span><span class="cov8" title="1">{
+                configMap, ok := config.(map[string]interface{})
+                if !ok </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov8" title="1">matcher, ok := configMap["matcher"].(string)
+                if !ok </span><span class="cov0" title="0">{
+                        matcher = ""
+                }</span>
+
+                <span class="cov8" title="1">if existingIndex, exists := existingMatchers[matcher]; exists </span><span class="cov8" title="1">{
+                        // 相同matcher，合并hooks命令
+                        if resultMap, ok := result[existingIndex].(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                                existingHooks, _ := resultMap["hooks"].([]interface{})
+                                newHooks, _ := configMap["hooks"].([]interface{})
+
+                                mergedHooks := m.mergeHookCommands(existingHooks, newHooks)
+                                resultMap["hooks"] = mergedHooks
+                        }</span>
+                } else<span class="cov8" title="1"> {
+                        // 新的matcher，直接添加
+                        result = append(result, m.deepCopyValue(config))
+                }</span>
+        }
+
+        <span class="cov8" title="1">return result</span>
+}
+
+// mergeHookCommands 按command去重合并hook命令
+func (m *SettingsJSONMerger) mergeHookCommands(existing, newHooks []interface{}) []interface{} <span class="cov8" title="1">{
+        existingCommands := make(map[string]bool)
+
+        // 记录现有命令
+        for _, hook := range existing </span><span class="cov8" title="1">{
+                if hookMap, ok := hook.(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                        if command, ok := hookMap["command"].(string); ok </span><span class="cov8" title="1">{
+                                existingCommands[command] = true
+                        }</span>
+                }
+        }
+
+        <span class="cov8" title="1">result := m.deepCopyValue(existing).([]interface{})
+
+        // 添加新命令（去重）
+        for _, hook := range newHooks </span><span class="cov8" title="1">{
+                if hookMap, ok := hook.(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                        if command, ok := hookMap["command"].(string); ok </span><span class="cov8" title="1">{
+                                if !existingCommands[command] </span><span class="cov8" title="1">{
+                                        result = append(result, m.deepCopyValue(hook))
+                                }</span>
+                        }
+                }
+        }
+
+        <span class="cov8" title="1">return result</span>
+}
+
+// MergeSettings 合并settings.json文件
+func (m *SettingsJSONMerger) MergeSettings(targetFile, sourceFile string) error <span class="cov8" title="1">{
+        // 读取源文件
+        sourceData, err := m.readJSONFile(sourceFile)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("读取源文件失败: %w", err)
+        }</span>
+
+        // 检查目标文件是否存在
+        <span class="cov8" title="1">if _, err := os.Stat(targetFile); os.IsNotExist(err) </span><span class="cov8" title="1">{
+                // 目标文件不存在，检查源文件是否包含代理配置
+                if env, ok := sourceData["env"].(map[string]interface{}); ok </span><span class="cov8" title="1">{
+                        if _, hasHTTP := env["http_proxy"]; hasHTTP </span><span class="cov8" title="1">{
+                                fmt.Println("⚠️  源文件包含代理配置，但将被跳过")
+                                fmt.Println("   请使用 claude-config proxy on 来配置代理")
+                                sourceData = m.FilterProxyFromSource(sourceData)
+                        }</span>
+                        <span class="cov8" title="1">if _, hasHTTPS := env["https_proxy"]; hasHTTPS </span><span class="cov0" title="0">{
+                                fmt.Println("⚠️  源文件包含代理配置，但将被跳过")
+                                fmt.Println("   请使用 claude-config proxy on 来配置代理")
+                                sourceData = m.FilterProxyFromSource(sourceData)
+                        }</span>
+                }
+
+                <span class="cov8" title="1">return m.writeJSONFile(targetFile, sourceData)</span>
+        }
+
+        // 读取目标文件
+        <span class="cov8" title="1">targetData, err := m.readJSONFile(targetFile)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("读取目标文件失败: %w", err)
+        }</span>
+
+        // 检查是否需要保留代理配置
+        <span class="cov8" title="1">preserveProxy := m.ShouldPreserveProxyConfig(targetData)
+
+        if preserveProxy </span><span class="cov8" title="1">{
+                fmt.Println("📡 检测到现有代理配置，将保留用户代理设置")
+                sourceData = m.FilterProxyFromSource(sourceData)
+        }</span>
+
+        // 深度合并
+        <span class="cov8" title="1">mergedData := m.DeepMergeDict(targetData, sourceData)
+
+        // 检查是否有变化
+        if !m.isEqual(mergedData, targetData) </span><span class="cov8" title="1">{
+                fmt.Println("🔄 检测到settings.json配置变化")
+                fmt.Println("将进行智能合并，保留您的个人配置")
+                if preserveProxy </span><span class="cov8" title="1">{
+                        fmt.Println("   - 保留现有代理配置")
+                }</span>
+
+                <span class="cov8" title="1">return m.writeJSONFile(targetFile, mergedData)</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("settings.json配置无变化，跳过")
+        return nil</span>
+}
+
+// readJSONFile 读取JSON文件
+func (m *SettingsJSONMerger) readJSONFile(filename string) (map[string]interface{}, error) <span class="cov8" title="1">{
+        data, err := os.ReadFile(filename)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">var result map[string]interface{}
+        if err := json.Unmarshal(data, &amp;result); err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">return result, nil</span>
+}
+
+// writeJSONFile 写入JSON文件
+func (m *SettingsJSONMerger) writeJSONFile(filename string, data map[string]interface{}) error <span class="cov8" title="1">{
+        // 确保目录存在
+        if err := os.MkdirAll(filepath.Dir(filename), 0755); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">jsonData, err := json.MarshalIndent(data, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return os.WriteFile(filename, jsonData, 0644)</span>
+}
+
+// isEqual 简单比较两个map是否相等
+func (m *SettingsJSONMerger) isEqual(a, b map[string]interface{}) bool <span class="cov8" title="1">{
+        if len(a) != len(b) </span><span class="cov0" title="0">{
+                return false
+        }</span>
+
+        <span class="cov8" title="1">aJSON, _ := json.Marshal(a)
+        bJSON, _ := json.Marshal(b)
+
+        return string(aJSON) == string(bJSON)</span>
+}
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package install
+
+import (
+        "os"
+        "path/filepath"
+        "strings"
+)
+
+// IsExecutableFile 检查文件是否应该设置为可执行
+// 基于文件扩展名来判断，支持常见的脚本文件扩展名
+func IsExecutableFile(filePath string) bool <span class="cov8" title="1">{
+        if filePath == "" </span><span class="cov8" title="1">{
+                return false
+        }</span>
+
+        <span class="cov8" title="1">ext := strings.ToLower(filepath.Ext(filePath))
+
+        // 可执行文件的扩展名列表
+        executableExts := map[string]bool{
+                ".sh":  true, // Shell脚本
+                ".js":  true, // JavaScript (Node.js脚本)
+                ".py":  true, // Python脚本
+                ".pl":  true, // Perl脚本
+                ".rb":  true, // Ruby脚本
+                ".php": true, // PHP脚本
+                ".bat": true, // Windows批处理
+                ".cmd": true, // Windows命令脚本
+        }
+
+        return executableExts[ext]</span>
+}
+
+// GetFilePermissions 根据文件路径返回适当的权限
+// 可执行文件返回 0755，普通文件返回 0644
+func GetFilePermissions(filePath string) os.FileMode <span class="cov8" title="1">{
+        if IsExecutableFile(filePath) </span><span class="cov8" title="1">{
+                return 0755 // 可执行权限：rwxr-xr-x
+        }</span>
+        <span class="cov8" title="1">return 0644</span> // 默认文件权限：rw-r--r--
+}
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">package install
+
+import "fmt"
+
+// Options 安装选项配置
+type Options struct {
+        All          bool // 安装所有配置文件
+        Agents       bool // 仅安装agents
+        Commands     bool // 仅安装commands
+        Hooks        bool // 仅安装hooks
+        OutputStyles bool // 仅安装output-styles
+        Settings     bool // 仅安装settings.json
+        Claude       bool // 仅安装CLAUDE.md
+        Statusline   bool // 仅安装statusline.js
+        Force        bool // 强制覆盖已存在的文件
+        Delete       bool // 删除目标目录中不在源资源中的文件（需要与Force配合使用）
+}
+
+// Validate 验证安装选项
+func (opts Options) Validate() error <span class="cov8" title="1">{
+        if !opts.All &amp;&amp; !opts.Agents &amp;&amp; !opts.Commands &amp;&amp; !opts.Hooks &amp;&amp;
+                !opts.OutputStyles &amp;&amp; !opts.Settings &amp;&amp; !opts.Claude &amp;&amp; !opts.Statusline </span><span class="cov8" title="1">{
+                return fmt.Errorf("必须至少选择一个安装选项")
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+// GetSelectedComponents 获取选中的组件列表
+func (opts Options) GetSelectedComponents() []string <span class="cov8" title="1">{
+        var components []string
+
+        if opts.All </span><span class="cov8" title="1">{
+                return []string{"agents", "commands", "hooks", "output-styles", "settings.json", "CLAUDE.md.template", "statusline.js"}
+        }</span>
+
+        <span class="cov8" title="1">if opts.Agents </span><span class="cov8" title="1">{
+                components = append(components, "agents")
+        }</span>
+        <span class="cov8" title="1">if opts.Commands </span><span class="cov8" title="1">{
+                components = append(components, "commands")
+        }</span>
+        <span class="cov8" title="1">if opts.Hooks </span><span class="cov8" title="1">{
+                components = append(components, "hooks")
+        }</span>
+        <span class="cov8" title="1">if opts.OutputStyles </span><span class="cov8" title="1">{
+                components = append(components, "output-styles")
+        }</span>
+        <span class="cov8" title="1">if opts.Settings </span><span class="cov8" title="1">{
+                components = append(components, "settings.json")
+        }</span>
+        <span class="cov8" title="1">if opts.Claude </span><span class="cov8" title="1">{
+                components = append(components, "CLAUDE.md.template")
+        }</span>
+        <span class="cov8" title="1">if opts.Statusline </span><span class="cov8" title="1">{
+                components = append(components, "statusline.js")
+        }</span>
+
+        <span class="cov8" title="1">return components</span>
+}
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">package provider
+
+import (
+        "fmt"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// EnvMapper 将 provider 配置映射到环境变量
+type EnvMapper struct{}
+
+// NewEnvMapper 创建新的环境变量映射器
+func NewEnvMapper() *EnvMapper <span class="cov8" title="1">{
+        return &amp;EnvMapper{}
+}</span>
+
+// MapToEnvironment 将 provider 配置映射为 ANTHROPIC_* 环境变量
+func (m *EnvMapper) MapToEnvironment(provider claude.ProviderType, config *claude.ProviderConfig, apiKey string) (map[string]string, error) <span class="cov8" title="1">{
+        if err := m.ValidateProviderConfig(provider, config, apiKey); err != nil </span><span class="cov8" title="1">{
+                return nil, err
+        }</span>
+
+        <span class="cov8" title="1">envVars := map[string]string{
+                "ANTHROPIC_AUTH_TOKEN": apiKey,
+                "ANTHROPIC_BASE_URL":   config.BaseURL,
+        }
+
+        // 添加默认模型环境变量
+        m.addDefaultModelEnvVars(envVars, provider, config)
+
+        return envVars, nil</span>
+}
+
+// addDefaultModelEnvVars 添加默认模型环境变量
+func (m *EnvMapper) addDefaultModelEnvVars(envVars map[string]string, provider claude.ProviderType, config *claude.ProviderConfig) <span class="cov8" title="1">{
+        var haikuModel, sonnetModel, opusModel string
+
+        switch provider </span>{
+        case claude.ProviderDeepSeek:<span class="cov8" title="1">
+                haikuModel = config.Model
+                sonnetModel = config.Model
+                opusModel = config.Model</span>
+        case claude.ProviderKimi:<span class="cov8" title="1">
+                haikuModel = config.Model
+                sonnetModel = config.Model
+                opusModel = config.Model</span>
+        case claude.ProviderGLM:<span class="cov8" title="1">
+                haikuModel = "glm-4.7"
+                sonnetModel = "glm-4.7"
+                opusModel = "glm-4.7"</span>
+        case claude.ProviderDoubao:<span class="cov8" title="1">
+                haikuModel = config.Model
+                sonnetModel = config.Model
+                opusModel = config.Model</span>
+        }
+
+        <span class="cov8" title="1">envVars["ANTHROPIC_DEFAULT_HAIKU_MODEL"] = haikuModel
+        envVars["ANTHROPIC_DEFAULT_SONNET_MODEL"] = sonnetModel
+        envVars["ANTHROPIC_DEFAULT_OPUS_MODEL"] = opusModel</span>
+}
+
+// ValidateProviderConfig 验证 provider 配置是否完整
+func (m *EnvMapper) ValidateProviderConfig(provider claude.ProviderType, config *claude.ProviderConfig, apiKey string) error <span class="cov8" title="1">{
+        if apiKey == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("API key is required")
+        }</span>
+
+        <span class="cov8" title="1">if config == nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("provider config is required")
+        }</span>
+
+        <span class="cov8" title="1">if config.BaseURL == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("base URL is required")
+        }</span>
+
+        <span class="cov8" title="1">if config.Model == "" </span><span class="cov8" title="1">{
+                return fmt.Errorf("model is required")
+        }</span>
+
+        // 验证 provider 是否支持
+        <span class="cov8" title="1">switch provider </span>{
+        case claude.ProviderDeepSeek, claude.ProviderKimi, claude.ProviderGLM, claude.ProviderDoubao:<span class="cov8" title="1">
+                return nil</span>
+        default:<span class="cov0" title="0">
+                return fmt.Errorf("unsupported provider: %s", provider)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package proxy
+
+import (
+        "context"
+        "encoding/json"
+        "fmt"
+        "os"
+        "path/filepath"
+
+        "github.com/ooneko/claude-config/internal/claude"
+)
+
+// Manager implements the ProxyManager interface
+type Manager struct {
+        claudeDir string
+}
+
+// NewManager creates a new proxy manager
+func NewManager(claudeDir string) *Manager <span class="cov8" title="1">{
+        return &amp;Manager{
+                claudeDir: claudeDir,
+        }
+}</span>
+
+// Enable enables proxy with the given configuration
+func (m *Manager) Enable(_ context.Context, config *claude.ProxyConfig) error <span class="cov8" title="1">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        // Initialize env map if it doesn't exist
+        <span class="cov8" title="1">if settings.Env == nil </span><span class="cov8" title="1">{
+                settings.Env = make(map[string]string)
+        }</span>
+
+        // Set proxy configuration
+        <span class="cov8" title="1">settings.Env["http_proxy"] = config.HTTPProxy
+        settings.Env["https_proxy"] = config.HTTPSProxy
+
+        // Save proxy configuration to .proxy_config file for future use
+        if err := m.saveProxyConfig(config); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save proxy config: %w", err)
+        }</span>
+
+        // Save settings
+        <span class="cov8" title="1">if err := m.saveSettings(settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Disable disables proxy
+func (m *Manager) Disable(_ context.Context) error <span class="cov8" title="1">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if settings.Env != nil </span><span class="cov8" title="1">{
+                delete(settings.Env, "http_proxy")
+                delete(settings.Env, "https_proxy")
+
+                // If env map is empty, set it to nil
+                if len(settings.Env) == 0 </span><span class="cov8" title="1">{
+                        settings.Env = nil
+                }</span>
+        }
+
+        // Save settings
+        <span class="cov8" title="1">if err := m.saveSettings(settings); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to save settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// Toggle toggles proxy state
+func (m *Manager) Toggle(ctx context.Context) error <span class="cov8" title="1">{
+        enabled, err := m.IsEnabled(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to check proxy status: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if enabled </span><span class="cov8" title="1">{
+                return m.Disable(ctx)
+        }</span>
+
+        // Load saved proxy configuration
+        <span class="cov8" title="1">config, err := m.loadProxyConfig()
+        if err != nil </span><span class="cov0" title="0">{
+                // Use default proxy configuration if no saved config
+                config = &amp;claude.ProxyConfig{
+                        HTTPProxy:  "http://127.0.0.1:7890",
+                        HTTPSProxy: "http://127.0.0.1:7890",
+                }
+        }</span>
+
+        <span class="cov8" title="1">return m.Enable(ctx, config)</span>
+}
+
+// IsEnabled returns whether proxy is currently enabled
+func (m *Manager) IsEnabled(_ context.Context) (bool, error) <span class="cov8" title="1">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return false, fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if settings.Env == nil </span><span class="cov8" title="1">{
+                return false, nil
+        }</span>
+
+        <span class="cov8" title="1">httpProxy := settings.Env["http_proxy"]
+        httpsProxy := settings.Env["https_proxy"]
+
+        return httpProxy != "" &amp;&amp; httpsProxy != "", nil</span>
+}
+
+// GetConfig returns current proxy configuration
+func (m *Manager) GetConfig(_ context.Context) (*claude.ProxyConfig, error) <span class="cov8" title="1">{
+        settings, err := m.loadSettings()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to load settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if settings.Env == nil </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        <span class="cov8" title="1">httpProxy := settings.Env["http_proxy"]
+        httpsProxy := settings.Env["https_proxy"]
+
+        if httpProxy == "" &amp;&amp; httpsProxy == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        <span class="cov8" title="1">return &amp;claude.ProxyConfig{
+                HTTPProxy:  httpProxy,
+                HTTPSProxy: httpsProxy,
+        }, nil</span>
+}
+
+// loadSettings loads settings from settings.json
+func (m *Manager) loadSettings() (*claude.Settings, error) <span class="cov8" title="1">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // If file doesn't exist, return default settings
+        if _, err := os.Stat(settingsPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return &amp;claude.Settings{
+                        IncludeCoAuthoredBy: false,
+                }, nil
+        }</span>
+
+        <span class="cov8" title="1">data, err := os.ReadFile(settingsPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">var settings claude.Settings
+        if err := json.Unmarshal(data, &amp;settings); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;settings, nil</span>
+}
+
+// saveSettings saves settings to settings.json
+func (m *Manager) saveSettings(settings *claude.Settings) error <span class="cov8" title="1">{
+        settingsPath := filepath.Join(m.claudeDir, "settings.json")
+
+        // Ensure directory exists
+        if err := os.MkdirAll(m.claudeDir, 0755); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create claude directory: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">data, err := json.MarshalIndent(settings, "", "  ")
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal settings: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := os.WriteFile(settingsPath, data, 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write settings file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// saveProxyConfig saves proxy configuration to .proxy_config file
+func (m *Manager) saveProxyConfig(config *claude.ProxyConfig) error <span class="cov8" title="1">{
+        configPath := filepath.Join(m.claudeDir, ".proxy_config")
+
+        data, err := json.Marshal(config)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to marshal proxy config: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err := os.WriteFile(configPath, data, 0644); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to write proxy config file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+// loadProxyConfig loads proxy configuration from .proxy_config file
+func (m *Manager) loadProxyConfig() (*claude.ProxyConfig, error) <span class="cov8" title="1">{
+        configPath := filepath.Join(m.claudeDir, ".proxy_config")
+
+        if _, err := os.Stat(configPath); os.IsNotExist(err) </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("proxy config file not found")
+        }</span>
+
+        <span class="cov8" title="1">data, err := os.ReadFile(configPath)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to read proxy config file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">var config claude.ProxyConfig
+        if err := json.Unmarshal(data, &amp;config); err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse proxy config file: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;config, nil</span>
+}
+
+// LoadSavedConfig loads saved proxy configuration from file
+func (m *Manager) LoadSavedConfig(_ context.Context) (*claude.ProxyConfig, error) <span class="cov0" title="0">{
+        return m.loadProxyConfig()
+}</span>
+
+// Reset removes saved proxy configuration and disables proxy
+func (m *Manager) Reset(ctx context.Context) error <span class="cov0" title="0">{
+        // First disable proxy
+        if err := m.Disable(ctx); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to disable proxy: %w", err)
+        }</span>
+
+        // Remove saved proxy configuration file
+        <span class="cov0" title="0">configPath := filepath.Join(m.claudeDir, ".proxy_config")
+        if _, err := os.Stat(configPath); err == nil </span><span class="cov0" title="0">{
+                if err := os.Remove(configPath); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to remove proxy config file: %w", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
