@@ -27,49 +27,63 @@ func NewManager(claudeDir string) *Manager {
 	}
 }
 
-// Load loads the current configuration from settings.json
+// Load loads the current configuration from settings.json，保留所有字段
 func (m *Manager) Load(_ context.Context) (*claude.Settings, error) {
 	settingsPath := filepath.Join(m.claudeDir, "settings.json")
-
-	// If file doesn't exist, return default settings
-	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
-		return &claude.Settings{
-			IncludeCoAuthoredBy: false,
-		}, nil
-	}
-
-	data, err := os.ReadFile(settingsPath)
+	raw, err := claude.LoadSettingsRaw(settingsPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read settings file: %w", err)
+		return nil, fmt.Errorf("failed to load settings: %w", err)
 	}
-
-	var settings claude.Settings
-	if err := json.Unmarshal(data, &settings); err != nil {
-		return nil, fmt.Errorf("failed to parse settings file: %w", err)
-	}
-
-	return &settings, nil
+	return claude.RawToSettings(raw), nil
 }
 
-// Save saves the configuration to settings.json
+// Save saves the configuration to settings.json，保留所有字段
 func (m *Manager) Save(_ context.Context, config *claude.Settings) error {
 	settingsPath := filepath.Join(m.claudeDir, "settings.json")
 
-	// Ensure directory exists
-	if err := os.MkdirAll(m.claudeDir, 0755); err != nil {
-		return fmt.Errorf("failed to create claude directory: %w", err)
-	}
-
-	data, err := json.MarshalIndent(config, "", "  ")
+	// 先读取现有数据以保留未知字段
+	raw, err := claude.LoadSettingsRaw(settingsPath)
 	if err != nil {
-		return fmt.Errorf("failed to marshal settings: %w", err)
+		return fmt.Errorf("failed to load existing settings: %w", err)
 	}
 
-	if err := os.WriteFile(settingsPath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write settings file: %w", err)
+	// 将 config 转换为 map
+	configData, err := json.Marshal(config)
+	if err != nil {
+		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	return nil
+	var configMap map[string]interface{}
+	if err := json.Unmarshal(configData, &configMap); err != nil {
+		return fmt.Errorf("failed to unmarshal config: %w", err)
+	}
+
+	// 合并：新数据覆盖旧数据
+	for k, v := range configMap {
+		raw[k] = v
+	}
+
+	// 特殊处理：如果 config.Env 为 nil，删除 raw 中的 env
+	if config.Env == nil {
+		delete(raw, "env")
+	} else if envMap, ok := raw["env"].(map[string]interface{}); ok {
+		// 删除原始 env 中已不存在的 key（用于删除操作）
+		configEnvMap := make(map[string]bool)
+		for k := range config.Env {
+			configEnvMap[k] = true
+		}
+		for k := range envMap {
+			if !configEnvMap[k] {
+				delete(envMap, k)
+			}
+		}
+		// 如果 env 为空，删除 env 字段
+		if len(envMap) == 0 {
+			delete(raw, "env")
+		}
+	}
+
+	return claude.SaveSettingsRaw(settingsPath, raw)
 }
 
 // GetStatus returns current configuration status

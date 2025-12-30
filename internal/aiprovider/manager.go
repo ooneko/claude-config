@@ -305,49 +305,63 @@ func (m *Manager) saveAPIKey(provider ProviderType, apiKey string) error {
 	return nil
 }
 
-// loadSettings loads settings from settings.json
+// loadSettings loads settings from settings.json，保留所有字段
 func (m *Manager) loadSettings() (*claude.Settings, error) {
 	settingsPath := filepath.Join(m.claudeDir, "settings.json")
-
-	// If file doesn't exist, return default settings
-	if _, err := os.Stat(settingsPath); os.IsNotExist(err) {
-		return &claude.Settings{
-			IncludeCoAuthoredBy: false,
-		}, nil
-	}
-
-	data, err := os.ReadFile(settingsPath)
+	raw, err := claude.LoadSettingsRaw(settingsPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read settings file: %w", err)
+		return nil, fmt.Errorf("failed to load settings: %w", err)
 	}
-
-	var settings claude.Settings
-	if err := json.Unmarshal(data, &settings); err != nil {
-		return nil, fmt.Errorf("failed to parse settings file: %w", err)
-	}
-
-	return &settings, nil
+	return claude.RawToSettings(raw), nil
 }
 
-// saveSettings saves settings to settings.json
+// saveSettings saves settings to settings.json，保留所有字段
 func (m *Manager) saveSettings(settings *claude.Settings) error {
 	settingsPath := filepath.Join(m.claudeDir, "settings.json")
 
-	// Ensure directory exists
-	if err := os.MkdirAll(m.claudeDir, 0755); err != nil {
-		return fmt.Errorf("failed to create claude directory: %w", err)
+	// 先读取现有数据以保留未知字段
+	raw, err := claude.LoadSettingsRaw(settingsPath)
+	if err != nil {
+		return fmt.Errorf("failed to load existing settings: %w", err)
 	}
 
-	data, err := json.MarshalIndent(settings, "", "  ")
+	// 将 settings 转换为 map
+	settingsData, err := json.Marshal(settings)
 	if err != nil {
 		return fmt.Errorf("failed to marshal settings: %w", err)
 	}
 
-	if err := os.WriteFile(settingsPath, data, 0644); err != nil {
-		return fmt.Errorf("failed to write settings file: %w", err)
+	var settingsMap map[string]interface{}
+	if err := json.Unmarshal(settingsData, &settingsMap); err != nil {
+		return fmt.Errorf("failed to unmarshal settings: %w", err)
 	}
 
-	return nil
+	// 合并：新数据覆盖旧数据
+	for k, v := range settingsMap {
+		raw[k] = v
+	}
+
+	// 特殊处理：如果 settings.Env 为 nil，删除 raw 中的 env
+	if settings.Env == nil {
+		delete(raw, "env")
+	} else if envMap, ok := raw["env"].(map[string]interface{}); ok {
+		// 删除原始 env 中已不存在的 key（用于删除操作）
+		settingsEnvMap := make(map[string]bool)
+		for k := range settings.Env {
+			settingsEnvMap[k] = true
+		}
+		for k := range envMap {
+			if !settingsEnvMap[k] {
+				delete(envMap, k)
+			}
+		}
+		// 如果 env 为空，删除 env 字段
+		if len(envMap) == 0 {
+			delete(raw, "env")
+		}
+	}
+
+	return claude.SaveSettingsRaw(settingsPath, raw)
 }
 
 // getLastActiveProviderPath returns the path for storing last active provider
